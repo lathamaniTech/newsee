@@ -8,10 +8,11 @@ import 'package:newsee/Model/login_request.dart';
 import 'package:newsee/blocs/login/login_bloc.dart';
 import 'package:newsee/pages/home_page.dart';
 import 'package:newsee/pages/newlead_page.dart';
+import 'package:newsee/pages/masters_page.dart';
 import 'package:newsee/pages/not_found_error.page.dart';
 
 final routes = GoRouter(
-  initialLocation: '/login',
+  initialLocation: '/master',
 
   routes: <RouteBase>[
     GoRoute(
@@ -37,6 +38,11 @@ final routes = GoRouter(
       path: AppRouteConstants.NEWLEAD_PAGE['path']!,
       name: AppRouteConstants.NEWLEAD_PAGE['name'],
       builder: (context, state) => NewLeadPage(),
+    ),
+    GoRoute(
+      path: AppRouteConstants.MASTER_PAGE['path']!,
+      name: AppRouteConstants.MASTER_PAGE['name'],
+      builder: (context, state) => MastersPage(),
     ),
   ],
   redirect: (context, state) {
