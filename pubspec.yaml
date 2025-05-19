@@ -54,6 +54,11 @@ dependencies:
   intl: ^0.19.0
   sqflite: ^2.4.2 # sqlite database
   path: ^1.9.1
+  json_annotation: ^4.9.0
+  image_picker: ^1.1.2
+  local_auth: ^2.3.0
+  url_launcher: ^6.3.1
+  # flutter_svg: ^2.1.0
 
 dev_dependencies:
   flutter_test:
@@ -84,6 +89,13 @@ flutter:
   # - assets/certificates/PSB.crt
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
+    - assets/logo.jpg
+    - assets/logo1.jpg
+    - assets/whatsapp.svg
+    
+    # - assets/logo1.jpg
+
+
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

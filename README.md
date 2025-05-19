@@ -16,3 +16,9 @@ For help getting started with Flutter development, view the
 samples, guidance on mobile development, and a full API reference.
 
 ndkVersion = flutter.ndkVersion
+
+## NEW - LOGIN - UI
+
+branch : new branch new-login-ui
+created : 16/05/2025
+purpose : to integrated and test new-login-ui created by developer @gayathri.b

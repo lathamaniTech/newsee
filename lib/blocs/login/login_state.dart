@@ -22,10 +22,11 @@ enum LoginStatus { init, fetch, success, error }
 final class LoginState extends Equatable {
   final LoginResponse loginResponse;
   final LoginStatus loginStatus;
-
+  final bool isPasswordHidden;
   LoginState({
     this.loginStatus = LoginStatus.init,
     required this.loginResponse,
+    this.isPasswordHidden = true
   });
 
   /*
@@ -37,20 +38,21 @@ final class LoginState extends Equatable {
 
   */
 
-  LoginState copyWith(LoginStatus? status, LoginResponse? response) {
+  LoginState copyWith({LoginStatus? status, LoginResponse? response , bool? isPasswordShown}) {
     return LoginState(
       loginStatus: status ?? this.loginStatus,
       loginResponse: response ?? this.loginResponse,
+      isPasswordHidden : isPasswordShown ?? this.isPasswordHidden
     );
   }
 
   @override
-  List<Object?> get props => [loginResponse, loginStatus];
+  List<Object?> get props => [loginResponse, loginStatus ,isPasswordHidden ];
 
   @override
   String toString() {
     return ''' LoginState { LoginResponse ${loginResponse.toString()}} ,
-              LoginStatus : $loginStatus
+              LoginStatus : $loginStatus , isPasswordHidden : $isPasswordHidden
      ''';
   }
 }
