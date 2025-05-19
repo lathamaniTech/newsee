@@ -33,7 +33,7 @@ class MastersBloc extends Bloc<MastersEvent, MastersState> {
     for (final type in types) {
       if (type != 'static') {
         final success = await _onUpdateMaster(type, emit, isChained: true);
-        // if (!success) break; // stop chain if one fails
+        if (!success) break; // stop chain if one fails
       } else {
         await fetchAllStaticMasters(type, emit);
       }

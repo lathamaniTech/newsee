@@ -4,7 +4,6 @@ import 'contactUs.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-
 void reachUsActionSheet(
   BuildContext context,
   String title,
@@ -55,7 +54,8 @@ void reachUsActionSheet(
                     children: [
                       SvgPicture.asset(
                         'assets/whatsapp.svg',
-                        height: 40,width: 40,
+                        height: 40,
+                        width: 40,
                       ),
                       // Icon(
                       //   icon1,
@@ -70,8 +70,8 @@ void reachUsActionSheet(
                     ],
                   ),
                 ),
-                //assign the pharam
 
+                //assign the pharam
                 CupertinoActionSheetAction(
                   onPressed: () {
                     contact(

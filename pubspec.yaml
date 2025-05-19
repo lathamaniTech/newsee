@@ -50,10 +50,9 @@ dependencies:
   socket_io_client: ^3.0.0
   share_plus: ^10.1.0
   equatable: ^2.0.5 # efficent revuild algorithm
-  json_annotation: any
   intl: ^0.19.0
   sqflite: ^2.4.2 # sqlite database
-  path: ^1.9.1
+  path: ^1.9.1 # db path
   json_annotation: ^4.9.0
   image_picker: ^1.1.2
   local_auth: ^2.3.0
@@ -86,16 +85,14 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - assets/db_tables.txt
-  # - assets/certificates/PSB.crt
-  #   - images/a_dot_burr.jpeg
-  #   - images/a_dot_ham.jpeg
+    # - assets/certificates/PSB.crt
+    #   - images/a_dot_burr.jpeg
+    #   - images/a_dot_ham.jpeg
     - assets/logo.jpg
     - assets/logo1.jpg
     - assets/whatsapp.svg
-    
+
     # - assets/logo1.jpg
-
-
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:newsee/AppData/app_constants.dart';
 import 'package:newsee/blocs/masters/master_bloc.dart';
 import '../blocs/masters/masters_event.dart';
@@ -18,6 +19,7 @@ class MastersPage extends StatelessWidget {
             (previous, current) =>
                 previous.done != current.done && current.allSynced,
         listener: (context, state) {
+          context.goNamed('home');
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('All master data synced successfully'),

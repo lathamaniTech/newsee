@@ -24,7 +24,7 @@ final AuthRepository = AuthRepositoryImpl(
   authRemoteDatasource: _authRemoteDatasource,
 );
 final routes = GoRouter(
-  initialLocation: '/master',
+  initialLocation: '/login',
 
   routes: <RouteBase>[
     GoRoute(

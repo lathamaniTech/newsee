@@ -69,7 +69,7 @@ class LoginpageWithAC extends StatelessWidget {
         switch (state.authStatus) {
           case AuthStatus.success:
             print('LoginStatus.success...');
-            context.goNamed('home');
+            context.goNamed('master');
           case AuthStatus.loading:
             print('LoginStatus.loading...');
 
