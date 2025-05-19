@@ -4,17 +4,24 @@ import 'package:newsee/AppData/newscollections.dart';
 import 'package:newsee/AppSamples/ReactiveForms/forms.dart';
 import 'package:newsee/AppSamples/RouterApp/routerapp.dart';
 import 'package:newsee/AppSamples/ToolBarWidget/toolbar.dart';
+import 'package:newsee/DataProviders/db_service.dart';
 import 'package:newsee/app.dart';
 import 'package:newsee/widgets/counter.dart';
 import 'package:newsee/widgets/news.dart';
 import 'package:provider/provider.dart';
 
-void main() {
+Future<void> main() async {
   // runApp(MyApp()) // Default MyApp()
   // runApp(Counter()); // load CounterApp
   // runApp(App()); // timerApp
   // runApp(ToolBarSample()); // Toolbar App
   //runApp(LoginApp()); // Login Form App
+
+  WidgetsFlutterBinding.ensureInitialized(); // Required to use async before runApp
+  await DBService.database; // Initializes and creates tables
+
+  // final DBService databaseService = DBService.instance;
+
   runApp(RouterApp()); // GoRouter Sample App
 }
 

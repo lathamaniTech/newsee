@@ -1,0 +1,25 @@
+CREATE TABLE staticDataMaster (
+  static_id INTEGER PRIMARY KEY,
+  code TEXT,
+  desc TEXT,
+  master_id TEXT
+);
+
+CREATE TABLE branchDataMaster (
+  bid INTEGER PRIMARY KEY,
+  code TEXT,
+  desc TEXT,
+  username TEXT
+);
+
+CREATE TABLE stateDataMaster (
+  sid INTEGER PRIMARY KEY,
+  code TEXT,
+  desc TEXT
+);
+
+CREATE TABLE districtDataMaster (
+  did INTEGER PRIMARY KEY,
+  code TEXT,
+  desc TEXT
+);
