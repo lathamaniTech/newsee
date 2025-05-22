@@ -13,3 +13,16 @@ encapsulate functionalites for
 4. show completed icon in the tab bar // 
 
  */
+
+part of 'savelead_sourcing_bloc.dart';
+
+sealed class SaveLeadSourcingEvent {}
+
+/* 
+
+@desc     :  define the initial Sourcingdetails object 
+             set the LeadStatus to init 
+
+ */
+
+final class SaveleadSourcingSave extends SaveLeadSourcingEvent {}

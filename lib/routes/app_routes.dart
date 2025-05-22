@@ -12,6 +12,7 @@ import 'package:newsee/feature/auth/data/datasource/auth_remote_datasource.dart'
 import 'package:newsee/feature/auth/data/repository/auth_repository_impl.dart';
 import 'package:newsee/feature/auth/domain/repository/auth_repository.dart';
 import 'package:newsee/feature/auth/presentation/bloc/auth_bloc.dart';
+import 'package:newsee/feature/savelead/presentation/bloc/savelead_sourcing_bloc.dart';
 import 'package:newsee/pages/home_page.dart';
 import 'package:newsee/pages/newlead_page.dart';
 import 'package:newsee/pages/masters_page.dart';
