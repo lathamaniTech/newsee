@@ -9,6 +9,7 @@ import 'package:newsee/feature/coapplicant/presentation/bloc/coapp_details_bloc.
 import 'package:newsee/feature/coapplicant/presentation/page/coapp_page.dart';
 import 'package:newsee/feature/dedupe/presentation/bloc/dedupe_bloc.dart';
 import 'package:newsee/feature/dedupe/presentation/page/dedupe_page.dart';
+import 'package:newsee/feature/leadInbox/domain/modal/get_lead_response.dart';
 import 'package:newsee/feature/leadsubmit/presentation/bloc/lead_submit_bloc.dart';
 import 'package:newsee/feature/loanproductdetails/presentation/bloc/loanproduct_bloc.dart';
 import 'package:newsee/feature/personaldetails/presentation/bloc/personal_details_bloc.dart';
@@ -22,15 +23,22 @@ import 'package:newsee/widgets/latlongbutton.dart';
 import 'package:newsee/widgets/side_navigation.dart';
 
 class NewLeadPage extends StatelessWidget {
+  final GetLeadResponse? fullLeadData;
+  NewLeadPage({this.fullLeadData});
+
   @override
   Widget build(BuildContext context) {
+    print("newlead page- fullLeadData $fullLeadData");
     return MultiBlocProvider(
       providers: [
         BlocProvider(
           create:
               (context) =>
                   LoanproductBloc()..add(
-                    LoanproductInit(loanproductState: LoanproductState.init()),
+                      fullLeadData == null ? 
+                      LoanproductInit(loanproductState: LoanproductState.init())
+                        :
+                      LoanproductFetchEvent(leadDetails: fullLeadData?.LeadDetails)
                   ),
         ),
         BlocProvider(create: (context) => DedupeBloc()),
@@ -38,7 +46,11 @@ class NewLeadPage extends StatelessWidget {
           create:
               (context) =>
                   PersonalDetailsBloc()
-                    ..add(PersonalDetailsInitEvent(cifResponseModel: null)),
+                    ..add(
+                      fullLeadData == null ? 
+                       PersonalDetailsInitEvent(cifResponseModel: null) : 
+                       PersonalDetailsFetchEvent(leadDetails: fullLeadData?.LeadDetails)
+                    ),
           lazy: false,
         ),
         BlocProvider(

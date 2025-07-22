@@ -28,6 +28,7 @@ final class PersonalDetailsBloc
     on<PersonalDetailsSaveEvent>(savePersonalDetails);
     on<AadhaarValidateEvent>(validateAadaar);
     on<ScannerResponseEvent>(onScannerSuccess);
+    on<PersonalDetailsFetchEvent>(onPersonalDetailsFetch);
   }
 
   /*
@@ -112,5 +113,47 @@ final class PersonalDetailsBloc
         aadhaarData: AadharvalidateResponse(referenceId: aadhaarId),
       ),
     );
+  }
+
+  Future<void> onPersonalDetailsFetch(PersonalDetailsFetchEvent event, Emitter emit) async {
+    try {
+      Database _db = await DBConfig().database;
+      List<Lov> listOfLov = await LovCrudRepo(_db).getAll();
+      print('listOfLov => $listOfLov');
+
+      PersonalData? personalData = PersonalData(
+        title: event.leadDetails!['lleadtitle'],
+        firstName: event.leadDetails!['lleadfrstname'],
+        middleName: event.leadDetails!['lleadmidname'],
+        lastName: event.leadDetails!['lleadlastname'],
+        dob: event.leadDetails!['lleaddob'],
+        residentialStatus: event.leadDetails!['lldResidentialStatus'],
+        primaryMobileNumber: event.leadDetails!['lleadmobnoEnc'],
+        secondaryMobileNumber: event.leadDetails![''],
+        email: event.leadDetails!['lleademailidEnc'],
+        panNumber: event.leadDetails!['lleadpannoEnc'],
+        aadharRefNo: event.leadDetails!['lleadadharnoEnc'],
+        passportNumber: event.leadDetails![''],
+        loanAmountRequested: event.leadDetails!['lldLoanamtRequested'].toString(),
+        natureOfActivity: event.leadDetails![''],
+        occupationType: event.leadDetails!['leadOccupationSector'],
+        agriculturistType: event.leadDetails![''],
+        farmerCategory: event.leadDetails!['lldCategory'],
+        farmerType: event.leadDetails![''],
+        religion: event.leadDetails!['lldReligion'],
+        caste: event.leadDetails!['lldCaste'],
+        gender: event.leadDetails!['lldGender'],
+        sourceid: event.leadDetails![''],
+        sourcename: event.leadDetails![''],
+        subActivity: event.leadDetails!['lldSubActivity']
+      );
+    } catch(error) {
+      print("onPersonalDetailsFetch-error => $error");
+      emit(
+        state.copyWith(
+          status: SaveStatus.failure
+        )
+      );
+    }
   }
 }

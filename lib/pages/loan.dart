@@ -127,7 +127,7 @@ class Loan extends StatelessWidget {
               Navigator.of(_context).pop();
             }
       
-            if (state.status == SaveStatus.success) {
+            if (state.status == SaveStatus.success && state.getLead == false) {
               Globalconfig.loanAmountMaximum = int.parse(
                 state.selectedProduct?.prdamtToRange ?? '0',
               );
@@ -160,6 +160,22 @@ class Loan extends StatelessWidget {
           },
           // child: BlocBuilder<LoanproductBloc, LoanproductState>(
           builder: (context, state) {
+            if (state.getLead!) {
+              form.controls['typeofloan']?.updateValue(
+                state.selectedProductScheme?.optionValue.toString()
+              );
+              form.controls['typeofloan']?.markAsDisabled();
+
+              form.controls['maincategory']?.updateValue(
+                state.selectedMainCategory?.lsfFacId.toString()
+              );
+              form.controls['maincategory']?.markAsDisabled();
+
+              form.controls['subcategory']?.updateValue(
+                state.selectedSubCategoryList?.lsfFacId.toString()
+              );
+              form.controls['subcategory']?.markAsDisabled();
+            }
             return ReactiveForm(
               formGroup: form,
               child: SafeArea(

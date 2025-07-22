@@ -77,6 +77,23 @@ class CompletedLeads extends StatelessWidget {
                   ),
             );
           }
+
+          if(state.getLeaStatus == SaveStatus.loading) {
+
+          } else if(state.getLeaStatus == SaveStatus.success) {
+            context.pushNamed('newlead', extra: {'leadData': state.getleadData});
+          } else if(state.getLeaStatus == SaveStatus.failure) {
+            showDialog(
+              context: context,
+              builder:
+                  (_) => SysmoAlert.failure(
+                    message: state.errorMessage.toString(),
+                    onButtonPressed: () {
+                      Navigator.pop(context);
+                    },
+                  ),
+            );
+          }
         },
         builder: (context, state) {
           Future<void> onRefresh() async {
@@ -167,7 +184,10 @@ class CompletedLeads extends StatelessWidget {
                   createdon: lead['lpdCreatedOn'] ?? 'N/A',
                   location: lead['lleadprefbrnch'] ?? 'N/A',
                   loanamount: lead['lldLoanamtRequested']?.toString() ?? '',
-                  onTap: () {},
+                  onTap: () {
+                    context.read<LeadBloc>().add(GetLeadDataEvent(leadId: lead['lleadid']));
+                    
+                  },
                   showarrow: false,
                   button: TextButton(
                     onPressed: () {
