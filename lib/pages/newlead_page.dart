@@ -67,7 +67,7 @@ class NewLeadPage extends StatelessWidget {
         BlocProvider(create: (context) => LeadSubmitBloc()),
       ],
       child: DefaultTabController(
-        length: 6,
+        length: fullLeadData == null ? 6 : 5,
         child: Scaffold(
           appBar:
               Globalconfig.isInitialRoute
@@ -104,13 +104,23 @@ class NewLeadPage extends StatelessWidget {
                             indicatorColor: Colors.white,
                             indicatorWeight: 3,
                             onTap: (index) {
-                              final statusList = [
+                              final firstStatusList = [
                                 loanState.status,
                                 dedupeState.status,
                                 personalState.status,
                                 addressState.status,
                                 // coappState.status,
                               ];
+
+                              final getstatusList = [
+                                loanState.status,
+                                dedupeState.status,
+                                personalState.status,
+                                addressState.status,
+                                // coappState.status,
+                              ];
+
+                              final statusList = fullLeadData == null ?  firstStatusList : getstatusList;
 
                               bool canNavigate = true;
                               for (int i = 0; i < index; i++) {
@@ -168,7 +178,7 @@ class NewLeadPage extends StatelessWidget {
                                 );
                               }
                             },
-                            tabs: <Widget>[
+                            tabs: fullLeadData == null ? <Widget>[
                               statusTabBar(
                                 icon: Icons.badge,
                                 isComplete:
@@ -201,6 +211,35 @@ class NewLeadPage extends StatelessWidget {
                                   color: Colors.white70,
                                 ),
                               ),
+                            ] 
+                              :
+                            <Widget>[
+                              statusTabBar(
+                                icon: Icons.badge,
+                                isComplete:
+                                    loanState.status == SaveStatus.success,
+                              ),
+                              statusTabBar(
+                                icon: Icons.face,
+                                isComplete:
+                                    personalState.status == SaveStatus.success,
+                              ),
+                              statusTabBar(
+                                icon: Icons.location_city,
+                                isComplete:
+                                    addressState.status == SaveStatus.success,
+                              ),
+                              statusTabBar(
+                                icon: Icons.add_reaction,
+                                isComplete:
+                                    coappState.status == SaveStatus.success,
+                              ),
+                              Tab(
+                                icon: Icon(
+                                  Icons.done_all,
+                                  color: Colors.white70,
+                                ),
+                              ),
                             ],
                           );
                         },
@@ -209,13 +248,21 @@ class NewLeadPage extends StatelessWidget {
                   ),
           drawer: Globalconfig.isInitialRoute ? null : Sidenavigationbar(),
           body: TabBarView(
-            children: [
+            children: fullLeadData == null ? [
               Loan(title: 'loan'),
               DedupeView(title: 'dedupe'),
               Personal(title: 'personal'),
               Address(title: 'address'),
               CoApplicantPage(title: 'Co Applicant Details'),
               LeadSubmitPage(title: 'Lead Details'),
+            ] 
+              : 
+            [
+              Loan(title: 'loan'),
+              Personal(title: 'personal'),
+              Address(title: 'address'),
+              CoApplicantPage(title: 'Co Applicant Details'),
+              LeadSubmitPage(title: 'Lead Details')
             ],
           ),
         ),

@@ -135,17 +135,25 @@ final class PersonalDetailsBloc
         aadharRefNo: event.leadDetails!['lleadadharnoEnc'],
         passportNumber: event.leadDetails![''],
         loanAmountRequested: event.leadDetails!['lldLoanamtRequested'].toString(),
-        natureOfActivity: event.leadDetails![''],
-        occupationType: event.leadDetails!['leadOccupationSector'],
-        agriculturistType: event.leadDetails![''],
-        farmerCategory: event.leadDetails!['lldCategory'],
-        farmerType: event.leadDetails![''],
+        natureOfActivity: event.leadDetails!['lldNameofActivity'],
+        occupationType: event.leadDetails!['lldOccType'],
+        agriculturistType: event.leadDetails!['lldAgrType'],
+        farmerCategory: event.leadDetails!['lldFarmCate'],
+        farmerType: event.leadDetails!['lldFarmType'],
         religion: event.leadDetails!['lldReligion'],
         caste: event.leadDetails!['lldCaste'],
         gender: event.leadDetails!['lldGender'],
-        sourceid: event.leadDetails![''],
-        sourcename: event.leadDetails![''],
+        sourceid: event.leadDetails!['lleadsourid'],
+        sourcename: event.leadDetails!['lleadsourname'],
         subActivity: event.leadDetails!['lldSubActivity']
+      );
+      emit(
+        state.copyWith(
+          lovList: listOfLov,
+          personalData: personalData,
+          status: SaveStatus.success,
+          getLead: true
+        )
       );
     } catch(error) {
       print("onPersonalDetailsFetch-error => $error");

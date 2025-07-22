@@ -105,7 +105,7 @@ class Personal extends StatelessWidget {
             print(
               'personaldetail::BlocConsumer:listen => ${state.lovList} ${state.personalData} ${state.status?.name}',
             );
-            if (state.status == SaveStatus.success) {
+            if (state.status == SaveStatus.success && state.getLead == false) {
               showDialog(
                 context: context,
                 barrierDismissible: false,
@@ -128,6 +128,9 @@ class Personal extends StatelessWidget {
                       onButtonPressed: () => Navigator.pop(context),
                     ),
               );
+            } else if (state.status == SaveStatus.success && state.getLead == true) {
+              Map<String,dynamic> personalDetails = state.personalData!.toMap();
+              form.patchValue(personalDetails);
             }
           },
           builder: (context, state) {

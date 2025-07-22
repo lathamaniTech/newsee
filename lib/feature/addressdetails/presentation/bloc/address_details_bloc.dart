@@ -33,6 +33,7 @@ final class AddressDetailsBloc
     on<AddressDetailsInitEvent>(initAddressDetails);
     on<AddressDetailsSaveEvent>(saveAddressDetails);
     on<OnStateCityChangeEvent>(getCityListBasedOnState);
+    on<AddressDetailsFetchEvent>(onAddressFetch);
     // on<OnStateCityChangeEvent>(getDisctrictListBasedOnCity);
   }
 
@@ -218,4 +219,12 @@ First, it attempts to fetch the data from the local database.If no matching data
   //     }
   //   }
   // }
+
+  Future<void> onAddressFetch(AddressDetailsFetchEvent event, Emitter emit) async {
+    try {
+      
+    } catch(error) {
+      emit(state.copyWith(status: SaveStatus.failure));
+    }
+  }
 }
