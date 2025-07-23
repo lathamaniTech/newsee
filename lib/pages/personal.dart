@@ -7,7 +7,6 @@ import 'package:newsee/Utils/qr_nav_utils.dart';
 import 'package:newsee/Utils/utils.dart';
 import 'package:newsee/feature/aadharvalidation/domain/modal/aadharvalidate_request.dart';
 import 'package:newsee/feature/dedupe/presentation/bloc/dedupe_bloc.dart';
-import 'package:newsee/feature/loanproductdetails/presentation/bloc/loanproduct_bloc.dart';
 import 'package:newsee/feature/masters/domain/modal/lov.dart';
 import 'package:newsee/feature/personaldetails/presentation/bloc/personal_details_bloc.dart';
 import 'package:newsee/widgets/SearchableMultiSelectDropdown.dart';
@@ -90,6 +89,37 @@ class Personal extends StatelessWidget {
     }
   }
 
+  mapPersonalData(val) {
+    try {
+      form.control('title').updateValue(val['title']);
+      form.control('firstName').updateValue(val['firstName']);
+      form.control('middleName').updateValue(val['middleName']);
+      form.control('lastName').updateValue(val['lastName']);
+      form.control('dob').updateValue(getDateFormat(val['dob']));
+      form.control('residentialStatus').updateValue(val['residentialStatus']);
+      form.control('primaryMobileNumber').updateValue(val['primaryMobileNumber']);
+      form.control('secondaryMobileNumber').updateValue(val['secondaryMobileNumber']);
+      form.control('email').updateValue(val['email']);
+      form.control('panNumber').updateValue(val['panNumber']);
+      form.control('aadharRefNo').updateValue(val['aadharRefNo']);
+      form.control('secondaryMobileNumber').updateValue(val['secondaryMobileNumber']);
+      form.control('loanAmountRequested').updateValue(val['loanAmountRequested']);
+      form.control('natureOfActivity').updateValue(val['natureOfActivity']);
+      form.control('occupationType').updateValue(val['occupationType']);
+      form.control('agriculturistType').updateValue(val['agriculturistType']);
+      form.control('farmerCategory').updateValue(val['farmerCategory']);
+      form.control('farmerType').updateValue(val['farmerType']);
+      form.control('religion').updateValue(val['religion']);
+      form.control('caste').updateValue(val['caste']);
+      form.control('gender').updateValue(val['gender']);
+      form.control('sourceid').updateValue(val['sourceid']);
+      form.control('sourcename').updateValue(val['sourcename']);
+      form.control('subActivity').updateValue(val['subActivity']);
+    } catch (error) {
+      print("mapPersonalData-catch-error $error");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Kwillpopscope(
@@ -128,9 +158,6 @@ class Personal extends StatelessWidget {
                       onButtonPressed: () => Navigator.pop(context),
                     ),
               );
-            } else if (state.status == SaveStatus.success && state.getLead == true) {
-              Map<String,dynamic> personalDetails = state.personalData!.toMap();
-              form.patchValue(personalDetails);
             }
           },
           builder: (context, state) {
@@ -148,8 +175,11 @@ class Personal extends StatelessWidget {
               } else if (dedupeState.aadharvalidateResponse != null) {
                 mapAadhaarData(dedupeState.aadharvalidateResponse);
               }
-            } else if (state.status == SaveStatus.success) {
+            } else if (state.status == SaveStatus.success && state.getLead == false) {
               print('saved personal data =>${state.personalData}');
+            } else if (state.status == SaveStatus.success && state.getLead == true) {
+              Map<String,dynamic> personalDetails = state.personalData!.toMap();
+              mapPersonalData(personalDetails);
             }
             return ReactiveForm(
               formGroup: form,

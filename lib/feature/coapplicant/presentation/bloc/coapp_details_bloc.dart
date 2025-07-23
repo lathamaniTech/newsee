@@ -48,6 +48,7 @@ final class CoappDetailsBloc
     on<CifEditManuallyEvent>((event, emit) {
       emit(state.copyWith(isCifValid: event.cifButton));
     });
+    on<CoApplicantandGurantorFetchEvent>(onCoappandGauDetailsFetch);
   }
 
   _deleteApplicant(DeleteCoApplicantEvent event, Emitter emit) {
@@ -251,6 +252,125 @@ fetching dedupe for co applicant reusing dedupe page cif search logic here
     } else {
       print('getStateCode $geographyMaster');
       return geographyMaster.code;
+    }
+  }
+
+  Future<void> onCoappandGauDetailsFetch(CoApplicantandGurantorFetchEvent event, Emitter emit) async {
+    try {
+
+      Database _db = await DBConfig().database;
+      List<Lov> listOfLov = await LovCrudRepo(_db).getAll();
+      List<GeographyMaster> stateCityMaster = await GeographymasterCrudRepo(
+        _db,
+      ).getByColumnNames(
+        columnNames: [
+          TableKeysGeographyMaster.stateId,
+          TableKeysGeographyMaster.cityId,
+        ],
+        columnValues: ['0', '0'],
+      );
+      
+      List<CoapplicantData> coappandGauList = [];
+      String coappAdded = event.leadDetails!['lldCoappfrstname'] != null ? 'Y' : 'N';
+      if(coappAdded == 'Y') {
+        CoapplicantData?  coappData = mapCoApplicant(event.leadDetails);
+        CoapplicantData?  gaurantorData = mapGaurantor(event.leadDetails);
+        coappandGauList.add(coappData!);
+        coappandGauList.add(gaurantorData!);
+      }
+      
+
+      
+      
+      emit(
+        state.copyWith(
+          status: SaveStatus.success,
+          lovList: listOfLov,
+          stateCityMaster: stateCityMaster,
+          isApplicantsAdded: coappAdded,
+          coAppList: coappandGauList,
+          getLead: true
+        )
+      );
+
+    } catch (error) {
+      emit(
+        state.copyWith(status: SaveStatus.failure)
+      );
+    }
+  }
+
+  CoapplicantData? mapCoApplicant(val) {
+    try {
+      CoapplicantData coappData = CoapplicantData(
+        applicantType: 'C',
+        customertype: '',
+        cifNumber: val['lldCoappCbsid'],
+        constitution: val['lldCoappConst'],
+        title: val['lldCoappTitle'],
+        firstName: val['lldCoappfrstname'],
+        middleName: val['lldCoappmidname'],
+        lastName: val['lldCoapplastname'],
+        dob: val['lldCoappdob'].toString(),
+        relationshipFirm: val['lldCoappRelationFirm'],
+        residentialStatus: val['lldCoappResidentStatus'],
+        email: val['lldCoappemailid'],
+        primaryMobileNumber: val['lldCoappmobno'],
+        secondaryMobileNumber: val[''],
+        panNumber: val['lldCoapppanno'],
+        aadharRefNo: val['lldCoappadharno'],
+        address1: val['lldCoappaddress'],
+        address2: val['lldCoappaddresslane1'],
+        address3: val['lldCoappaddresslane2'],
+        state: val['lldCoappstate'],
+        cityDistrict: val['lldCoappcity'],
+        pincode: val['lldCoapppinno'],
+        loanLiabilityCount: val['lpcbscoborrLiabilityCount'],
+        loanLiabilityAmount: val['lpcbscoborrLiabilityAmount'],
+        depositCount: val['lpcbscoborrdepositCount'],
+        depositAmount: val['lpcbscoborrdepositAmount']
+      );
+      return coappData;
+    } catch (error) {
+      print("mapCoApplicant-error => $error");
+      return null;
+    }
+  }
+
+  CoapplicantData? mapGaurantor(val) {
+    try {
+      CoapplicantData gaurantorData = CoapplicantData(
+        applicantType: 'G',
+        customertype: val[''],
+        cifNumber: val['lldGuaCbsid'],
+        constitution: val['lleadGuaConst'],
+        title: val['lleadGuTitle'],
+        firstName: val['lldguafrstname'],
+        middleName: val['lldguamidname'],
+        lastName: val['lldgualastname'],
+        dob: val['lldguadob'].toString(),
+        relationshipFirm: val['lldGuaRelationFirm'],
+        residentialStatus: val['lldGuaResidentStatus'],
+        email: val['lldguaemailid'],
+        primaryMobileNumber: val['lldguamobno'],
+        secondaryMobileNumber: val[''],
+        panNumber: val['lldGuapanno'],
+        aadharRefNo: val['lldGuaadharno'],
+        address1: val['lldGuaaddress'],
+        address2: val['lldGuaaddresslane1'],
+        address3: val['lldGuaaddresslane2'],
+        state: val['lldGuastate'],
+        cityDistrict: val['lldGuacity'],
+        pincode: val['lldGuapinno'],
+        loanLiabilityCount: val['lpcbsgauLiabilityCount'],
+        loanLiabilityAmount: val['lpcbsgauLiabilityAmount'],
+        depositCount: val['lpcbsgaudepositCount'],
+        depositAmount: val['lpcbsgaudepositAmount']
+      );
+      return gaurantorData;
+    } catch (error) {
+      print("mapGaurantor-error => $error");
+      return null;
     }
   }
 }

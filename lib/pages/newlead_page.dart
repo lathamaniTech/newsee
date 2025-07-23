@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:newsee/AppData/app_constants.dart';
 import 'package:newsee/AppData/globalconfig.dart';
-import 'package:newsee/feature/CropDetails/presentation/page/cropdetailspage.dart';
 import 'package:newsee/feature/addressdetails/presentation/bloc/address_details_bloc.dart';
-import 'package:newsee/feature/cif/presentation/bloc/cif_bloc.dart';
 import 'package:newsee/feature/coapplicant/presentation/bloc/coapp_details_bloc.dart';
 import 'package:newsee/feature/coapplicant/presentation/page/coapp_page.dart';
 import 'package:newsee/feature/dedupe/presentation/bloc/dedupe_bloc.dart';
@@ -16,10 +14,7 @@ import 'package:newsee/feature/personaldetails/presentation/bloc/personal_detail
 import 'package:newsee/pages/address.dart';
 import 'package:newsee/pages/lead_submit_page.dart';
 import 'package:newsee/pages/loan.dart';
-import 'package:newsee/pages/location.dart';
 import 'package:newsee/pages/personal.dart';
-import 'package:newsee/widgets/address_tab_bar.dart';
-import 'package:newsee/widgets/latlongbutton.dart';
 import 'package:newsee/widgets/side_navigation.dart';
 
 class NewLeadPage extends StatelessWidget {
@@ -57,17 +52,25 @@ class NewLeadPage extends StatelessWidget {
           create:
               (context) =>
                   AddressDetailsBloc()
-                    ..add(AddressDetailsInitEvent(cifResponseModel: null)),
+                    ..add(
+                      fullLeadData == null ? 
+                      AddressDetailsInitEvent(cifResponseModel: null) :
+                      AddressDetailsFetchEvent(leadAddressDetails: fullLeadData?.LeadAddressDetails)
+                    ),
           lazy: false,
         ),
         BlocProvider(
-          create: (context) => CoappDetailsBloc()..add(CoAppDetailsInitEvent()),
+          create: (context) => CoappDetailsBloc()..add(
+            fullLeadData == null ? 
+            CoAppDetailsInitEvent() :
+            CoApplicantandGurantorFetchEvent(leadDetails: fullLeadData?.LeadDetails)
+          ),
           lazy: false,
         ),
         BlocProvider(create: (context) => LeadSubmitBloc()),
       ],
       child: DefaultTabController(
-        length: fullLeadData == null ? 6 : 5,
+        length: fullLeadData == null ? 6 : 4,
         child: Scaffold(
           appBar:
               Globalconfig.isInitialRoute
@@ -114,10 +117,8 @@ class NewLeadPage extends StatelessWidget {
 
                               final getstatusList = [
                                 loanState.status,
-                                dedupeState.status,
                                 personalState.status,
                                 addressState.status,
-                                // coappState.status,
                               ];
 
                               final statusList = fullLeadData == null ?  firstStatusList : getstatusList;
@@ -234,12 +235,6 @@ class NewLeadPage extends StatelessWidget {
                                 isComplete:
                                     coappState.status == SaveStatus.success,
                               ),
-                              Tab(
-                                icon: Icon(
-                                  Icons.done_all,
-                                  color: Colors.white70,
-                                ),
-                              ),
                             ],
                           );
                         },
@@ -262,7 +257,6 @@ class NewLeadPage extends StatelessWidget {
               Personal(title: 'personal'),
               Address(title: 'address'),
               CoApplicantPage(title: 'Co Applicant Details'),
-              LeadSubmitPage(title: 'Lead Details')
             ],
           ),
         ),

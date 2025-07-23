@@ -72,3 +72,8 @@ class CifEditManuallyEvent extends CoappDetailsEvent {
   final bool cifButton;
   CifEditManuallyEvent(this.cifButton);
 }
+
+class CoApplicantandGurantorFetchEvent extends CoappDetailsEvent {
+  final Map<String, dynamic>? leadDetails;
+  CoApplicantandGurantorFetchEvent({required this.leadDetails});
+}
