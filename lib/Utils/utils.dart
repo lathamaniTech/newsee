@@ -245,10 +245,12 @@ List<GroupProposalInbox>? onSearchApplicationInbox({
   final filteredLeads =
       items?.where((lead) {
         final name = (lead.finalList['lleadfrstname'] ?? '').toLowerCase();
+        final propNo = (lead.finalList!['propNo'] ?? '').toString();
         final id = (lead.finalList['lleadid'] ?? '').toLowerCase();
         final phone = (lead.finalList['lleadmobno'] ?? '').toLowerCase();
         final loan = (lead.finalList['lldLoanamtRequested'] ?? '').toString();
         return name.contains(searchQuery.toLowerCase()) ||
+            propNo.contains(searchQuery.toLowerCase()) ||
             id.contains(searchQuery.toLowerCase()) ||
             phone.contains(searchQuery.toLowerCase()) ||
             loan.contains(searchQuery.toLowerCase());

@@ -11,12 +11,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:newsee/AppData/app_api_constants.dart';
 import 'package:newsee/AppData/app_constants.dart';
-import 'package:newsee/Utils/proposal_utils.dart';
 import 'package:newsee/Utils/utils.dart';
 import 'package:newsee/feature/leadInbox/domain/modal/group_lead_inbox.dart';
-import 'package:newsee/core/api/api_config.dart';
-import 'package:newsee/feature/leadsubmit/domain/modal/proposal_creation_request.dart';
-import 'package:newsee/feature/leadsubmit/presentation/bloc/lead_submit_bloc.dart';
 import 'package:newsee/widgets/sysmo_alert.dart';
 import 'package:newsee/widgets/loader.dart';
 import 'package:newsee/widgets/success_bottom_sheet.dart';
@@ -40,6 +36,11 @@ class CompletedLeads extends StatelessWidget {
             presentLoading(context, 'Creating Proposal...');
           } else if (state.proposalSubmitStatus == SaveStatus.success ||
               state.proposalSubmitStatus == SaveStatus.failure) {
+            dismissLoading(context);
+          }
+          if (state.getLeaStatus == SaveStatus.loading) {
+            presentLoading(context, 'Fetching Lead Details...');
+          } else if (state.getLeaStatus == SaveStatus.success || state.getLeaStatus == SaveStatus.failure) {
             dismissLoading(context);
           }
 

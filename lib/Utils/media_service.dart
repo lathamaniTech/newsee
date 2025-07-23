@@ -22,6 +22,13 @@ import 'package:image_picker/image_picker.dart';
 import 'package:newsee/Model/loader.dart';
 import 'package:path_provider/path_provider.dart';
 
+class LocationResponse {
+  final Position? position;
+  final String? error;
+
+  LocationResponse({this.position, this.error});
+}
+
 class MediaService {
   /* 
 @author         :   ganeshkumar.b    14/05/2025
@@ -30,47 +37,43 @@ class MediaService {
 @return data     :   Current Cooridnate like latitude and longitude value returned
  */
 
-  Future<Position> getLocation(BuildContext context) async {
+  Future<LocationResponse> getLocation(BuildContext context) async {
     try {
-      LocationPermission permissionstatus;
-      Position gelocationdata;
-
-      // showDialog(
-      //   context: context,
-      //   barrierDismissible: false,
-      //   builder: (_) => const LoaderView(),
-      // );
-
-      final bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-      if (!serviceEnabled) {
-        throw Exception('Location services are disabled.');
+      final bool locationEnabled = await checkIsLocationServiceEnabled();
+      if (!locationEnabled) {
+        // return LocationResponse(
+        //   error: 'Location services are disabled. Please enable GPS.',
+        // );
+        await handlePermissions();
       }
-
-      permissionstatus = await Geolocator.checkPermission();
-      print("Geolocator.checkPermission(): $permissionstatus");
-      if (permissionstatus == LocationPermission.denied) {
-        permissionstatus = await Geolocator.requestPermission();
-        if (permissionstatus == LocationPermission.denied) {
-          throw Exception('Location services are disabled.');
-        }
-      }
-
-      if (permissionstatus == LocationPermission.deniedForever) {
-        throw Exception(
-          'Location permissions are permanently denied, we cannot request permissions.',
-        );
-      }
-
-      gelocationdata = await Geolocator.getCurrentPosition();
-      print("gelocationdata: $gelocationdata");
-
-      return gelocationdata;
+      Position position = await Geolocator.getCurrentPosition();
+      print("gelocationdata: $position");
+      return LocationResponse(position: position);
     } catch (error) {
-      rethrow;
-    } finally {
-      // if (context.mounted) {
-      //   Navigator.of(context, rootNavigator: true).pop(); // Dismiss the loader
-      // }
+      return LocationResponse(error: error.toString());
+    }
+  }
+
+  Future<bool> checkIsLocationServiceEnabled() async {
+    return await Geolocator.isLocationServiceEnabled();
+  }
+
+  Future<void> handlePermissions() async {
+    LocationPermission permission = await Geolocator.checkPermission();
+
+    if (permission == LocationPermission.denied ||
+        permission == LocationPermission.deniedForever) {
+      permission = await Geolocator.requestPermission();
+    }
+
+    if (permission == LocationPermission.denied) {
+      throw Exception('Location permission is denied.');
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      throw Exception(
+        'Location permission is permanently denied. Please enable it from app settings.',
+      );
     }
   }
 
@@ -137,23 +140,10 @@ class MediaService {
   Future<Uint8List?> cropper(context, filepath) async {
     try {
       Uint8List? croppedImage;
-      // double screenwidth = MediaQuery.of(context).size.width;
-
-      // final padding = MediaQuery.of(context).padding.top;
-      // final appBarHieght = kToolbarHeight;
-      // double screenheight =
-      //     MediaQuery.of(context).size.height - padding - appBarHieght;
-      // double cropperW = (screenwidth * 0.5);
-      // double cropperH = (screenheight * 0.5);
-      // if (screenwidth < 600) {
-      //   cropperW = screenwidth * 0.9;
-      //   cropperH = screenheight * 0.5;
-      // }
-      // final intwidth = cropperW.round();
-      // final intheight = cropperH.round();
 
       double screenWidth = MediaQuery.of(context).size.width;
       double screenHeight = MediaQuery.of(context).size.height;
+      print('screenHeight: $screenHeight');
 
       // base padding from system
       final topPadding = MediaQuery.of(context).padding.top;
@@ -161,8 +151,8 @@ class MediaService {
 
       // add extra padding if screen is large
       double extraTopPadding = 0;
-      if (screenHeight > 800 || screenWidth > 600) {
-        extraTopPadding = 28;
+      if (screenHeight > 700) {
+        extraTopPadding = 80; // 28
       }
 
       double usableHeight =
@@ -177,9 +167,14 @@ class MediaService {
         uiSettings: [
           AndroidUiSettings(
             toolbarTitle: 'Cropper',
+            // toolbarColor: Colors.deepOrange,
+            // statusBarColor: Colors.yellow,
+            // toolbarWidgetColor: const Color.fromRGBO(255, 255, 255, 1),
+            // initAspectRatio: CropAspectRatioPreset.square,
             toolbarColor: Colors.deepOrange,
-            toolbarWidgetColor: const Color.fromRGBO(255, 255, 255, 1),
-            initAspectRatio: CropAspectRatioPreset.square,
+            toolbarWidgetColor: Colors.white,
+            statusBarColor: Colors.deepOrange,
+            activeControlsWidgetColor: Colors.deepOrange,
             lockAspectRatio: false,
             aspectRatioPresets: [
               CropAspectRatioPreset.original,

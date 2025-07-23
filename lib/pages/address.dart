@@ -87,6 +87,7 @@ class Address extends StatelessWidget {
       form.control('cityDistrict').updateValue(val.cityDistrict);
       form.control('area').updateValue(val.area);
       form.control('pincode').updateValue(val.pincode);
+      form.markAsDisabled();
     } catch (error) {
       print('mapAddressDetails-error => $error');
     }
@@ -353,18 +354,20 @@ class Address extends StatelessWidget {
                                 ),
                               ),
                               onPressed: () {
-                                print("Address Details value ${form.value}");
-                                if (form.valid) {
-                                  AddressData addressData = AddressData.fromMap(
-                                    form.value,
-                                  );
-                                  context.read<AddressDetailsBloc>().add(
-                                    AddressDetailsSaveEvent(
-                                      addressData: addressData,
-                                    ),
-                                  );
-                                } else {
-                                  form.markAllAsTouched();
+                                if (state.getLead == null || state.getLead == false) {
+                                  print("Address Details value ${form.value}");
+                                  if (form.valid) {
+                                    AddressData addressData = AddressData.fromMap(
+                                      form.value,
+                                    );
+                                    context.read<AddressDetailsBloc>().add(
+                                      AddressDetailsSaveEvent(
+                                        addressData: addressData,
+                                      ),
+                                    );
+                                  } else {
+                                    form.markAllAsTouched();
+                                  }
                                 }
                               },
                               child: Text('Next'),

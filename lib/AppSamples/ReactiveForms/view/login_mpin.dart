@@ -19,19 +19,15 @@ mpin(
   AsyncResponseHandler? masterVersionCheckResponseHandler,
 ) {
   // show the custom modal bottom sheet
-  String pin = '';
 
   showModalBottomSheet<void>(
     isScrollControlled: true,
     backgroundColor: Colors.white,
     context: context,
-    builder: (BuildContext context) {
-      final size = MediaQuery.of(context).size;
-      final screenWidth = size.width;
-      final screenHeight = size.height;
-
+    builder: (BuildContext modalcontext) {
       return SysmoMpin(
         masterVersionCheckResponseHandler: masterVersionCheckResponseHandler,
+        pageContext: context,
       );
     },
   );

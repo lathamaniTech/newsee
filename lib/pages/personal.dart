@@ -113,6 +113,7 @@ class Personal extends StatelessWidget {
       form.control('caste').updateValue(val['caste']);
       form.control('gender').updateValue(val['gender']);
       form.control('subActivity').updateValue(val['subActivity']);
+      form.markAsDisabled();
     } catch (error) {
       print("mapPersonalData-catch-error $error");
     }
@@ -133,7 +134,7 @@ class Personal extends StatelessWidget {
             print(
               'personaldetail::BlocConsumer:listen => ${state.lovList} ${state.personalData} ${state.status?.name}',
             );
-            if (state.status == SaveStatus.success && state.getLead == false) {
+            if (state.status == SaveStatus.success && (state.getLead == false || state.getLead == null)) {
               showDialog(
                 context: context,
                 barrierDismissible: false,
@@ -290,6 +291,7 @@ class Personal extends StatelessWidget {
                         label: 'Pan No',
                         mantatory: true,
                         autoCapitalize: true,
+                        maxlength: 10,
                       ),
                       refAadhaar
                           ? Row(
@@ -688,47 +690,48 @@ class Personal extends StatelessWidget {
                             ),
                           ),
                           onPressed: () {
-                            print("personal Details value ${form.value}");
+                            if (state.getLead == null || state.getLead == false) {
+                              print("personal Details value ${form.value}");
+                              if (form.valid) {
+                                PersonalData personalData = PersonalData.fromMap(
+                                  form.value,
+                                );
+                                PersonalData personalDataFormatted = personalData
+                                    .copyWith(
+                                      dob: getDateFormatedByProvided(
+                                        personalData.dob,
+                                        from: AppConstants.Format_dd_MM_yyyy,
+                                        to: AppConstants.Format_yyyy_MM_dd,
+                                      ),
+                                    );
 
-                            if (form.valid) {
-                              PersonalData personalData = PersonalData.fromMap(
-                                form.value,
-                              );
-                              PersonalData personalDataFormatted = personalData
-                                  .copyWith(
-                                    dob: getDateFormatedByProvided(
-                                      personalData.dob,
-                                      from: AppConstants.Format_dd_MM_yyyy,
-                                      to: AppConstants.Format_yyyy_MM_dd,
-                                    ),
-                                  );
-
-                              context.read<PersonalDetailsBloc>().add(
-                                PersonalDetailsSaveEvent(
-                                  personalData: personalDataFormatted,
-                                ),
-                              );
-                            } else {
-                              form.markAllAsTouched();
-                              showDialog(
-                                context: context,
-                                barrierDismissible: false,
-                                builder:
-                                    (_) => SysmoAlert.warning(
-                                      message:
-                                          "Please check error message and Enter valid data",
-                                      onButtonPressed:
-                                          () => Navigator.pop(context),
-                                    ),
-                              );
-                              // ScaffoldMessenger.of(context).showSnackBar(
-                              //   SnackBar(
-                              //     content: Text(
-                              //       'Please Check Error Message and Enter Valid Data ',
-                              //     ),
-                              //   ),
-                              // );
-                            }
+                                context.read<PersonalDetailsBloc>().add(
+                                  PersonalDetailsSaveEvent(
+                                    personalData: personalDataFormatted,
+                                  ),
+                                );
+                              } else {
+                                form.markAllAsTouched();
+                                showDialog(
+                                  context: context,
+                                  barrierDismissible: false,
+                                  builder:
+                                      (_) => SysmoAlert.warning(
+                                        message:
+                                            "Please check error message and Enter valid data",
+                                        onButtonPressed:
+                                            () => Navigator.pop(context),
+                                      ),
+                                );
+                                // ScaffoldMessenger.of(context).showSnackBar(
+                                //   SnackBar(
+                                //     content: Text(
+                                //       'Please Check Error Message and Enter Valid Data ',
+                                //     ),
+                                //   ),
+                                // );
+                              }
+                            } 
                           },
                           child: Text('Next'),
                         ),

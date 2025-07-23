@@ -162,17 +162,13 @@ class Loan extends StatelessWidget {
               form.controls['typeofloan']?.updateValue(
                 state.selectedProductScheme?.optionValue.toString()
               );
-              form.controls['typeofloan']?.markAsDisabled();
-
               form.controls['maincategory']?.updateValue(
                 state.selectedMainCategory?.lsfFacId.toString()
               );
-              form.controls['maincategory']?.markAsDisabled();
-
               form.controls['subcategory']?.updateValue(
                 state.selectedSubCategoryList?.lsfFacId.toString()
               );
-              form.controls['subcategory']?.markAsDisabled();
+              form.markAsDisabled();
             }
             return ReactiveForm(
               formGroup: form,
@@ -329,52 +325,55 @@ class Loan extends StatelessWidget {
                             ),
                           ),
                           onPressed: () {
-                            final blocState =
+                            if (state.getLead == null || state.getLead == false) {
+                              final blocState =
                                 context.read<LoanproductBloc>().state;
-                            final selectedProduct = blocState.selectedProduct;
-      
-                            if (form.valid) {
-                              if (selectedProduct == null) {
-                                showDialog(
-                                  context: context,
-                                  builder:
-                                      (ctx) => AlertDialog(
-                                        title: Row(
-                                          children: [
-                                            Icon(Icons.info, color: Colors.teal),
-                                            SizedBox(width: 8),
-      
-                                            Text(
-                                              'Alert',
-                                              style: TextStyle(
-                                                fontSize: 20,
-                                                fontWeight: FontWeight.bold,
+                              final selectedProduct = blocState.selectedProduct;
+        
+                              if (form.valid) {
+                                if (selectedProduct == null) {
+                                  showDialog(
+                                    context: context,
+                                    builder:
+                                        (ctx) => AlertDialog(
+                                          title: Row(
+                                            children: [
+                                              Icon(Icons.info, color: Colors.teal),
+                                              SizedBox(width: 8),
+        
+                                              Text(
+                                                'Alert',
+                                                style: TextStyle(
+                                                  fontSize: 20,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
                                               ),
+                                            ],
+                                          ),
+                                          content: Text(
+                                            'Please choose a product before processing..',
+                                            style: TextStyle(fontSize: 18),
+                                          ),
+                                          actions: [
+                                            TextButton(
+                                              onPressed:
+                                                  () => Navigator.of(ctx).pop(),
+                                              child: Text('OK'),
                                             ),
                                           ],
                                         ),
-                                        content: Text(
-                                          'Please choose a product before processing..',
-                                          style: TextStyle(fontSize: 18),
-                                        ),
-                                        actions: [
-                                          TextButton(
-                                            onPressed:
-                                                () => Navigator.of(ctx).pop(),
-                                            child: Text('OK'),
-                                          ),
-                                        ],
-                                      ),
+                                  );
+                                  return;
+                                }
+                                print('loan product form value => ${form.value}');
+                                context.read<LoanproductBloc>().add(
+                                  SaveLoanProduct(choosenProduct: form.value),
                                 );
-                                return;
+                              } else {
+                                form.markAllAsTouched();
                               }
-                              print('loan product form value => ${form.value}');
-                              context.read<LoanproductBloc>().add(
-                                SaveLoanProduct(choosenProduct: form.value),
-                              );
-                            } else {
-                              form.markAllAsTouched();
                             }
+                            
                           },
                           child: Text('Next'),
                         ),
