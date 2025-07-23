@@ -20,6 +20,7 @@ class SearchableDropdown<T> extends StatefulWidget {
   final List<T> items;
   final bool? mantatory;
   final T? Function() selItem;
+  final Key? fieldKey;
   /*
    @modifiedby   : karthick.d  05/06/2025
    @desc         : this is a changelister function that handle dropdown option change
@@ -27,7 +28,7 @@ class SearchableDropdown<T> extends StatefulWidget {
   final Function? onChangeListener;
 
   const SearchableDropdown({
-    super.key,
+    this.fieldKey,
     required this.controlName,
     required this.label,
     required this.items,
@@ -62,6 +63,7 @@ class _SearchableDropdownState<T> extends State<SearchableDropdown<T>> {
   @override
   Widget build(BuildContext context) {
     return ReactiveFormField<String, T>(
+      key: widget.fieldKey,
       formControlName: widget.controlName,
       validationMessages: {
         ValidationMessage.required: (error) => '${widget.label} is required',

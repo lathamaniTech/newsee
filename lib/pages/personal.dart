@@ -19,10 +19,33 @@ import 'package:reactive_forms/reactive_forms.dart';
 
 class Personal extends StatelessWidget {
   final String title;
-
+  // scrollcontroller is required to scroll to errorformfield
+  final _scrollController = ScrollController();
   Personal({required this.title, super.key});
 
   final FormGroup form = AppForms.GET_PERSONAL_DETAILS_FORM();
+  final _titleKey = GlobalKey();
+  final _firstNameKey = GlobalKey();
+  final _middleNameKey = GlobalKey();
+  final _lastNameKey = GlobalKey();
+  final _dobKey = GlobalKey();
+  final _residentialStatusKey = GlobalKey();
+  final _primaryMobileNumberKey = GlobalKey();
+  final _secondaryMobileNumberKey = GlobalKey();
+  final _emailKey = GlobalKey();
+  final _aadhaarKey = GlobalKey();
+  final _panNumberKey = GlobalKey();
+  final _aadharRefNoKey = GlobalKey();
+  final _loanAmountRequestedKey = GlobalKey();
+  final _natureOfActivityKey = GlobalKey();
+  final _occupationTypeKey = GlobalKey();
+  final _agriculturistTypeKey = GlobalKey();
+  final _farmerCategoryKey = GlobalKey();
+  final _farmerTypeKey = GlobalKey();
+  final _religionKey = GlobalKey();
+  final _casteKey = GlobalKey();
+  final _genderKey = GlobalKey();
+  final _subActivityKey = GlobalKey();
   bool refAadhaar = true;
 
   /* 
@@ -58,7 +81,6 @@ class Personal extends StatelessWidget {
         print('formattedDate in personal page => $formattedDate');
 
         form.control('dob').updateValue(formattedDate);
-        // form.control('primaryMobileNumber').updateValue(val?.mobile!);
         form.control('email').updateValue(val?.email!);
       }
     } catch (error) {
@@ -71,7 +93,11 @@ class Personal extends StatelessWidget {
     @desc       : map cif response in personal form
     @param      : {CifResponse val} - cifresponse
   */
-  mapCifDate(val, state) {
+  mapCifDate(val) {
+    datamapperCif(val);
+  }
+
+  void datamapperCif(val) {
     try {
       form.control('firstName').updateValue(val.lleadfrstname!);
       form.control('middleName').updateValue(val.lleadmidname!);
@@ -116,6 +142,58 @@ class Personal extends StatelessWidget {
       form.markAsDisabled();
     } catch (error) {
       print("mapPersonalData-catch-error $error");
+    }
+  }
+  
+  void scrollToErrorField() {
+    final fields = [
+      {'key': _titleKey, 'controlName': 'title'},
+      {'key': _firstNameKey, 'controlName': 'firstName'},
+      {'key': _middleNameKey, 'controlName': 'middleName'},
+      {'key': _lastNameKey, 'controlName': 'lastName'},
+      {'key': _dobKey, 'controlName': 'dob'},
+      {'key': _primaryMobileNumberKey, 'controlName': 'primaryMobileNumber'},
+      {
+        'key': _secondaryMobileNumberKey,
+        'controlName': 'secondaryMobileNumber',
+      },
+      {'key': _emailKey, 'controlName': 'email'},
+      {'key': _panNumberKey, 'controlName': 'panNumber'},
+      {'key': _aadhaarKey, 'controlName': 'aadhaar'},
+      {'key': _aadharRefNoKey, 'controlName': 'aadharRefNo'},
+      {'key': _loanAmountRequestedKey, 'controlName': 'loanAmountRequested'},
+      {'key': _residentialStatusKey, 'controlName': 'residentialStatus'},
+      {'key': _natureOfActivityKey, 'controlName': 'natureOfActivity'},
+      {'key': _occupationTypeKey, 'controlName': 'occupationType'},
+      {'key': _agriculturistTypeKey, 'controlName': 'agriculturistType'},
+      {'key': _farmerCategoryKey, 'controlName': 'farmerCategory'},
+      {'key': _farmerTypeKey, 'controlName': 'farmerType'},
+      {'key': _religionKey, 'controlName': 'religion'},
+      {'key': _casteKey, 'controlName': 'caste'},
+      {'key': _genderKey, 'controlName': 'gender'},
+    ];
+
+    for (var field in fields) {
+      final control = form.control(field['controlName'] as String);
+      if (control.invalid && control.touched) {
+        control.focus();
+        break;
+        // final context = (field['key'] as GlobalKey).currentContext;
+        // if (context != null) {
+        //   final RenderBox renderBox = context.findRenderObject() as RenderBox;
+        //   final position = renderBox.localToGlobal(Offset.zero);
+        //   print(
+        //     'controlName => ${field['controlName']} , dy => ${position.dy}',
+        //   );
+        //   // Scroll to the position of the invalid field
+        //   _scrollController.animateTo(
+        //     position.dy,
+        //     duration: const Duration(milliseconds: 300),
+        //     curve: Curves.easeInOut,
+        //   );
+        //   break; // Stop after finding the first invalid field
+        // }
+      }
     }
   }
 
@@ -170,7 +248,7 @@ class Personal extends StatelessWidget {
                   'cif response title => ${dedupeState.cifResponse?.lleadtitle}',
                 );
                 print('state.lovList =>${state.lovList}');
-                mapCifDate(dedupeState.cifResponse, state);
+                mapCifDate(dedupeState.cifResponse);
               } else if (dedupeState.aadharvalidateResponse != null) {
                 mapAadhaarData(dedupeState.aadharvalidateResponse);
               }
@@ -184,9 +262,11 @@ class Personal extends StatelessWidget {
               formGroup: form,
               child: SafeArea(
                 child: SingleChildScrollView(
+                  controller: _scrollController,
                   child: Column(
                     children: [
                       SearchableDropdown(
+                        fieldKey: _titleKey,
                         controlName: 'title',
                         label: 'Title',
                         items:
@@ -221,16 +301,19 @@ class Personal extends StatelessWidget {
                             ),
                       ),
                       CustomTextField(
+                        fieldKey: _firstNameKey,
                         controlName: 'firstName',
                         label: 'First Name',
                         mantatory: true,
                       ),
                       CustomTextField(
+                        fieldKey: _middleNameKey,
                         controlName: 'middleName',
                         label: 'Middle Name',
                         mantatory: true,
                       ),
                       CustomTextField(
+                        fieldKey: _lastNameKey,
                         controlName: 'lastName',
                         label: 'Last Name',
                         mantatory: true,
@@ -238,6 +321,7 @@ class Personal extends StatelessWidget {
                       Padding(
                         padding: const EdgeInsets.all(12.0),
                         child: ReactiveTextField<String>(
+                          key: _dobKey,
                           formControlName: 'dob',
                           validationMessages: {
                             ValidationMessage.required:
@@ -268,6 +352,7 @@ class Personal extends StatelessWidget {
                         ),
                       ),
                       IntegerTextField(
+                        fieldKey: _primaryMobileNumberKey,
                         controlName: 'primaryMobileNumber',
                         label: 'Primary Mobile Number',
                         mantatory: true,
@@ -275,6 +360,7 @@ class Personal extends StatelessWidget {
                         minlength: 10,
                       ),
                       IntegerTextField(
+                        fieldKey: _secondaryMobileNumberKey,
                         controlName: 'secondaryMobileNumber',
                         label: 'Secondary Mobile Number',
                         mantatory: true,
@@ -282,11 +368,13 @@ class Personal extends StatelessWidget {
                         minlength: 10,
                       ),
                       CustomTextField(
+                        fieldKey: _emailKey,
                         controlName: 'email',
                         label: 'Email Id',
                         mantatory: true,
                       ),
                       CustomTextField(
+                        fieldKey: _panNumberKey,
                         controlName: 'panNumber',
                         label: 'Pan No',
                         mantatory: true,
@@ -298,6 +386,7 @@ class Personal extends StatelessWidget {
                             children: [
                               Expanded(
                                 child: IntegerTextField(
+                                  fieldKey: _aadharRefNoKey,
                                   controlName: 'aadharRefNo',
                                   label: 'Aadhaar No',
                                   mantatory: true,
@@ -318,6 +407,7 @@ class Personal extends StatelessWidget {
                             children: [
                               Expanded(
                                 child: IntegerTextField(
+                                  fieldKey: _aadhaarKey,
                                   controlName: 'aadhaar',
                                   label: 'Aadhaar Number',
                                   mantatory: true,
@@ -363,12 +453,14 @@ class Personal extends StatelessWidget {
                             ],
                           ),
                       IntegerTextField(
+                        fieldKey: _loanAmountRequestedKey,
                         controlName: 'loanAmountRequested',
                         label: 'Loan Amount Required',
                         mantatory: true,
                         isRupeeFormat: true,
                       ),
                       SearchableDropdown<Lov>(
+                        fieldKey: _residentialStatusKey,
                         controlName: 'residentialStatus',
                         label: 'Residential Status',
                         items:
@@ -401,6 +493,7 @@ class Personal extends StatelessWidget {
                       ),
 
                       SearchableDropdown<Lov>(
+                        fieldKey: _natureOfActivityKey,
                         controlName: 'natureOfActivity',
                         label: 'Nature of Activity',
                         items:
@@ -432,6 +525,7 @@ class Personal extends StatelessWidget {
                         },
                       ),
                       SearchableDropdown<Lov>(
+                        fieldKey: _occupationTypeKey,
                         controlName: 'occupationType',
                         label: 'Occupation Type',
                         items:
@@ -463,6 +557,7 @@ class Personal extends StatelessWidget {
                         },
                       ),
                       SearchableDropdown<Lov>(
+                        fieldKey: _agriculturistTypeKey,
                         controlName: 'agriculturistType',
                         label: 'Agriculturist Type',
                         items:
@@ -494,6 +589,7 @@ class Personal extends StatelessWidget {
                         },
                       ),
                       SearchableDropdown<Lov>(
+                        fieldKey: _farmerCategoryKey,
                         controlName: 'farmerCategory',
                         label: 'Farmer Category',
                         items:
@@ -525,6 +621,7 @@ class Personal extends StatelessWidget {
                         },
                       ),
                       SearchableDropdown<Lov>(
+                        fieldKey: _farmerTypeKey,
                         controlName: 'farmerType',
                         label: 'Farmer Type',
                         items:
@@ -556,6 +653,7 @@ class Personal extends StatelessWidget {
                         },
                       ),
                       SearchableDropdown<Lov>(
+                        fieldKey: _religionKey,
                         controlName: 'religion',
                         label: 'Religion',
                         items:
@@ -585,6 +683,7 @@ class Personal extends StatelessWidget {
                         },
                       ),
                       SearchableDropdown<Lov>(
+                        fieldKey: _casteKey,
                         controlName: 'caste',
                         label: 'Caste',
                         items:
@@ -615,6 +714,7 @@ class Personal extends StatelessWidget {
                         },
                       ),
                       SearchableDropdown<Lov>(
+                        fieldKey: _genderKey,
                         controlName: 'gender',
                         label: 'Gender',
                         items:
@@ -644,6 +744,7 @@ class Personal extends StatelessWidget {
                         },
                       ),
                       SearchableMultiSelectDropdown<Lov>(
+                        fieldKey: _subActivityKey,
                         controlName: 'subActivity',
                         label: 'Sub Activity',
                         items:
@@ -675,7 +776,7 @@ class Personal extends StatelessWidget {
                         },
                       ),
                       SizedBox(height: 20),
-                    
+
                       Center(
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
@@ -691,7 +792,6 @@ class Personal extends StatelessWidget {
                           ),
                           onPressed: () {
                             if (state.getLead == null || state.getLead == false) {
-                              print("personal Details value ${form.value}");
                               if (form.valid) {
                                 PersonalData personalData = PersonalData.fromMap(
                                   form.value,
@@ -712,24 +812,7 @@ class Personal extends StatelessWidget {
                                 );
                               } else {
                                 form.markAllAsTouched();
-                                showDialog(
-                                  context: context,
-                                  barrierDismissible: false,
-                                  builder:
-                                      (_) => SysmoAlert.warning(
-                                        message:
-                                            "Please check error message and Enter valid data",
-                                        onButtonPressed:
-                                            () => Navigator.pop(context),
-                                      ),
-                                );
-                                // ScaffoldMessenger.of(context).showSnackBar(
-                                //   SnackBar(
-                                //     content: Text(
-                                //       'Please Check Error Message and Enter Valid Data ',
-                                //     ),
-                                //   ),
-                                // );
+                                scrollToErrorField();
                               }
                             } 
                           },
