@@ -31,6 +31,7 @@ import 'package:newsee/feature/documentupload/presentation/pages/document_page.d
 import 'package:newsee/feature/documentupload/presentation/widget/image_view.dart';
 import 'package:newsee/feature/forgetmpin/presentation/page/forgetpassword.dart';
 import 'package:newsee/feature/landholding/presentation/page/land_holding_page.dart';
+import 'package:newsee/feature/leadInbox/domain/modal/get_lead_response.dart';
 import 'package:newsee/feature/masters/data/repository/master_repo_impl.dart';
 import 'package:newsee/feature/masters/domain/modal/master_version.dart';
 import 'package:newsee/feature/masters/domain/repository/master_repo.dart';
@@ -145,7 +146,10 @@ final routes = GoRouter(
     GoRoute(
       path: AppRouteConstants.NEWLEAD_PAGE['path']!,
       name: AppRouteConstants.NEWLEAD_PAGE['name'],
-      builder: (context, state) => NewLeadPage(),
+      builder: (context, state)  {
+        final GetLeadResponse? leadData = (state.extra as Map<String,dynamic>?)?['leadData']!;
+        return NewLeadPage(fullLeadData: leadData);
+      } 
     ),
     GoRoute(
       path: AppRouteConstants.MASTERS_PAGE['path']!,

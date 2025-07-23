@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 import 'package:newsee/AppData/app_constants.dart';
 import 'package:newsee/AppData/globalconfig.dart';
 import 'package:newsee/Utils/utils.dart';
@@ -11,7 +10,6 @@ import 'package:newsee/feature/masters/domain/modal/productschema.dart';
 import 'package:newsee/widgets/k_willpopscope.dart';
 import 'package:newsee/widgets/sysmo_alert.dart';
 import 'package:newsee/widgets/bottom_sheet.dart';
-import 'package:newsee/widgets/drop_down.dart';
 import 'package:newsee/widgets/productcard.dart';
 import 'package:newsee/widgets/searchable_drop_down.dart';
 import 'package:reactive_forms/reactive_forms.dart';
@@ -127,7 +125,7 @@ class Loan extends StatelessWidget {
               Navigator.of(_context).pop();
             }
       
-            if (state.status == SaveStatus.success) {
+            if (state.status == SaveStatus.success && state.getLead == false) {
               Globalconfig.loanAmountMaximum = int.parse(
                 state.selectedProduct?.prdamtToRange ?? '0',
               );
@@ -160,6 +158,22 @@ class Loan extends StatelessWidget {
           },
           // child: BlocBuilder<LoanproductBloc, LoanproductState>(
           builder: (context, state) {
+            if (state.getLead!) {
+              form.controls['typeofloan']?.updateValue(
+                state.selectedProductScheme?.optionValue.toString()
+              );
+              form.controls['typeofloan']?.markAsDisabled();
+
+              form.controls['maincategory']?.updateValue(
+                state.selectedMainCategory?.lsfFacId.toString()
+              );
+              form.controls['maincategory']?.markAsDisabled();
+
+              form.controls['subcategory']?.updateValue(
+                state.selectedSubCategoryList?.lsfFacId.toString()
+              );
+              form.controls['subcategory']?.markAsDisabled();
+            }
             return ReactiveForm(
               formGroup: form,
               child: SafeArea(
