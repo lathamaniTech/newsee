@@ -16,7 +16,6 @@ import 'package:newsee/widgets/custom_text_field.dart';
 import 'package:newsee/widgets/integer_text_field.dart';
 import 'package:newsee/widgets/k_willpopscope.dart';
 import 'package:newsee/widgets/searchable_drop_down.dart';
-import 'package:path/path.dart';
 import 'package:reactive_forms/reactive_forms.dart';
 
 class CoApplicantFormBottomSheet extends StatefulWidget {
@@ -630,6 +629,19 @@ class _CoApplicantFormBottomSheetState
                               coAppAndGurantorForm.controls['state']
                                   ?.updateValue("");
                               return <GeographyMaster>[];
+                            } else if (state.getLead) {
+                              String? stateCode = widget.existingData!.state;
+      
+                              GeographyMaster? geographyMaster = state
+                                  .stateCityMaster
+                                  ?.firstWhere((val) => val.code == stateCode);
+                              if (geographyMaster != null) {
+                                coAppAndGurantorForm.controls['state']
+                                    ?.updateValue(geographyMaster.code);
+                                return geographyMaster;
+                              } else {
+                                return <GeographyMaster>[];
+                              }
                             }
                           },
                         ),

@@ -134,12 +134,25 @@ class LeadBloc extends Bloc<LeadEvent, LeadState> {
           )
         );
       }
+
+      Future.delayed(Duration(seconds: 2));
+      emit(
+        state.copyWith(
+          getLeaStatus: SaveStatus.update
+        )
+      );
     } catch(error) {
       print('Proposal Creation Request Error => $error');
       emit(
         state.copyWith(
           getLeaStatus: SaveStatus.failure,
           errorMessage: error.toString()
+        )
+      );
+      Future.delayed(Duration(seconds: 2));
+      emit(
+        state.copyWith(
+          getLeaStatus: SaveStatus.update
         )
       );
     }

@@ -129,7 +129,7 @@ final class PersonalDetailsBloc
         dob: event.leadDetails!['lleaddob'],
         residentialStatus: event.leadDetails!['lldResidentialStatus'],
         primaryMobileNumber: event.leadDetails!['lleadmobno'],
-        secondaryMobileNumber: event.leadDetails![''],
+        secondaryMobileNumber: event.leadDetails!['lleadSecMobNo'],
         email: event.leadDetails!['lleademailid'],
         panNumber: event.leadDetails!['lleadpanno'],
         aadharRefNo: event.leadDetails!['lleadadharno'],

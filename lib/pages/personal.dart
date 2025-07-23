@@ -112,8 +112,6 @@ class Personal extends StatelessWidget {
       form.control('religion').updateValue(val['religion']);
       form.control('caste').updateValue(val['caste']);
       form.control('gender').updateValue(val['gender']);
-      form.control('sourceid').updateValue(val['sourceid']);
-      form.control('sourcename').updateValue(val['sourcename']);
       form.control('subActivity').updateValue(val['subActivity']);
     } catch (error) {
       print("mapPersonalData-catch-error $error");
