@@ -123,13 +123,21 @@ class Personal extends StatelessWidget {
       form.control('lastName').updateValue(val['lastName']);
       form.control('dob').updateValue(getDateFormat(val['dob']));
       form.control('residentialStatus').updateValue(val['residentialStatus']);
-      form.control('primaryMobileNumber').updateValue(val['primaryMobileNumber']);
-      form.control('secondaryMobileNumber').updateValue(val['secondaryMobileNumber']);
+      form
+          .control('primaryMobileNumber')
+          .updateValue(val['primaryMobileNumber']);
+      form
+          .control('secondaryMobileNumber')
+          .updateValue(val['secondaryMobileNumber']);
       form.control('email').updateValue(val['email']);
       form.control('panNumber').updateValue(val['panNumber']);
       form.control('aadharRefNo').updateValue(val['aadharRefNo']);
-      form.control('secondaryMobileNumber').updateValue(val['secondaryMobileNumber']);
-      form.control('loanAmountRequested').updateValue(val['loanAmountRequested']);
+      form
+          .control('secondaryMobileNumber')
+          .updateValue(val['secondaryMobileNumber']);
+      form
+          .control('loanAmountRequested')
+          .updateValue(val['loanAmountRequested']);
       form.control('natureOfActivity').updateValue(val['natureOfActivity']);
       form.control('occupationType').updateValue(val['occupationType']);
       form.control('agriculturistType').updateValue(val['agriculturistType']);
@@ -144,8 +152,7 @@ class Personal extends StatelessWidget {
       print("mapPersonalData-catch-error $error");
     }
   }
-  
-  void scrollToErrorField() {
+
   /* 
     @author : karthick.d  
     @desc   : scroll to error field which identified first in the widget tree
@@ -213,7 +220,8 @@ class Personal extends StatelessWidget {
             print(
               'personaldetail::BlocConsumer:listen => ${state.lovList} ${state.personalData} ${state.status?.name}',
             );
-            if (state.status == SaveStatus.success && (state.getLead == false || state.getLead == null)) {
+            if (state.status == SaveStatus.success &&
+                (state.getLead == false || state.getLead == null)) {
               showDialog(
                 context: context,
                 barrierDismissible: false,
@@ -253,10 +261,13 @@ class Personal extends StatelessWidget {
               } else if (dedupeState.aadharvalidateResponse != null) {
                 mapAadhaarData(dedupeState.aadharvalidateResponse);
               }
-            } else if (state.status == SaveStatus.success && state.getLead == false) {
+            } else if (state.status == SaveStatus.success &&
+                state.getLead == false) {
               print('saved personal data =>${state.personalData}');
-            } else if (state.status == SaveStatus.success && state.getLead == true) {
-              Map<String,dynamic> personalDetails = state.personalData!.toMap();
+            } else if (state.status == SaveStatus.success &&
+                state.getLead == true) {
+              Map<String, dynamic> personalDetails =
+                  state.personalData!.toMap();
               mapPersonalData(personalDetails);
             }
             return ReactiveForm(
@@ -792,13 +803,13 @@ class Personal extends StatelessWidget {
                             ),
                           ),
                           onPressed: () {
-                            if (state.getLead == null || state.getLead == false) {
+                            if (state.getLead == null ||
+                                state.getLead == false) {
                               if (form.valid) {
-                                PersonalData personalData = PersonalData.fromMap(
-                                  form.value,
-                                );
-                                PersonalData personalDataFormatted = personalData
-                                    .copyWith(
+                                PersonalData personalData =
+                                    PersonalData.fromMap(form.value);
+                                PersonalData personalDataFormatted =
+                                    personalData.copyWith(
                                       dob: getDateFormatedByProvided(
                                         personalData.dob,
                                         from: AppConstants.Format_dd_MM_yyyy,
@@ -815,8 +826,7 @@ class Personal extends StatelessWidget {
                                 form.markAllAsTouched();
                                 scrollToErrorField();
                               }
-                            } 
-
+                            }
                           },
                           child: Text('Next'),
                         ),
