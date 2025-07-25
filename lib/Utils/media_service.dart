@@ -40,12 +40,12 @@ class MediaService {
   Future<LocationResponse> getLocation(BuildContext context) async {
     try {
       final bool locationEnabled = await checkIsLocationServiceEnabled();
-      if (!locationEnabled) {
-        // return LocationResponse(
-        //   error: 'Location services are disabled. Please enable GPS.',
-        // );
-        await handlePermissions();
-      }
+      // if (!locationEnabled) {
+      // return LocationResponse(
+      //   error: 'Location services are disabled. Please enable GPS.',
+      // );
+      // }
+      await handlePermissions();
       Position position = await Geolocator.getCurrentPosition();
       print("gelocationdata: $position");
       return LocationResponse(position: position);
