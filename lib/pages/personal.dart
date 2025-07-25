@@ -144,7 +144,6 @@ class Personal extends StatelessWidget {
       print("mapPersonalData-catch-error $error");
     }
   }
-
   /* 
     @author : karthick.d  
     @desc   : scroll to error field which identified first in the widget tree
