@@ -68,7 +68,7 @@ class ProposalInbox extends StatelessWidget {
           Future<void> onRefresh() async {
             context.read<ProposalInboxBloc>().add(
               SearchProposalInboxEvent(
-                request: LeadInboxRequest(userid: '', token: ''),
+                request: LeadInboxRequest(userid: '', token: '', pageNo: state.currentPage),
               ),
             );
           }
