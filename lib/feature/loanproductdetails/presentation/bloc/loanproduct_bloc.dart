@@ -10,6 +10,7 @@ import 'package:newsee/AppData/DBConstants/table_key_products.dart';
 import 'package:newsee/AppData/app_constants.dart';
 import 'package:newsee/Utils/query_builder.dart';
 import 'package:newsee/core/db/db_config.dart';
+import 'package:newsee/feature/draft/draft_service.dart';
 import 'package:newsee/feature/masters/domain/modal/lov.dart';
 import 'package:newsee/feature/masters/domain/modal/product.dart';
 import 'package:newsee/feature/masters/domain/modal/product_master.dart';
@@ -76,7 +77,9 @@ class LoanproductBloc extends Bloc<LoanproductEvent, LoanproductState> {
     ResetShowBottomSheet event,
     Emitter emit,
   ) async {
-    print("successfully came to onresetshowbottonsheet, ${event.selectedProduct}");
+    print(
+      "successfully came to onresetshowbottonsheet, ${event.selectedProduct}",
+    );
     emit(
       state.copyWith(
         selectedProduct: event.selectedProduct,
@@ -183,6 +186,7 @@ class LoanproductBloc extends Bloc<LoanproductEvent, LoanproductState> {
       Product subProduct = state.subCategoryList.firstWhere(
         (p) => p.lsfFacId == subCategory,
       );
+
       if (state.status == SaveStatus.init) {
         emit(
           state.copyWith(
@@ -204,20 +208,35 @@ class LoanproductBloc extends Bloc<LoanproductEvent, LoanproductState> {
           ),
         );
       }
+
+      final draftService = DraftService();
+      await draftService.saveOrUpdateTabData(
+        tabKey: 'loan',
+        tabData: {
+          'selectedProductScheme': productSchema.toJson(),
+          'selectedMainCategory': mainProduct.toJson(),
+          'selectedSubCategoryList': subProduct.toJson(),
+          'selectedProduct': state.selectedProduct!.toJson(),
+        },
+      );
     }
   }
-  
-  Future<void> onLoanDetailsFetch(LoanproductFetchEvent event, Emitter emit) async {
-    try {
 
+  Future<void> onLoanDetailsFetch(
+    LoanproductFetchEvent event,
+    Emitter emit,
+  ) async {
+    try {
       Database db = await DBConfig().database;
-      List<ProductSchema> productSchemaList = await ProductSchemaCrudRepo(db).getAll();
-      List<ProductMaster> productMasterList = await ProductMasterCrudRepo(db).getAll();
+      List<ProductSchema> productSchemaList =
+          await ProductSchemaCrudRepo(db).getAll();
+      List<ProductMaster> productMasterList =
+          await ProductMasterCrudRepo(db).getAll();
       List<Product> productList = await ProductsCrudRepo(db).getAll();
       print('productSchemaList from DB => ${productSchemaList.length}');
 
       String typeOfLoan = event.leadDetails!['lleadloantyp'] as String;
-      String productID   = event.leadDetails!['lfProdId'] as String;
+      String productID = event.leadDetails!['lfProdId'] as String;
 
       ProductSchema productSchema = productSchemaList.firstWhere(
         (p) => p.optionValue == typeOfLoan,
@@ -265,16 +284,11 @@ class LoanproductBloc extends Bloc<LoanproductEvent, LoanproductState> {
           selectedSubCategoryList: subProduct,
           selectedProduct: productMaster,
           status: SaveStatus.success,
-          getLead: true
+          getLead: true,
         ),
       );
-      
-    
-    } catch(error) {
+    } catch (error) {
       emit(state.copyWith(status: SaveStatus.failure));
     }
   }
-
-  
-    
 }

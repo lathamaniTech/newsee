@@ -16,6 +16,7 @@ import 'package:newsee/feature/addressdetails/data/repository/citylist_repo_impl
 import 'package:newsee/feature/addressdetails/domain/model/citydistrictrequest.dart';
 import 'package:newsee/feature/addressdetails/domain/repository/cityrepository.dart';
 import 'package:newsee/feature/cif/domain/model/user/cif_response_model.dart';
+import 'package:newsee/feature/draft/draft_service.dart';
 import 'package:newsee/feature/masters/domain/modal/geography_master.dart';
 import 'package:newsee/feature/masters/domain/modal/lov.dart';
 import 'package:newsee/feature/masters/domain/modal/statecitymaster.dart';
@@ -72,6 +73,12 @@ final class AddressDetailsBloc
         status: SaveStatus.success,
       ),
     );
+    draftData(event.addressData);
+  }
+
+  draftData(data) async {
+    final draftService = DraftService();
+    await draftService.saveOrUpdateTabData(tabKey: 'address', tabData: data);
   }
 
   Future<void> getCityListBasedOnState(
@@ -220,7 +227,10 @@ First, it attempts to fetch the data from the local database.If no matching data
   //   }
   // }
 
-  Future<void> onAddressFetch(AddressDetailsFetchEvent event, Emitter emit) async {
+  Future<void> onAddressFetch(
+    AddressDetailsFetchEvent event,
+    Emitter emit,
+  ) async {
     try {
       Database _db = await DBConfig().database;
       List<Lov> listOfLov = await LovCrudRepo(_db).getAll();
@@ -238,7 +248,10 @@ First, it attempts to fetch the data from the local database.If no matching data
 
       final getcityList = await getCityandDistrict(addressList1['state'], null);
 
-      final getDistrictList = await getCityandDistrict(addressList1['state'], addressList1['city']);
+      final getDistrictList = await getCityandDistrict(
+        addressList1['state'],
+        addressList1['city'],
+      );
 
       AddressData addressData = AddressData(
         addressType: addressList1['addresstype'],
@@ -248,7 +261,7 @@ First, it attempts to fetch the data from the local database.If no matching data
         state: addressList1['state'],
         cityDistrict: addressList1['city'],
         area: addressList1['area'],
-        pincode: addressList1['pincode']
+        pincode: addressList1['pincode'],
       );
 
       emit(
@@ -259,11 +272,10 @@ First, it attempts to fetch the data from the local database.If no matching data
           districtMaster: getDistrictList?.districtMaster,
           addressData: addressData,
           status: SaveStatus.success,
-          getLead: true
+          getLead: true,
         ),
       );
-      
-    } catch(error) {
+    } catch (error) {
       emit(state.copyWith(status: SaveStatus.failure));
     }
   }
@@ -282,7 +294,7 @@ First, it attempts to fetch the data from the local database.If no matching data
       AddressDetailsState addressDetailsState =
           mapGeographyMasterResponseForAddressPage(state, response);
       return addressDetailsState;
-    } catch(error) {
+    } catch (error) {
       return null;
     }
   }

@@ -8,8 +8,10 @@ import 'package:newsee/feature/aadharvalidation/domain/modal/aadharvalidate_requ
 import 'package:newsee/feature/aadharvalidation/domain/modal/aadharvalidate_response.dart';
 import 'package:newsee/feature/aadharvalidation/domain/repository/aadharvalidate_repo.dart';
 import 'package:newsee/feature/cif/domain/model/user/cif_response_model.dart';
+import 'package:newsee/feature/draft/draft_service.dart';
 import 'package:newsee/feature/masters/domain/modal/lov.dart';
 import 'package:newsee/feature/masters/domain/repository/lov_crud_repo.dart';
+import 'package:path/path.dart';
 import 'package:sqflite/sqlite_api.dart';
 
 part './personal_details_event.dart';
@@ -62,6 +64,7 @@ final class PersonalDetailsBloc
       RegExp(r'[^\d]'),
       '',
     );
+    // event.personalData?.loanAmountRequested = loanamaount;
     emit(
       state.copyWith(
         personalData: event.personalData,
@@ -70,6 +73,15 @@ final class PersonalDetailsBloc
     );
     state.copyWith(
       personalData: PersonalData(loanAmountRequested: loanamaount),
+    );
+    personalDraftData(event.personalData);
+  }
+
+  personalDraftData(personalData) async {
+    final draftService = DraftService();
+    await draftService.saveOrUpdateTabData(
+      tabKey: 'personal',
+      tabData: personalData,
     );
   }
 
@@ -115,7 +127,10 @@ final class PersonalDetailsBloc
     );
   }
 
-  Future<void> onPersonalDetailsFetch(PersonalDetailsFetchEvent event, Emitter emit) async {
+  Future<void> onPersonalDetailsFetch(
+    PersonalDetailsFetchEvent event,
+    Emitter emit,
+  ) async {
     try {
       Database _db = await DBConfig().database;
       List<Lov> listOfLov = await LovCrudRepo(_db).getAll();
@@ -134,7 +149,8 @@ final class PersonalDetailsBloc
         panNumber: event.leadDetails!['lleadpanno'],
         aadharRefNo: event.leadDetails!['lleadadharno'],
         passportNumber: event.leadDetails![''],
-        loanAmountRequested: event.leadDetails!['lldLoanamtRequested'].toString(),
+        loanAmountRequested:
+            event.leadDetails!['lldLoanamtRequested'].toString(),
         natureOfActivity: event.leadDetails!['lldNameofActivity'],
         occupationType: event.leadDetails!['lldOccType'],
         agriculturistType: event.leadDetails!['lldAgrType'],
@@ -145,23 +161,19 @@ final class PersonalDetailsBloc
         gender: event.leadDetails!['lldGender'],
         sourceid: event.leadDetails!['lleadsourid'],
         sourcename: event.leadDetails!['lleadsourname'],
-        subActivity: event.leadDetails!['lldSubActivity']
+        subActivity: event.leadDetails!['lldSubActivity'],
       );
       emit(
         state.copyWith(
           lovList: listOfLov,
           personalData: personalData,
           status: SaveStatus.success,
-          getLead: true
-        )
+          getLead: true,
+        ),
       );
-    } catch(error) {
+    } catch (error) {
       print("onPersonalDetailsFetch-error => $error");
-      emit(
-        state.copyWith(
-          status: SaveStatus.failure
-        )
-      );
+      emit(state.copyWith(status: SaveStatus.failure));
     }
   }
 }
