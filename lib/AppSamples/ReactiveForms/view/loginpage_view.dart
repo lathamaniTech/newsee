@@ -36,6 +36,11 @@ description : A stateless widget that serves as the main login screen for the ap
  */
 
 class LoginpageView extends StatelessWidget {
+  // online / offline mode switcher for enabling offline feature
+  final ValueNotifier<OperationNetwork> networkValueChange = ValueNotifier(
+    OperationNetwork.online,
+  );
+
   Future fingerPrintScanner(context) async {
     final result =
         await GetIt.instance
@@ -53,14 +58,10 @@ class LoginpageView extends StatelessWidget {
               opening bottomsheet , when clicking enable offline mode
               will set the 
  */
-  Widget renderSettingWidget(context, scrollController) {
-    final ValueNotifier<OperationNetwork> networkValueChange = ValueNotifier(
-      OperationNetwork.online,
-    );
-
+  Widget renderSettingWidget(context) {
     print('networkValueChange.value => ${networkValueChange.value}');
-    return SingleChildScrollView(
-      controller: scrollController,
+    return Padding(
+      padding: EdgeInsets.all(8.0),
       child: Column(
         children: [
           const SizedBox(height: 12),
@@ -89,7 +90,7 @@ class LoginpageView extends StatelessWidget {
               } else {
                 networkValueChange.value =
                     Globalconfig.fromValue(
-                      network: OperationNetwork.online,
+                      network: OperationNetwork.offline,
                     ).operationNetwork;
                 print('OperationNetwork = ${networkValueChange.value}');
               }
@@ -115,7 +116,15 @@ class LoginpageView extends StatelessWidget {
             'SCALE END DETAILS => velocity : ${details.velocity} scalevelocity ${details.scaleVelocity} pointerCount : ${details.pointerCount}',
           );
           if (details.pointerCount >= 2) {
-            openBottomSheet(context, 0.3, 0.2, 0.9, renderSettingWidget);
+            //openBottomSheet(context, 0.3, 0.2, 0.9, renderSettingWidget);
+            showBottomSheet(
+              backgroundColor: Colors.amber,
+              constraints: BoxConstraints(maxHeight: screenHeight * 0.2),
+              context: context,
+              builder: (context) {
+                return renderSettingWidget(context);
+              },
+            );
           }
         },
         child: Column(
