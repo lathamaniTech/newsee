@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get_it/get_it.dart';
 import 'package:newsee/AppData/app_constants.dart';
+import 'package:newsee/AppData/globalconfig.dart';
 import 'package:newsee/AppSamples/ReactiveForms/view/login-with-account.dart';
 import 'package:flutter_pdfview/flutter_pdfview.dart';
 import 'package:newsee/Utils/local_biometric.dart';
@@ -46,18 +47,53 @@ class LoginpageView extends StatelessWidget {
     );
   }
 
+  /* 
+@author     : karthick.d  07/08/2025
+@desc       : when panning gesture detected with 2 finger pointers
+              opening bottomsheet , when clicking enable offline mode
+              will set the 
+ */
   Widget renderSettingWidget(context, scrollController) {
+    final ValueNotifier<OperationNetwork> networkValueChange = ValueNotifier(
+      OperationNetwork.online,
+    );
+
+    print('networkValueChange.value => ${networkValueChange.value}');
     return SingleChildScrollView(
       controller: scrollController,
       child: Column(
         children: [
           const SizedBox(height: 12),
           OptionsSheet(
-            bgColor: Colors.red,
-            icon: Icons.signal_wifi_connected_no_internet_4,
-            title: "Enable Offline Mode",
+            bgColor:
+                networkValueChange.value != OperationNetwork.online
+                    ? Colors.red
+                    : Colors.greenAccent,
+            icon:
+                networkValueChange.value != OperationNetwork.online
+                    ? Icons.signal_wifi_connected_no_internet_4
+                    : Icons.network_wifi,
+            title:
+                networkValueChange.value != OperationNetwork.online
+                    ? "Enable Offline Mode"
+                    : "Enable Online Mode",
             subtitle: "Husstle free Lead Onboarding",
             onTap: () {
+              // set operation network value based on which offline feature enabled
+              if (networkValueChange.value != OperationNetwork.online) {
+                networkValueChange.value =
+                    Globalconfig.fromValue(
+                      network: OperationNetwork.online,
+                    ).operationNetwork;
+                print('OperationNetwork = ${networkValueChange.value}');
+              } else {
+                networkValueChange.value =
+                    Globalconfig.fromValue(
+                      network: OperationNetwork.online,
+                    ).operationNetwork;
+                print('OperationNetwork = ${networkValueChange.value}');
+              }
+
               Navigator.pop(context);
             },
           ),

@@ -28,7 +28,7 @@ class DraftLead {
     leadref: json['leadref'],
     loan: Map<String, dynamic>.from(json['loan'] ?? {}),
     dedupe: Map<String, dynamic>.from(json['dedupe'] ?? {}),
-    personal: Map<String, dynamic>.from(json['personal'] ?? {}),
+    personal: {},
     address: Map<String, dynamic>.from(json['address'] ?? {}),
     coapplicant: List<Map<String, dynamic>>.from(json['coapplicant'] ?? []),
   );
