@@ -49,7 +49,7 @@ class NewLeadPage extends StatelessWidget {
         BlocProvider(
           create:
               (context) =>
-                  (fullLeadData != null && tabType == 'draft')
+                  (tabType == 'draft')
                       ? (fullLeadData?.dedupe is Map &&
                               (fullLeadData!.dedupe as Map).isNotEmpty)
                           ? (DedupeBloc()..add(
@@ -58,7 +58,7 @@ class NewLeadPage extends StatelessWidget {
                             ),
                           ))
                           : (DedupeBloc()..add(DedupeDetailsInitEvent()))
-                      : DedupeBloc(),
+                      : (DedupeBloc()..add(DedupeDetailsInitEvent())),
         ),
 
         BlocProvider(

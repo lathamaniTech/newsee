@@ -66,32 +66,26 @@ class DedupeView extends StatelessWidget {
               (context, state) => {
                 if (state.status == DedupeFetchStatus.change)
                   {callOpenSheet(context, state)},
-                if (state.status == DedupeFetchStatus.success)
-                  {
-                    customerTypeForm
-                        .control('constitution')
-                        .updateValue(state.constitution),
-                    customerTypeForm
-                        .control('constitution')
-                        .updateValueAndValidity(),
-                    customerTypeForm
-                        .control('isNewCustomer')
-                        .updateValue(state.isNewCustomer),
-                    customerTypeForm
-                        .control('isNewCustomer')
-                        .updateValueAndValidity(),
-
-                    print("customerTypededupe ${customerTypeForm.value}"),
-                  }
-                else if (state.status == DedupeFetchStatus.init)
-                  {customerTypeForm.reset()},
               },
           builder: (context, state) {
             print("Current status => ${state.status}");
-            print("Current state, => $state");
             print("customerTypeForm ${customerTypeForm.value}");
             if (state.status == DedupeFetchStatus.init) {
+              print("Current state, => $state");
               customerTypeForm.reset();
+            } else if (state.status == DedupeFetchStatus.success) {
+              customerTypeForm
+                  .control('constitution')
+                  .updateValue(state.constitution);
+              customerTypeForm.control('constitution').updateValueAndValidity();
+              customerTypeForm
+                  .control('isNewCustomer')
+                  .updateValue(state.isNewCustomer);
+              customerTypeForm
+                  .control('isNewCustomer')
+                  .updateValueAndValidity();
+
+              print("customerTypededupe ${customerTypeForm.value}");
             }
             print("customerTypeFormf ${customerTypeForm.value}");
             return ReactiveForm(

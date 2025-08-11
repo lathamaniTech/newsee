@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:newsee/feature/draft/draft_event_notifier.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:newsee/feature/draft/domain/draft_lead_model.dart';
 
@@ -63,6 +64,7 @@ class DraftService {
 
     await prefs.setString(key, jsonEncode(currentData));
     print('drafsave: $currentData');
+    draftEventNotifier.refresh();
   }
 
   Future<DraftLead?> getDraft(String leadref) async {
@@ -81,6 +83,7 @@ class DraftService {
     final prefs = await SharedPreferences.getInstance();
     final key = '$_draftKeyPrefix$leadref';
     await prefs.remove(key);
+    draftEventNotifier.refresh();
   }
 
   //get list of all leadrefs with saved drafts
