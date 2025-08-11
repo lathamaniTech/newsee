@@ -75,12 +75,13 @@ final routes = GoRouter(
                 // context.go('/'); // Navigate back using GoRouter
               }
             },
-            child: Scaffold(
-              body: BlocProvider(
-                create: (_) => AuthBloc(authRepository: AuthRepository),
-                child: LoginpageView(),
-              ),
-            ),
+            // child: Scaffold(
+            //   body: BlocProvider(
+            //     create: (_) => AuthBloc(authRepository: AuthRepository),
+            //     child: LoginpageView(),
+            //   ),
+            // ),
+            child: Scaffold(body: LoginpageView()),
           ),
     ),
     GoRoute(

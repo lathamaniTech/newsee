@@ -71,8 +71,10 @@ class DraftService {
     final jsonString = prefs.getString(key);
 
     if (jsonString == null) return null;
-    print('getDraft:  $jsonString');
-    return DraftLead.fromJson(jsonDecode(jsonString));
+    print('getDraft:  $jsonString ');
+    final draftmap = jsonDecode(jsonString) as Map<String, dynamic>;
+    print('draft sting to map => $draftmap');
+    return DraftLead.fromJson(draftmap);
   }
 
   Future<void> deleteDraft(String leadref) async {
