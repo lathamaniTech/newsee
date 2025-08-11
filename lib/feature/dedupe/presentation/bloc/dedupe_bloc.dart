@@ -30,6 +30,7 @@ class DedupeBloc extends Bloc<DedupeEvent, DedupeState> {
     DedupeDetailsInitEvent event,
     Emitter emit,
   ) async {
+    print('event');
     emit(
       state.copyWith(
         isNewCustomer: null,

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:newsee/feature/draft/domain/draft_lead_model.dart';
 import 'package:newsee/feature/draft/draft_service.dart';
+import 'package:newsee/feature/draft/draft_event_notifier.dart';
 import 'package:newsee/widgets/lead_tile_card.dart';
 import 'package:number_paginator/number_paginator.dart';
 
@@ -9,37 +10,49 @@ class DraftInbox extends StatefulWidget {
   const DraftInbox({super.key});
 
   @override
-  State<DraftInbox> createState() => _DraftLeadPageState();
+  DraftInboxState createState() => DraftInboxState();
 }
 
-class _DraftLeadPageState extends State<DraftInbox> {
+class DraftInboxState extends State<DraftInbox> {
   final DraftService draftService = DraftService();
   List<DraftLead> allDrafts = [];
   int currentPage = 0;
   int pageSize = 10;
 
   @override
+  // bool get wantKeepAlive => true;
+  @override
   void initState() {
     super.initState();
+    loadDrafts();
+
+    draftEventNotifier.addListener(_onDraftEvent);
+  }
+
+  @override
+  void dispose() {
+    draftEventNotifier.removeListener(_onDraftEvent);
+    super.dispose();
+  }
+
+  void _onDraftEvent() {
     loadDrafts();
   }
 
   Future<void> loadDrafts() async {
     final refs = await draftService.getAllDraftLeadRefs();
     final List<DraftLead> loaded = [];
-    print('leads: $refs');
     for (var ref in refs) {
       final draft = await draftService.getDraft(ref);
       if (draft != null) loaded.add(draft);
     }
-
-    setState(() {
-      allDrafts = loaded;
-    });
+    setState(() => allDrafts = loaded);
   }
 
   @override
   Widget build(BuildContext context) {
+    // super.build(context);
+
     final paginatedDrafts =
         allDrafts.skip(currentPage * pageSize).take(pageSize).toList();
     final numberOfPages = (allDrafts.length / pageSize).ceil();
@@ -72,7 +85,6 @@ class _DraftLeadPageState extends State<DraftInbox> {
                       itemCount: paginatedDrafts.length,
                       itemBuilder: (context, index) {
                         final draft = paginatedDrafts[index];
-
                         return LeadTileCard(
                           title: draft.personal['firstName'] ?? 'N/A',
                           subtitle: draft.leadref,
@@ -94,13 +106,11 @@ class _DraftLeadPageState extends State<DraftInbox> {
                               draft.personal['loanAmountRequested']
                                   ?.toString() ??
                               '',
-                          onTap: () async {
-                            print('inbox: ${draft.coapplicant}');
+                          onTap: () {
                             context.pushNamed(
                               'newlead',
                               extra: {'leadData': draft, 'tabType': 'draft'},
                             );
-                            loadDrafts();
                           },
                           showarrow: false,
                         );
