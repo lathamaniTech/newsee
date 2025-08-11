@@ -38,11 +38,6 @@ description : A stateless widget that serves as the main login screen for the ap
  */
 
 class LoginpageView extends StatelessWidget {
-  // online / offline mode switcher for enabling offline feature
-  // final ValueNotifier<OperationNetwork> networkValueChange = ValueNotifier(
-  //   OperationNetwork.online,
-  // );
-
   Future fingerPrintScanner(context) async {
     final result =
         await GetIt.instance
