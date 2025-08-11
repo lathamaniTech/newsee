@@ -142,6 +142,19 @@ class LoginpageWithAC extends StatelessWidget {
 
           case AuthStatus.failure:
             //context.goNamed('home');
+            // Globalconfig.masterVersionMapper = {
+            //   "Listofvalues": "5",
+            //   "ProductMaster": "5",
+            //   "ProductScheme": "5",
+            //   "StateCityMaster": "2",
+            // };
+            // Globalconfig.diffListOfMaster = [
+            //   MasterVersion(mastername: "Listofvalues", version: "5", status: "success"),
+            //   MasterVersion(mastername: "ProductMaster", version: "5", status: "success"), 
+            //   MasterVersion(mastername: "ProductScheme", version: "5", status: "success"), 
+            //   MasterVersion(mastername: "StateCityMaster", version: "3", status: "success") 
+            // ];
+            // context.goNamed('masters');
             print('LoginStatus.error...');
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text(state.errorMessage ?? 'Login Failed...')),
