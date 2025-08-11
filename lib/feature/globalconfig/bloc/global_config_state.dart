@@ -2,6 +2,11 @@
 
 part of 'global_config_bloc.dart';
 
+/*
+@author    :  karthick.d  07/10/2025
+@desc      :  state object for maintain offline ,online network state
+
+*/
 abstract class GlobalConfigState extends Equatable {
   final Globalconfig globalconfig;
   GlobalConfigState({required this.globalconfig});
