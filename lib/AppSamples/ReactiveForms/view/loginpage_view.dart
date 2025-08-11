@@ -50,7 +50,6 @@ class LoginpageView extends StatelessWidget {
     );
   }
 
-
   /* 
 @author     : karthick.d  07/08/2025
 @desc       : when panning gesture detected with 2 finger pointers
@@ -64,7 +63,6 @@ class LoginpageView extends StatelessWidget {
         children: [
           const SizedBox(height: 12),
           OptionsSheet(
-
             bgColor:
                 state.globalconfig.operationNetwork == OperationNetwork.online
                     ? Colors.red
@@ -390,11 +388,10 @@ class LoginpageView extends StatelessWidget {
                         ],
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
-
       ),
     );
   }
