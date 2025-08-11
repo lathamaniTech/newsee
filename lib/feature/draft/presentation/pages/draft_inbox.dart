@@ -13,16 +13,14 @@ class DraftInbox extends StatefulWidget {
   DraftInboxState createState() => DraftInboxState();
 }
 
-class DraftInboxState extends State<DraftInbox>
-    with AutomaticKeepAliveClientMixin {
+class DraftInboxState extends State<DraftInbox> {
   final DraftService draftService = DraftService();
   List<DraftLead> allDrafts = [];
   int currentPage = 0;
   int pageSize = 10;
 
   @override
-  bool get wantKeepAlive => true;
-
+  // bool get wantKeepAlive => true;
   @override
   void initState() {
     super.initState();
@@ -53,7 +51,7 @@ class DraftInboxState extends State<DraftInbox>
 
   @override
   Widget build(BuildContext context) {
-    super.build(context);
+    // super.build(context);
 
     final paginatedDrafts =
         allDrafts.skip(currentPage * pageSize).take(pageSize).toList();
