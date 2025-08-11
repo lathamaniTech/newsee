@@ -75,12 +75,13 @@ final routes = GoRouter(
                 // context.go('/'); // Navigate back using GoRouter
               }
             },
-            child: Scaffold(
-              body: BlocProvider(
-                create: (_) => AuthBloc(authRepository: AuthRepository),
-                child: LoginpageView(),
-              ),
-            ),
+            // child: Scaffold(
+            //   body: BlocProvider(
+            //     create: (_) => AuthBloc(authRepository: AuthRepository),
+            //     child: LoginpageView(),
+            //   ),
+            // ),
+            child: Scaffold(body: LoginpageView()),
           ),
     ),
     GoRoute(
@@ -127,10 +128,11 @@ final routes = GoRouter(
     GoRoute(
       path: AppRouteConstants.NEWLEAD_PAGE['path']!,
       name: AppRouteConstants.NEWLEAD_PAGE['name'],
-      builder: (context, state)  {
-        final GetLeadResponse? leadData = (state.extra as Map<String,dynamic>?)?['leadData']!;
+      builder: (context, state) {
+        final GetLeadResponse? leadData =
+            (state.extra as Map<String, dynamic>?)?['leadData']!;
         return NewLeadPage(fullLeadData: leadData);
-      } 
+      },
     ),
     GoRoute(
       path: AppRouteConstants.MASTERS_PAGE['path']!,

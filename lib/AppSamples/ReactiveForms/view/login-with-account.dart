@@ -11,6 +11,7 @@ import 'package:newsee/Model/login_request.dart';
 import 'package:newsee/Utils/masterversioncheck.dart';
 import 'package:newsee/core/api/AsyncResponseHandler.dart';
 import 'package:newsee/feature/auth/presentation/bloc/auth_bloc.dart';
+import 'package:newsee/feature/globalconfig/bloc/global_config_bloc.dart';
 import 'package:newsee/feature/masters/domain/modal/master_version.dart';
 import 'package:provider/provider.dart';
 import 'package:reactive_forms/reactive_forms.dart';
@@ -28,9 +29,12 @@ import 'package:shared_preferences/shared_preferences.dart';
   - BuildContext context : The context in which the bottom sheet is presented.
  */
 
-void loginActionSheet(BuildContext context, {bool createMPIN = false}) {
+void loginActionSheet(
+  BuildContext context,
+  OperationNetwork networkState, {
+  bool createMPIN = false,
+}) {
   //dynamically adapts its size based on  screen width and height.
-
   final double screenwidth = MediaQuery.of(context).size.width;
   final double screenheight = MediaQuery.of(context).size.height;
   final bool isCreateMpin = createMPIN;
@@ -53,7 +57,7 @@ void loginActionSheet(BuildContext context, {bool createMPIN = false}) {
             padding: EdgeInsets.all(10),
             width: screenwidth * 1.0,
             height: screenheight * 0.75,
-            child: LoginBlocProvide(isCreateMpin),
+            child: LoginBlocProvide(isCreateMpin, networkState),
           ),
         ),
   );
@@ -64,8 +68,8 @@ class LoginpageWithAC extends StatelessWidget {
   // createMPIN bottomsheet will be called
 
   final bool? createPIN;
-
-  const LoginpageWithAC(this.createPIN, {super.key});
+  final OperationNetwork network;
+  const LoginpageWithAC(this.createPIN, this.network);
 
   @override
   Widget build(BuildContext context) {
@@ -89,6 +93,10 @@ class LoginpageWithAC extends StatelessWidget {
           const SnackBar(content: Text('Please fill in all required fields')),
         );
       }
+    }
+
+    offlineLogin() {
+      context.goNamed('home');
     }
 
     return BlocListener<AuthBloc, AuthState>(
@@ -151,6 +159,7 @@ class LoginpageWithAC extends StatelessWidget {
       },
       child: BlocBuilder<AuthBloc, AuthState>(
         builder: (context, state) {
+          // final globalConfig = context.watch<GlobalConfigState>().globalconfig;
           final isLoading = state.authStatus == AuthStatus.loading;
           print('state.authStatus => ${state.authStatus}');
           final isPasswordHidden = state.isPasswordHidden;
@@ -250,7 +259,13 @@ class LoginpageWithAC extends StatelessWidget {
                                 isLoading
                                     ? null
                                     : () {
-                                      login(state);
+                                      print('network => $network');
+                                      switch (network) {
+                                        case OperationNetwork.offline:
+                                          offlineLogin();
+                                        case OperationNetwork.online:
+                                          login(state);
+                                      }
                                     },
                             child:
                                 isLoading
