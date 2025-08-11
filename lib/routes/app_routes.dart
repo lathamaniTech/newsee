@@ -129,9 +129,13 @@ final routes = GoRouter(
       path: AppRouteConstants.NEWLEAD_PAGE['path']!,
       name: AppRouteConstants.NEWLEAD_PAGE['name'],
       builder: (context, state) {
-        final GetLeadResponse? leadData =
-            (state.extra as Map<String, dynamic>?)?['leadData']!;
-        return NewLeadPage(fullLeadData: leadData);
+        // final GetLeadResponse? leadData = (state.extra as Map<String,dynamic>?)?['leadData']!;
+        final data = (state.extra as Map<String, dynamic>?) ?? {};
+
+        return NewLeadPage(
+          fullLeadData: data['leadData'] != null ? data['leadData'] : null,
+          tabType: data['tabType'] != null ? data['tabType'] as String : null,
+        );
       },
     ),
     GoRoute(

@@ -234,10 +234,39 @@ class LoanproductBloc extends Bloc<LoanproductEvent, LoanproductState> {
           await ProductMasterCrudRepo(db).getAll();
       List<Product> productList = await ProductsCrudRepo(db).getAll();
       print('productSchemaList from DB => ${productSchemaList.length}');
+      print('loanDraft => ${event.leadDetails}');
 
-      String typeOfLoan = event.leadDetails!['lleadloantyp'] as String;
-      String productID = event.leadDetails!['lfProdId'] as String;
+      // String typeOfLoan =
+      //     event.leadDetails!.containsKey("lleadloantyp")
+      //         ? event.leadDetails!['lleadloantyp'] as String
+      //         : event.leadDetails!['selectedProductScheme']['optionValue']
+      //             as String;
+      // String productID =
+      //     event.leadDetails!.containsKey("lfProdId")
+      //         ? event.leadDetails!['lfProdId'] as String
+      //         : event.leadDetails!['selectedMainCategory']['optionValue']
+      //             as String;
 
+      String typeOfLoan;
+      if (event.leadDetails!.containsKey("lleadloantyp")) {
+        typeOfLoan = event.leadDetails!["lleadloantyp"]?.toString() ?? '';
+      } else {
+        typeOfLoan =
+            event.leadDetails!["selectedProductScheme"]?["optionValue"]
+                ?.toString() ??
+            '';
+      }
+
+      String productID;
+      if (event.leadDetails!.containsKey("lfProdId")) {
+        productID = event.leadDetails!["lfProdId"]?.toString() ?? '';
+      } else {
+        productID =
+            event.leadDetails!["selectedProduct"]?["prdCode"]?.toString() ?? '';
+      }
+
+      print('loanDraft => $typeOfLoan, $productID');
+      print('productID => $productID');
       ProductSchema productSchema = productSchemaList.firstWhere(
         (p) => p.optionValue == typeOfLoan,
       );
@@ -254,11 +283,12 @@ class LoanproductBloc extends Bloc<LoanproductEvent, LoanproductState> {
         db,
       ).getByColumnName(columnName: 'lsfFacType', columnValue: optCode);
       print('mainCategoryList => $mainCategoryList');
+      print('productMasterList => $productMasterList');
 
       ProductMaster productMaster = productMasterList.firstWhere(
         (p) => p.prdCode == productID,
       );
-
+      print('productMaster => $productMaster');
       Product mainProduct = mainCategoryList.firstWhere(
         (p) => p.lsfFacId == productMaster.prdMainCat,
       );
@@ -270,10 +300,14 @@ class LoanproductBloc extends Bloc<LoanproductEvent, LoanproductState> {
         columnValue: productMaster.prdMainCat,
       );
 
+      print('subCategoryList => $subCategoryList');
       Product subProduct = subCategoryList.firstWhere(
         (p) => p.lsfFacId == productMaster.prdSubCat,
       );
-
+      print('subProduct => $subProduct');
+      print(
+        'loanDraft => ${{'productSchemeList': productSchemaList, 'selectedProductScheme': productSchema, 'mainCategoryList': mainCategoryList, 'selectedMainCategory': mainProduct, 'subCategoryList': subCategoryList, 'selectedSubCategoryList': subProduct, 'selectedProduct': productMaster}}',
+      );
       emit(
         state.copyWith(
           productSchemeList: productSchemaList,
@@ -288,6 +322,7 @@ class LoanproductBloc extends Bloc<LoanproductEvent, LoanproductState> {
         ),
       );
     } catch (error) {
+      print('loanerr: $error');
       emit(state.copyWith(status: SaveStatus.failure));
     }
   }

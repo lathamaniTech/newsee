@@ -34,7 +34,11 @@ class CIFSearch extends StatelessWidget {
                 final draftService = DraftService();
                 await draftService.saveOrUpdateTabData(
                   tabKey: 'dedupe',
-                  tabData: cifres,
+                  tabData: {
+                    'cifResponse': cifres.cifResponse,
+                    'isNewCustomer': cifres.isNewCustomer,
+                    'constitution': cifres.constitution,
+                  },
                 );
               }
             },
@@ -110,8 +114,7 @@ class CIFSearch extends StatelessWidget {
                         heightSize: 0.6,
                         dataList: dataList,
                         buttonshow: true,
-                        onpressed:
-                            () => disposeResponse(context, state.cifResponse),
+                        onpressed: () => disposeResponse(context, state),
                       ),
                     );
                   },

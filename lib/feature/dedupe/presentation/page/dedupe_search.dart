@@ -43,7 +43,11 @@ class DedupeSearch extends StatelessWidget {
       final draftService = DraftService();
       await draftService.saveOrUpdateTabData(
         tabKey: 'dedupe',
-        tabData: state.aadharvalidateResponse,
+        tabData: {
+          'aadharvalidateResponse': state.aadharvalidateResponse,
+          'isNewCustomer': state.isNewCustomer,
+          'constitution': state.constitution,
+        },
       );
     }
 

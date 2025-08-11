@@ -7,6 +7,8 @@ import 'package:newsee/Utils/qr_nav_utils.dart';
 import 'package:newsee/Utils/utils.dart';
 import 'package:newsee/feature/aadharvalidation/domain/modal/aadharvalidate_request.dart';
 import 'package:newsee/feature/dedupe/presentation/bloc/dedupe_bloc.dart';
+import 'package:newsee/feature/draft/draft_service.dart';
+import 'package:newsee/feature/draft/presentation/pages/draft_inbox.dart';
 import 'package:newsee/feature/masters/domain/modal/lov.dart';
 import 'package:newsee/feature/personaldetails/presentation/bloc/personal_details_bloc.dart';
 import 'package:newsee/widgets/SearchableMultiSelectDropdown.dart';
@@ -147,7 +149,10 @@ class Personal extends StatelessWidget {
       form.control('caste').updateValue(val['caste']);
       form.control('gender').updateValue(val['gender']);
       form.control('subActivity').updateValue(val['subActivity']);
-      form.markAsDisabled();
+      final leadref = DraftService().getCurrentLeadRef();
+      if (leadref == '' && leadref.isEmpty) {
+        form.markAsDisabled();
+      }
     } catch (error) {
       print("mapPersonalData-catch-error $error");
     }
@@ -264,6 +269,9 @@ class Personal extends StatelessWidget {
             } else if (state.status == SaveStatus.success &&
                 state.getLead == false) {
               print('saved personal data =>${state.personalData}');
+              Map<String, dynamic> personalDetails =
+                  state.personalData!.toMap();
+              mapPersonalData(personalDetails);
             } else if (state.status == SaveStatus.success &&
                 state.getLead == true) {
               Map<String, dynamic> personalDetails =
