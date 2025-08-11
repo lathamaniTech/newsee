@@ -1,5 +1,7 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:dio/dio.dart';
+import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:newsee/AppData/app_api_constants.dart';
 import 'package:newsee/core/api/AsyncResponseHandler.dart';
@@ -88,9 +90,12 @@ class MasterRepoImpl extends MasterRepo {
           /* Lov Master fetch from API and Save in respective table */
           masterTypes = MasterTypes.lov;
           if (listofmaster.isEmpty || lovlist) {
-            Response response = await MastersRemoteDatasource(
-              dio: ApiClient().getDio(),
-            ).downloadMaster(request);
+            // Response response = await MastersRemoteDatasource(
+            //   dio: ApiClient().getDio(),
+            // ).downloadMaster(request);
+
+            final String res = await rootBundle.loadString('assets/data/lov.json');
+            Response response = Response(data: json.decode(res), requestOptions: RequestOptions());
 
             final String versionFromResponse = response.data['version'];
             final String masterNameFromResponse = ApiConstants.master_key_lov;
@@ -155,9 +160,12 @@ class MasterRepoImpl extends MasterRepo {
 
           masterTypes = MasterTypes.products;
           if (listofmaster.isEmpty || productmasterlist) {
-            Response response = await MastersRemoteDatasource(
-              dio: ApiClient().getDio(),
-            ).downloadMaster(request);
+            // Response response = await MastersRemoteDatasource(
+            //   dio: ApiClient().getDio(),
+            // ).downloadMaster(request);
+
+            final String res = await rootBundle.loadString('assets/data/product.json');
+            Response response = Response(data: json.decode(res), requestOptions: RequestOptions());
 
             final String versionFromResponse = response.data['version'];
             final String masterNameFromResponse =
@@ -270,9 +278,13 @@ class MasterRepoImpl extends MasterRepo {
           masterTypes = MasterTypes.productschema;
           if (listofmaster.isEmpty || productschemalist) {
 
-            Response response = await MastersRemoteDatasource(
-              dio: ApiClient().getDio(),
-            ).downloadMaster(request);
+            // Response response = await MastersRemoteDatasource(
+            //   dio: ApiClient().getDio(),
+            // ).downloadMaster(request);
+
+            final String res = await rootBundle.loadString('assets/data/productschema.json');
+            Response response = Response(data: json.decode(res), requestOptions: RequestOptions());
+
             List<ProductSchema> productSchemaList = ProductSchemaParserImpl()
                 .parseResponse(response);
 
@@ -341,9 +353,13 @@ class MasterRepoImpl extends MasterRepo {
         case ApiConstants.master_key_statecity:
           masterTypes = MasterTypes.statecitymaster;
           if (listofmaster.isEmpty || statecitylist) {
-            Response response = await MastersRemoteDatasource(
-              dio: ApiClient().getDio(),
-            ).downloadMaster(request);
+            // Response response = await MastersRemoteDatasource(
+            //   dio: ApiClient().getDio(),
+            // ).downloadMaster(request);
+
+            final String res = await rootBundle.loadString('assets/data/statecity.json');
+            Response response = Response(data: json.decode(res), requestOptions: RequestOptions());
+
 
             final String versionFromResponse = response.data['version'];
             final String masterNameFromResponse =

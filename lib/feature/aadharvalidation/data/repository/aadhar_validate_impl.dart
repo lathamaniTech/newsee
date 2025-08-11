@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
+import 'package:flutter/services.dart';
 import 'package:newsee/core/api/AsyncResponseHandler.dart';
 import 'package:newsee/core/api/api_client.dart';
 import 'package:newsee/core/api/auth_failure.dart';
@@ -30,9 +33,13 @@ class AadharValidateImpl extends AadharvalidateRepo {
   }) async {
     HttpConnectionFailure failure = HttpConnectionFailure(message: "");
     try {
-      var responseData = await AadharValidateDatasource(
-        dio: ApiClient().getDio(),
-      ).validateAadhaar(request);
+      // var responseData = await AadharValidateDatasource(
+      //   dio: ApiClient().getDio(),
+      // ).validateAadhaar(request);
+
+      final String res = await rootBundle.loadString('assets/data/aadhaar_response.json');
+      Response responseData = Response(data: json.decode(res), requestOptions: RequestOptions());
+
       if (responseData.data['Success']) {
         final AadharvalidateResponse response = AadharvalidateResponse.fromMap(
           responseData.data['responseData']['data'],

@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
+import 'package:flutter/services.dart';
 import 'package:newsee/core/api/AsyncResponseHandler.dart';
 import 'package:newsee/core/api/api_client.dart';
 import 'package:newsee/core/api/api_config.dart';
@@ -17,9 +20,12 @@ class DedupeSearchRepositoryimpl implements DedupeRepository {
   ) async {
     try {
       final payload = request.toJson();
-      var response = await DedupeDataSource(
-        dio: ApiClient().getDio(),
-      ).dedupeSearchcustomer(payload);
+      // var response = await DedupeDataSource(
+      //   dio: ApiClient().getDio(),
+      // ).dedupeSearchcustomer(payload);
+
+      final String res = await rootBundle.loadString('assets/data/dedupe.json');
+      Response response = Response(data: json.decode(res), requestOptions: RequestOptions()); 
 
       if (response.data[ApiConfig.API_RESPONSE_SUCCESS_KEY]) {
         print(

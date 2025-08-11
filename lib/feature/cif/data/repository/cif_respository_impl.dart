@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:dio/dio.dart';
+import 'package:flutter/services.dart';
 import 'package:newsee/core/api/AsyncResponseHandler.dart';
 import 'package:newsee/core/api/api_client.dart';
 import 'package:newsee/core/api/api_config.dart';
@@ -11,6 +14,8 @@ import 'package:newsee/feature/cif/domain/model/user/cif_request.dart';
 import 'package:newsee/feature/cif/domain/model/user/cif_response.dart';
 import 'package:newsee/feature/cif/domain/repository/cif_repository.dart';
 
+import 'dart:convert';
+
 class CifRepositoryImpl implements CifRepository {
   @override
   Future<AsyncResponseHandler<Failure, CifResponse>> searchCif(
@@ -20,9 +25,12 @@ class CifRepositoryImpl implements CifRepository {
       print('CIF Search request payload => $req');
       final payload = req.toJson();
       
-      var response = await CifRemoteDatasource(
-        dio: ApiClient().getDio(),
-      ).searchCif(payload);
+      // var response = await CifRemoteDatasource(
+      //   dio: ApiClient().getDio(),
+      // ).searchCif(payload);
+
+      final String res = await rootBundle.loadString('assets/data/cif.json');
+      Response response = Response(data: json.decode(res), requestOptions: RequestOptions()); 
 
       if (response.data[ApiConfig.API_RESPONSE_SUCCESS_KEY]) {
         final cifResponse = CifResponse.fromJson(
