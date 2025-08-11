@@ -78,7 +78,10 @@ final class AddressDetailsBloc
 
   draftData(data) async {
     final draftService = DraftService();
-    await draftService.saveOrUpdateTabData(tabKey: 'address', tabData: data);
+    await draftService.saveOrUpdateTabData(
+      tabKey: 'address',
+      tabData: data.toMap(),
+    );
   }
 
   Future<void> getCityListBasedOnState(
@@ -243,26 +246,39 @@ First, it attempts to fetch the data from the local database.If no matching data
         ],
         columnValues: ['0', '0'],
       );
-
-      final addressList1 = event.leadAddressDetails![0];
-
+      print('adddraft: ${event.leadAddressDetails}');
+      final addressList1 =
+          event.leadAddressDetails is List
+              ? (event.leadAddressDetails as List).isNotEmpty
+                  ? (event.leadAddressDetails as List)[0]
+                      as Map<String, dynamic>
+                  : <String, dynamic>{}
+              : event.leadAddressDetails as Map<String, dynamic>;
       final getcityList = await getCityandDistrict(addressList1['state'], null);
-
+      final city =
+          addressList1.containsKey('cityDistrict')
+              ? addressList1['cityDistrict']
+              : addressList1['city'];
       final getDistrictList = await getCityandDistrict(
         addressList1['state'],
-        addressList1['city'],
+        city,
       );
-
-      AddressData addressData = AddressData(
-        addressType: addressList1['addresstype'],
-        address1: addressList1['addressline1'],
-        address2: addressList1['addressline2'],
-        address3: addressList1['addressline3'],
-        state: addressList1['state'],
-        cityDistrict: addressList1['city'],
-        area: addressList1['area'],
-        pincode: addressList1['pincode'],
-      );
+      print('getDistrictList: $getDistrictList');
+      AddressData? addressData =
+          addressList1.containsKey('addressline1')
+              ? AddressData(
+                addressType: addressList1['addresstype'],
+                address1: addressList1['addressline1'],
+                address2: addressList1['addressline2'],
+                address3: addressList1['addressline3'],
+                state: addressList1['state'],
+                cityDistrict: addressList1['city'],
+                area: addressList1['area'],
+                pincode: addressList1['pincode'],
+              )
+              : event.leadAddressDetails != null
+              ? AddressData.fromMap(addressList1)
+              : null;
 
       emit(
         state.copyWith(
@@ -272,7 +288,7 @@ First, it attempts to fetch the data from the local database.If no matching data
           districtMaster: getDistrictList?.districtMaster,
           addressData: addressData,
           status: SaveStatus.success,
-          getLead: true,
+          getLead: addressList1.containsKey('addressline1') ? true : false,
         ),
       );
     } catch (error) {

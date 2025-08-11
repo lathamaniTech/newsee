@@ -25,11 +25,31 @@ class DraftLead {
   };
 
   factory DraftLead.fromJson(Map<String, dynamic> json) => DraftLead(
-    leadref: json['leadref'],
-    loan: Map<String, dynamic>.from(json['loan'] ?? {}),
-    dedupe: Map<String, dynamic>.from(json['dedupe'] ?? {}),
-    personal: Map<String, dynamic>.from(json['personal'] ?? {}),
-    address: Map<String, dynamic>.from(json['address'] ?? {}),
-    coapplicant: List<Map<String, dynamic>>.from(json['coapplicant'] ?? []),
+    leadref: json['leadref'] as String,
+    loan:
+        json['loan'] is Map<String, dynamic>
+            ? Map<String, dynamic>.from(json['loan'])
+            : {},
+    dedupe:
+        json['dedupe'] is Map<String, dynamic>
+            ? Map<String, dynamic>.from(json['dedupe'])
+            : {},
+    personal:
+        json['personal'] is Map<String, dynamic>
+            ? Map<String, dynamic>.from(json['personal'])
+            : {},
+    address:
+        json['address'] is Map<String, dynamic>
+            ? Map<String, dynamic>.from(json['address'])
+            : {},
+    coapplicant:
+        json['coapplicant'] is List
+            ? (json['coapplicant'] as List)
+                .where((e) => e is Map<String, dynamic>)
+                .map(
+                  (e) => Map<String, dynamic>.from(e as Map<String, dynamic>),
+                )
+                .toList()
+            : [],
   );
 }

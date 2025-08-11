@@ -6,49 +6,65 @@ class DraftService {
   static const String _draftKeyPrefix = 'draft_';
   static String leadref = '';
 
-  /// Save or update a specific tab data for a lead
   Future<void> saveOrUpdateTabData({
     String? leadrefOverride,
-    required String tabKey, // 'loan', 'personal', etc.
+    required String tabKey,
     required dynamic tabData,
   }) async {
     final prefs = await SharedPreferences.getInstance();
     print('leadref: $leadrefOverride, $tabData');
+
     if (tabKey == 'loan') {
-      // Generate leadref on loan tab only
       leadref = DateTime.now().millisecondsSinceEpoch.toString();
     } else {
-      // Use existing leadref
-      // if (leadref.isEmpty && leadrefOverride == null) {
-      //   throw Exception('LeadRef not initialized. Save loan tab first.');
-      // }
       leadref = leadrefOverride ?? leadref;
     }
 
     final key = '$_draftKeyPrefix$leadref';
 
-    final Map<String, dynamic> currentData;
+    // load existing data or create a new structure
+    Map<String, dynamic> currentData;
     final jsonString = prefs.getString(key);
     if (jsonString != null) {
-      currentData = jsonDecode(jsonString);
-      currentData[tabKey] = tabData;
-      await prefs.setString(key, jsonEncode(currentData));
+      currentData = jsonDecode(jsonString) as Map<String, dynamic>;
     } else {
-      // First save (i.e., loan tab), create structure
       currentData = {
         'leadref': leadref,
         'loan': {},
         'dedupe': {},
         'personal': {},
         'address': {},
-        'coapplicant': [],
+        'coapplicant': <Map<String, dynamic>>[],
       };
-      currentData[tabKey] = tabData;
-      await prefs.setString(key, jsonEncode(currentData));
     }
+
+    if (tabKey == 'coapplicant') {
+      if (tabData is Map<String, dynamic>) {
+        currentData[tabKey] = [tabData];
+      } else if (tabData is List) {
+        currentData[tabKey] =
+            tabData
+                .where((e) => e is Map<String, dynamic>)
+                .map(
+                  (e) => Map<String, dynamic>.from(e as Map<String, dynamic>),
+                )
+                .toList();
+        print('drafsavecoapp: ${currentData[tabKey]}');
+      } else {
+        currentData[tabKey] = <Map<String, dynamic>>[];
+      }
+    } else {
+      if (tabData is Map<String, dynamic>) {
+        currentData[tabKey] = tabData;
+      } else {
+        currentData[tabKey] = {};
+      }
+    }
+
+    await prefs.setString(key, jsonEncode(currentData));
+    print('drafsave: $currentData');
   }
 
-  /// Get full draft by lead reference
   Future<DraftLead?> getDraft(String leadref) async {
     final prefs = await SharedPreferences.getInstance();
     final key = '$_draftKeyPrefix$leadref';
@@ -65,7 +81,7 @@ class DraftService {
     await prefs.remove(key);
   }
 
-  /// Get list of all leadrefs with saved drafts
+  //get list of all leadrefs with saved drafts
   Future<List<String>> getAllDraftLeadRefs() async {
     final prefs = await SharedPreferences.getInstance();
     final keys = prefs.getKeys();
@@ -76,7 +92,7 @@ class DraftService {
         .toList();
   }
 
-  /// Optional method: return currently active leadref
+  //return currently active leadref
   String getCurrentLeadRef() {
     return leadref;
   }

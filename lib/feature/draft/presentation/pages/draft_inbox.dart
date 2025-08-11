@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:newsee/feature/draft/domain/draft_lead_model.dart';
 import 'package:newsee/feature/draft/draft_service.dart';
 import 'package:newsee/widgets/lead_tile_card.dart';
@@ -47,42 +48,64 @@ class _DraftLeadPageState extends State<DraftInbox> {
       children: [
         Expanded(
           child: RefreshIndicator(
-            onRefresh: loadDrafts, // Pull-to-refresh triggers this
-            child: ListView.builder(
-              itemCount: paginatedDrafts.length,
-              itemBuilder: (context, index) {
-                final draft = paginatedDrafts[index];
+            onRefresh: loadDrafts,
+            child:
+                allDrafts.isEmpty
+                    ? ListView(
+                      children: const [
+                        SizedBox(
+                          height: 250,
+                          child: Center(
+                            child: Text(
+                              'No leads found',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.black87,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    )
+                    : ListView.builder(
+                      itemCount: paginatedDrafts.length,
+                      itemBuilder: (context, index) {
+                        final draft = paginatedDrafts[index];
 
-                return LeadTileCard(
-                  title: draft.personal['firstName'] ?? 'N/A',
-                  subtitle: draft.leadref,
-                  icon: Icons.person,
-                  color: Colors.teal,
-                  type:
-                      draft.dedupe['existingCustomer'] == 'N'
-                          ? 'New Customer'
-                          : 'Existing Customer',
-                  product:
-                      draft.loan['selectedProductScheme']['optionDesc'] ??
-                      'N/A',
-                  phone: draft.personal['primaryMobileNumber'] ?? 'N/A',
-                  ennablePhoneTap: true,
-                  createdon: draft.personal['dob'] ?? 'N/A',
-                  location: draft.address['state'] ?? 'N/A',
-                  loanamount:
-                      draft.personal['loanAmountRequested']?.toString() ?? '',
-                  onTap: () async {
-                    await Navigator.pushNamed(
-                      context,
-                      '/resume-lead',
-                      arguments: draft.leadref,
-                    );
-                    loadDrafts(); // Reload when coming back
-                  },
-                  showarrow: false,
-                );
-              },
-            ),
+                        return LeadTileCard(
+                          title: draft.personal['firstName'] ?? 'N/A',
+                          subtitle: draft.leadref,
+                          icon: Icons.person,
+                          color: Colors.teal,
+                          type:
+                              draft.dedupe['isNewCustomer'] == false
+                                  ? 'Existing Customer'
+                                  : 'New Customer',
+                          product:
+                              draft
+                                  .loan['selectedProductScheme']['optionDesc'] ??
+                              'N/A',
+                          phone: draft.personal['primaryMobileNumber'] ?? 'N/A',
+                          ennablePhoneTap: true,
+                          createdon: draft.personal['dob'] ?? 'N/A',
+                          location: draft.address['state'] ?? 'N/A',
+                          loanamount:
+                              draft.personal['loanAmountRequested']
+                                  ?.toString() ??
+                              '',
+                          onTap: () async {
+                            print('inbox: ${draft.coapplicant}');
+                            context.pushNamed(
+                              'newlead',
+                              extra: {'leadData': draft, 'tabType': 'draft'},
+                            );
+                            loadDrafts();
+                          },
+                          showarrow: false,
+                        );
+                      },
+                    ),
           ),
         ),
         if (numberOfPages > 1)
