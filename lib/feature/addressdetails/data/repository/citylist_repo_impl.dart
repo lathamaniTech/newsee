@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
+import 'package:flutter/services.dart';
 import 'package:newsee/AppData/DBConstants/table_key_geographymaster.dart';
 import 'package:newsee/AppData/app_constants.dart';
 import 'package:newsee/core/api/AsyncResponseHandler.dart';
@@ -46,17 +49,23 @@ class CitylistRepoImpl implements Cityrepository {
         // fetch data from geography master
         if (cityDistrictRequest.cityCode != null) {
           // district data will be fetched
-          final response = await CityDatasource(
-            dio: ApiClient().getDio(),
-          ).fecthDistrictList(cityDistrictRequest);
+          // final response = await CityDatasource(
+          //   dio: ApiClient().getDio(),
+          // ).fecthDistrictList(cityDistrictRequest);
+
+          final String res = await rootBundle.loadString('assets/data/districtlist.json');
+          Response response = Response(data: json.decode(res), requestOptions: RequestOptions());
           geographyMasterResponse = await _getDistrict(
             response: response,
             cityDistrictRequest: cityDistrictRequest,
           );
         } else {
-          final response = await CityDatasource(
-            dio: ApiClient().getDio(),
-          ).fecthCityList(cityDistrictRequest.stateCode);
+          // final response = await CityDatasource(
+          //   dio: ApiClient().getDio(),
+          // ).fecthCityList(cityDistrictRequest.stateCode);
+
+          final String res = await rootBundle.loadString('assets/data/citylist.json');
+          Response response = Response(data: json.decode(res), requestOptions: RequestOptions());
           geographyMasterResponse = await _getCity(
             response: response,
             cityDistrictRequest: cityDistrictRequest,
