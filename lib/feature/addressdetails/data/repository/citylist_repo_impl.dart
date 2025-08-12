@@ -4,6 +4,8 @@ import 'package:dio/dio.dart';
 import 'package:flutter/services.dart';
 import 'package:newsee/AppData/DBConstants/table_key_geographymaster.dart';
 import 'package:newsee/AppData/app_constants.dart';
+import 'package:newsee/AppData/globalconfig.dart';
+import 'package:newsee/Utils/offline_data_provider.dart';
 import 'package:newsee/core/api/AsyncResponseHandler.dart';
 import 'package:newsee/core/api/api_client.dart';
 import 'package:newsee/core/api/api_config.dart';
@@ -49,23 +51,30 @@ class CitylistRepoImpl implements Cityrepository {
         // fetch data from geography master
         if (cityDistrictRequest.cityCode != null) {
           // district data will be fetched
-          // final response = await CityDatasource(
-          //   dio: ApiClient().getDio(),
-          // ).fecthDistrictList(cityDistrictRequest);
 
-          final String res = await rootBundle.loadString('assets/data/districtlist.json');
-          Response response = Response(data: json.decode(res), requestOptions: RequestOptions());
+          final response =
+              Globalconfig.isOffline
+                  ? await offlineDataProvider(
+                    path: AppConstants.districtResponse,
+                  )
+                  : await CityDatasource(
+                    dio: ApiClient().getDio(),
+                  ).fecthDistrictList(cityDistrictRequest);
+
           geographyMasterResponse = await _getDistrict(
             response: response,
             cityDistrictRequest: cityDistrictRequest,
           );
         } else {
-          // final response = await CityDatasource(
-          //   dio: ApiClient().getDio(),
-          // ).fecthCityList(cityDistrictRequest.stateCode);
+          final response =
+              Globalconfig.isOffline
+                  ? await offlineDataProvider(
+                    path: AppConstants.cityListResponse,
+                  )
+                  : await CityDatasource(
+                    dio: ApiClient().getDio(),
+                  ).fecthCityList(cityDistrictRequest.stateCode);
 
-          final String res = await rootBundle.loadString('assets/data/citylist.json');
-          Response response = Response(data: json.decode(res), requestOptions: RequestOptions());
           geographyMasterResponse = await _getCity(
             response: response,
             cityDistrictRequest: cityDistrictRequest,

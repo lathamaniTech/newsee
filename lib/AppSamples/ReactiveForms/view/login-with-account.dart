@@ -12,6 +12,7 @@ import 'package:newsee/Utils/masterversioncheck.dart';
 import 'package:newsee/core/api/AsyncResponseHandler.dart';
 import 'package:newsee/feature/auth/presentation/bloc/auth_bloc.dart';
 import 'package:newsee/feature/globalconfig/bloc/global_config_bloc.dart';
+import 'package:newsee/feature/masters/domain/modal/master_request.dart';
 import 'package:newsee/feature/masters/domain/modal/master_version.dart';
 import 'package:provider/provider.dart';
 import 'package:reactive_forms/reactive_forms.dart';
@@ -76,6 +77,8 @@ class LoginpageWithAC extends StatelessWidget {
     final loginFormgroup = AppConfig().loginFormgroup;
 
     login(AuthState state) {
+      print('Globalconfig.isOffline => ${Globalconfig.isOffline}');
+
       if (loginFormgroup.valid) {
         context.read<AuthBloc>().add(
           LoginWithAccount(
@@ -96,7 +99,14 @@ class LoginpageWithAC extends StatelessWidget {
     }
 
     offlineLogin() {
-      context.goNamed('home');
+      print('Globalconfig.isOffline => ${Globalconfig.isOffline}');
+      Globalconfig.masterVersionMapper = {
+        "Listofvalues": "5",
+        "ProductMaster": "5",
+        "ProductScheme": "5",
+        "StateCityMaster": "2",
+      };
+      context.goNamed('masters');
     }
 
     return BlocListener<AuthBloc, AuthState>(

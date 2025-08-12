@@ -17,6 +17,8 @@ class GlobalConfigBloc extends Bloc<GlobalconfigEvent, NetworkState> {
   }
 
   Future<void> onNetworkChanged(NetworkChangedEvent ev, Emitter emit) async {
+    Globalconfig.isOffline =
+        ev.globalConfig.operationNetwork == OperationNetwork.offline;
     emit(NetworkState(globalconfig: ev.globalConfig));
   }
 }

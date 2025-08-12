@@ -2,6 +2,9 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/services.dart';
+import 'package:newsee/AppData/app_constants.dart';
+import 'package:newsee/AppData/globalconfig.dart';
+import 'package:newsee/Utils/offline_data_provider.dart';
 import 'package:newsee/core/api/AsyncResponseHandler.dart';
 import 'package:newsee/core/api/api_client.dart';
 import 'package:newsee/core/api/api_config.dart';
@@ -24,13 +27,13 @@ class CifRepositoryImpl implements CifRepository {
     try {
       print('CIF Search request payload => $req');
       final payload = req.toJson();
-      
-      // var response = await CifRemoteDatasource(
-      //   dio: ApiClient().getDio(),
-      // ).searchCif(payload);
 
-      final String res = await rootBundle.loadString('assets/data/cif.json');
-      Response response = Response(data: json.decode(res), requestOptions: RequestOptions()); 
+      var response =
+          Globalconfig.isOffline
+              ? await offlineDataProvider(path: AppConstants.cifResponsonse)
+              : await CifRemoteDatasource(
+                dio: ApiClient().getDio(),
+              ).searchCif(payload);
 
       if (response.data[ApiConfig.API_RESPONSE_SUCCESS_KEY]) {
         final cifResponse = CifResponse.fromJson(
