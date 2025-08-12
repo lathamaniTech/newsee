@@ -63,10 +63,6 @@ class LoginpageView extends StatelessWidget {
         children: [
           const SizedBox(height: 12),
           OptionsSheet(
-            bgColor:
-                state.globalconfig.operationNetwork == OperationNetwork.online
-                    ? Colors.red
-                    : Colors.greenAccent,
             icon:
                 state.globalconfig.operationNetwork == OperationNetwork.online
                     ? Icons.signal_wifi_connected_no_internet_4
