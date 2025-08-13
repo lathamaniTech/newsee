@@ -54,7 +54,6 @@ class AppConstants {
   static const String productResponse = 'assets/data/product.json';
   static const String productSchemaResponse = 'assets/data/productschema.json';
   static const String statecityResponse = 'assets/data/statecity.json';
-  static const String documentsResponse = 'assets/data/documents.json';
 }
 
 class BioMetricResult {

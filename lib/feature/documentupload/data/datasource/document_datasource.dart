@@ -1,7 +1,4 @@
 import 'package:dio/dio.dart';
-import 'package:newsee/AppData/app_constants.dart';
-import 'package:newsee/AppData/globalconfig.dart';
-import 'package:newsee/Utils/offline_data_provider.dart';
 import 'package:newsee/core/api/api_config.dart';
 
 class DocumentDataSource {
@@ -19,10 +16,7 @@ class DocumentDataSource {
   }
 
   Future<Response> getDocuments(Map<String, dynamic> payload) async {
-    final res =
-        Globalconfig.isOffline
-            ? await offlineDataProvider(path: AppConstants.documentsResponse)
-            : await dio.post(ApiConfig.GET_DOCUMENTS, data: payload);
+    final res = await dio.post(ApiConfig.GET_DOCUMENTS, data: payload);
     return res;
   }
 
