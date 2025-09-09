@@ -175,7 +175,7 @@ class CropDetailsPage extends StatelessWidget {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
-      builder: (_) { 
+      builder: (_) {
         final showSubmitButton = state.showSubmit;
         print("showSubmitButton $showSubmitButton");
         return BlocProvider<CropyieldpageBloc>.value(
@@ -190,7 +190,7 @@ class CropDetailsPage extends StatelessWidget {
                     "Note: Scroll left or right to delete land detail",
                     style: TextStyle(
                       color: Colors.red,
-                      fontWeight: FontWeight.bold
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                   Expanded(
@@ -220,26 +220,37 @@ class CropDetailsPage extends StatelessWidget {
                                   key: ValueKey(item.lasSeqno),
                                   endActionPane: ActionPane(
                                     motion: ScrollMotion(),
-                                    extentRatio: 0.25, // Controls width of action pane
+                                    extentRatio:
+                                        0.25, // Controls width of action pane
                                     children: [
                                       SlidableAction(
                                         onPressed: (slidableContext) {
                                           try {
                                             if (item.lasSeqno != '') {
-                                              slidableContext.read<CropyieldpageBloc>().add(
-                                                CropDetailsDeleteEvent(
-                                                  proposalNumber: proposalnumber,
-                                                  rowId: item.lasSeqno ?? '',
-                                                  index: index
-                                                ),
-                                              );
+                                              slidableContext
+                                                  .read<CropyieldpageBloc>()
+                                                  .add(
+                                                    CropDetailsDeleteEvent(
+                                                      proposalNumber:
+                                                          proposalnumber,
+                                                      rowId:
+                                                          item.lasSeqno ?? '',
+                                                      index: index,
+                                                    ),
+                                                  );
                                             } else {
-                                              slidableContext.read<CropyieldpageBloc>().add(
-                                                CropDetailsRemoveEvent(index: index),
-                                              );
+                                              slidableContext
+                                                  .read<CropyieldpageBloc>()
+                                                  .add(
+                                                    CropDetailsRemoveEvent(
+                                                      index: index,
+                                                    ),
+                                                  );
                                             }
-                                          } catch(error) {
-                                            print("deleteLandData-error $error");
+                                          } catch (error) {
+                                            print(
+                                              "deleteLandData-error $error",
+                                            );
                                           }
                                         },
                                         backgroundColor: Colors.red,
@@ -250,22 +261,18 @@ class CropDetailsPage extends StatelessWidget {
                                     ],
                                   ),
                                   child: OptionsSheet(
-                                icon: Icons.agriculture,
-                                title: 'LandType - ${landname.optDesc}',
-                                details: [
-                                  cropname.optDesc
-                                ],
-                                detailsName: [
-                                  "Name of the Crop",
-                                ],
-                                onTap: () {
-                                  currentIndex.value = index;
-                                  Navigator.pop(context);
-                                  context.read<CropyieldpageBloc>().add(
-                                    CropDetailsSetEvent(cropData: item),
-                                  );
-                                },
-                              ),
+                                    icon: Icons.agriculture,
+                                    title: 'LandType - ${landname.optDesc}',
+                                    details: [cropname.optDesc],
+                                    detailsName: ["Name of the Crop"],
+                                    onTap: () {
+                                      currentIndex.value = index;
+                                      Navigator.pop(context);
+                                      context.read<CropyieldpageBloc>().add(
+                                        CropDetailsSetEvent(cropData: item),
+                                      );
+                                    },
+                                  ),
                                   // ListTile(
                                   //   leading: Icon(
                                   //     Icons.agriculture,
@@ -292,7 +299,8 @@ class CropDetailsPage extends StatelessWidget {
                               },
                             ),
                   ),
-                  (entries.isNotEmpty && context.read<CropyieldpageBloc>().state.showSubmit)
+                  (entries.isNotEmpty &&
+                          context.read<CropyieldpageBloc>().state.showSubmit)
                       ? Center(
                         child: Padding(
                           padding: const EdgeInsets.all(10),
@@ -337,11 +345,10 @@ class CropDetailsPage extends StatelessWidget {
                       : SizedBox.shrink(),
                 ],
               ),
-              
             ),
           ),
         );
-      }
+      },
     );
   }
 
@@ -423,6 +430,32 @@ class CropDetailsPage extends StatelessWidget {
                                 fontWeight: FontWeight.bold,
                               ),
                               overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(4.0),
+                          child: IconButton(
+                            onPressed: () {
+                              CropyieldpageBloc().add(
+                                CropPageInitialEvent(
+                                  proposalNumber: proposalnumber,
+                                  isRefresh: true,
+                                ),
+                              );
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.blue,
+                              minimumSize: const Size(30, 30),
+                              padding: EdgeInsets.zero,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            icon: const Icon(
+                              Icons.sync,
+                              color: Colors.white,
+                              size: 16,
                             ),
                           ),
                         ),
@@ -513,16 +546,18 @@ class CropDetailsPage extends StatelessWidget {
                 showSnack(
                   context,
                   message: 'Crop Details Deleted Successfully',
-                ); 
-              } 
+                );
+              }
 
               if (state.status == SaveStatus.init) {
-                globalLoadingBloc.add(
-                  HideLoading(),
-                );
-                if ((state.cropData != null && state.cropData!.isNotEmpty) && (state.landDetails != null && state.landDetails!.isNotEmpty)) {
-                  irrigatedController.text = state.landDetails!['lpAgriPcIrrigated'].toString();
-                  rainfedController.text = state.landDetails!['lpAgriPcRainfed'].toString();
+                globalLoadingBloc.add(HideLoading());
+                if ((state.cropData != null && state.cropData!.isNotEmpty) &&
+                    (state.landDetails != null &&
+                        state.landDetails!.isNotEmpty)) {
+                  irrigatedController.text =
+                      state.landDetails!['lpAgriPcIrrigated'].toString();
+                  rainfedController.text =
+                      state.landDetails!['lpAgriPcRainfed'].toString();
                 }
               } else if (state.status == SaveStatus.mastersucess) {
                 form.reset();
@@ -536,17 +571,21 @@ class CropDetailsPage extends StatelessWidget {
                   context,
                   message: 'Crop Details Submitted Successfully',
                 );
-              } else if (state.status == SaveStatus.failure && state.errorMessage != null) {
+              } else if (state.status == SaveStatus.failure &&
+                  state.errorMessage != null) {
                 globalLoadingBloc.add(HideLoading());
-                ScaffoldMessenger.of(
-                  context,
-                ).showSnackBar(SnackBar(content: Text(state.errorMessage.toString())));
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(state.errorMessage.toString())),
+                );
               }
             },
             builder: (context, state) {
               print("state.showSubmit-builer ${state.showSubmit}");
-              if (state.status == SaveStatus.update && state.selectedCropData != null) {
-                print("currently current selected cropdetails index is ${currentIndex.value}");
+              if (state.status == SaveStatus.update &&
+                  state.selectedCropData != null) {
+                print(
+                  "currently current selected cropdetails index is ${currentIndex.value}",
+                );
                 print("state.selectedCropData is => ${state.selectedCropData}");
                 form.patchValue(state.selectedCropData!.toForm());
                 if (state.selectedCropData!.notifiedCropFlag!) {
@@ -790,57 +829,81 @@ class CropDetailsPage extends StatelessWidget {
                                       isRupeeFormat: true,
                                     ),
                                     Center(
-                                      child: 
-                                      state.status == SaveStatus.update || state.status == SaveStatus.edit ?
-                                      ElevatedButton.icon(
-                                        onPressed: () => handleUpdate(context, state),
-                                        icon: const Icon(Icons.save, color: Colors.white),
-                                        label: const Text(
-                                          'Update',
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.white,
-                                          ),
-                                        ),
-                                        style: ElevatedButton.styleFrom(
-                                          // backgroundColor: const Color.fromARGB(
-                                          //   212,
-                                          //   5,
-                                          //   8,
-                                          //   205,
-                                          // ),
-                                          backgroundColor: Colors.teal,
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 32,
-                                            vertical: 14,
-                                          ),
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(8),
-                                          ),
-                                        ),
-                                      ) :
-                                      ElevatedButton.icon(
-                                        onPressed: () => handleSave(context, state),
-                                        icon: const Icon(Icons.save, color: Colors.white),
-                                        label: const Text(
-                                          'Save',
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.white,
-                                          ),
-                                        ),
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: Colors.teal,
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 32,
-                                            vertical: 14,
-                                          ),
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(8),
-                                          ),
-                                        ),
-                                      ),
-                                    )
+                                      child:
+                                          state.status == SaveStatus.update ||
+                                                  state.status ==
+                                                      SaveStatus.edit
+                                              ? ElevatedButton.icon(
+                                                onPressed:
+                                                    () => handleUpdate(
+                                                      context,
+                                                      state,
+                                                    ),
+                                                icon: const Icon(
+                                                  Icons.save,
+                                                  color: Colors.white,
+                                                ),
+                                                label: const Text(
+                                                  'Update',
+                                                  style: TextStyle(
+                                                    fontWeight: FontWeight.bold,
+                                                    color: Colors.white,
+                                                  ),
+                                                ),
+                                                style: ElevatedButton.styleFrom(
+                                                  // backgroundColor: const Color.fromARGB(
+                                                  //   212,
+                                                  //   5,
+                                                  //   8,
+                                                  //   205,
+                                                  // ),
+                                                  backgroundColor: Colors.teal,
+                                                  padding:
+                                                      const EdgeInsets.symmetric(
+                                                        horizontal: 32,
+                                                        vertical: 14,
+                                                      ),
+                                                  shape: RoundedRectangleBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                          8,
+                                                        ),
+                                                  ),
+                                                ),
+                                              )
+                                              : ElevatedButton.icon(
+                                                onPressed:
+                                                    () => handleSave(
+                                                      context,
+                                                      state,
+                                                    ),
+                                                icon: const Icon(
+                                                  Icons.save,
+                                                  color: Colors.white,
+                                                ),
+                                                label: const Text(
+                                                  'Save',
+                                                  style: TextStyle(
+                                                    fontWeight: FontWeight.bold,
+                                                    color: Colors.white,
+                                                  ),
+                                                ),
+                                                style: ElevatedButton.styleFrom(
+                                                  backgroundColor: Colors.teal,
+                                                  padding:
+                                                      const EdgeInsets.symmetric(
+                                                        horizontal: 32,
+                                                        vertical: 14,
+                                                      ),
+                                                  shape: RoundedRectangleBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                          8,
+                                                        ),
+                                                  ),
+                                                ),
+                                              ),
+                                    ),
                                   ],
                                 ),
                               ),

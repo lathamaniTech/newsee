@@ -177,79 +177,111 @@ class LandHoldingPage extends StatelessWidget {
     return Kwillpopscope(
       routeContext: context,
       form: form,
-      widget: Scaffold(
-        appBar: AppBar(
-          toolbarHeight: MediaQuery.of(context).size.height * 0.15,
-          automaticallyImplyLeading: false,
-          flexibleSpace: Container(
-            decoration: BoxDecoration(color: Colors.teal),
-          ),
-          title: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(height: 10),
-              Text(
-                title,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
+      widget: BlocProvider(
+        create:
+            (_) =>
+                LandHoldingBloc()
+                  ..add(LandHoldingInitEvent(proposalNumber: proposalNumber)),
+        child: Scaffold(
+          appBar: AppBar(
+            toolbarHeight: MediaQuery.of(context).size.height * 0.15,
+            automaticallyImplyLeading: false,
+            flexibleSpace: Container(
+              decoration: BoxDecoration(color: Colors.teal),
+            ),
+            title: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(height: 10),
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
                 ),
-              ),
-              SizedBox(height: 10),
+                SizedBox(height: 10),
 
-              Center(
-                child: Container(
-                  width: double.infinity,
-                  margin: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 12,
-                  ),
-                  padding: const EdgeInsets.all(8),
+                Center(
+                  child: Container(
+                    width: double.infinity,
+                    margin: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 12,
+                    ),
+                    padding: const EdgeInsets.all(8),
 
-                  decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.10),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Row(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Text(
-                          "Proposal Id: ",
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        child: Padding(
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.10),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Row(
+                      children: [
+                        Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: Text(
-                            proposalNumber ?? 'N/A',
+                            "Proposal Id: ",
                             style: TextStyle(
-                              color: Colors.white,
                               fontSize: 14,
+                              color: Colors.white,
                               fontWeight: FontWeight.bold,
                             ),
-                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
-                      ),
-                    ],
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text(
+                              proposalNumber ?? 'N/A',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(4.0),
+                          child: IconButton(
+                            onPressed: () {
+                              LandHoldingBloc().add(
+                                LandHoldingInitEvent(
+                                  proposalNumber: proposalNumber,
+                                  isRefresh: true,
+                                ),
+                              );
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.blue,
+                              minimumSize: const Size(36, 36),
+                              padding: EdgeInsets.zero,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            icon: const Icon(
+                              Icons.sync,
+                              color: Colors.white,
+                              size: 16,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-        body: BlocProvider(
-          create:
-              (_) =>
-                  LandHoldingBloc()
-                    ..add(LandHoldingInitEvent(proposalNumber: proposalNumber)),
-          child: BlocConsumer<LandHoldingBloc, LandHoldingState>(
+          // body: BlocProvider(
+          //   create:
+          //       (_) =>
+          //           LandHoldingBloc()
+          //             ..add(LandHoldingInitEvent(proposalNumber: proposalNumber)),
+          //   child: BlocConsumer<LandHoldingBloc, LandHoldingState>(
+          body: BlocConsumer<LandHoldingBloc, LandHoldingState>(
             listener: (context, state) {
               if (state.status == SaveStatus.loading) {
                 globalLoadingBloc.add(ShowLoading(message: 'Please wait...'));
@@ -284,6 +316,13 @@ class LandHoldingPage extends StatelessWidget {
             builder: (context, state) {
               if (state.status == SaveStatus.init) {
                 form.control('applicantName').updateValue(applicantName);
+              }
+              if (state.status == SaveStatus.loading) {
+                globalLoadingBloc.add(ShowLoading(message: 'Please wait...'));
+              }
+              if (state.status == SaveStatus.success) {
+                globalLoadingBloc.add(HideLoading());
+                form.reset();
               }
               return ReactiveForm(
                 formGroup: form,
@@ -327,27 +366,41 @@ class LandHoldingPage extends StatelessWidget {
                                         );
                                       },
                                       selItem: () {
-                                        final value = form.control('state').value;
-                                        if (value == null || value.toString().isEmpty) {
+                                        final value =
+                                            form.control('state').value;
+                                        if (value == null ||
+                                            value.toString().isEmpty) {
                                           return null;
                                         }
-                                        if (state.status == SaveStatus.update && state.selectedLandData?.lslLandState != null) {
-                                          String? stateCode = state.selectedLandData?.lslLandState;
+                                        if (state.status == SaveStatus.update &&
+                                            state
+                                                    .selectedLandData
+                                                    ?.lslLandState !=
+                                                null) {
+                                          String? stateCode =
+                                              state
+                                                  .selectedLandData
+                                                  ?.lslLandState;
 
-                                          GeographyMaster? geographyMaster = state
-                                              .stateCityMaster
-                                              ?.firstWhere((val) => val.code == stateCode);
+                                          GeographyMaster? geographyMaster =
+                                              state.stateCityMaster?.firstWhere(
+                                                (val) => val.code == stateCode,
+                                              );
                                           print(geographyMaster);
                                           if (geographyMaster != null) {
-                                            form.controls['state']
-                                                ?.updateValue(geographyMaster.code);
+                                            form.controls['state']?.updateValue(
+                                              geographyMaster.code,
+                                            );
                                             return geographyMaster;
                                           } else {
                                             return <GeographyMaster>[];
                                           }
-                                        } else if (state.stateCityMaster!.isEmpty) {
-                                          form.controls['state']
-                                              ?.updateValue("");
+                                        } else if (state
+                                            .stateCityMaster!
+                                            .isEmpty) {
+                                          form.controls['state']?.updateValue(
+                                            "",
+                                          );
                                           return <GeographyMaster>[];
                                         }
                                       },
@@ -362,25 +415,39 @@ class LandHoldingPage extends StatelessWidget {
                                         );
                                       },
                                       selItem: () {
-                                        final value = form.control('district').value;
-                                        if (value == null || value.toString().isEmpty) {
+                                        final value =
+                                            form.control('district').value;
+                                        if (value == null ||
+                                            value.toString().isEmpty) {
                                           return null;
                                         }
-                                        if (state.status == SaveStatus.update && state.selectedLandData?.lslLandState != null) {
-                                          String? cityCode = state.selectedLandData?.lslLandDistrict;
+                                        if (state.status == SaveStatus.update &&
+                                            state
+                                                    .selectedLandData
+                                                    ?.lslLandState !=
+                                                null) {
+                                          String? cityCode =
+                                              state
+                                                  .selectedLandData
+                                                  ?.lslLandDistrict;
 
-                                          GeographyMaster? geographyMaster = state
-                                              .cityMaster
-                                              ?.firstWhere((val) => val.code == cityCode);
+                                          GeographyMaster? geographyMaster =
+                                              state.cityMaster?.firstWhere(
+                                                (val) => val.code == cityCode,
+                                              );
                                           print(geographyMaster);
                                           if (geographyMaster != null) {
                                             form.controls['district']
-                                                ?.updateValue(geographyMaster.code);
+                                                ?.updateValue(
+                                                  geographyMaster.code,
+                                                );
                                             return geographyMaster;
                                           } else {
                                             return <GeographyMaster>[];
                                           }
-                                        } else if (state.stateCityMaster!.isEmpty) {
+                                        } else if (state
+                                            .stateCityMaster!
+                                            .isEmpty) {
                                           form.controls['district']
                                               ?.updateValue("");
                                           return <GeographyMaster>[];
@@ -541,7 +608,7 @@ class LandHoldingPage extends StatelessWidget {
                                       label: 'Distance from Branch (in Kms)',
                                       mantatory: true,
                                       minlength: 1,
-                                      maxlength: 3
+                                      maxlength: 3,
                                     ),
 
                                     IntegerTextField(
@@ -738,6 +805,52 @@ class LandHoldingPage extends StatelessWidget {
                                 ),
                               ),
                             ),
+                            SizedBox(height: 28),
+
+                            if (state.landData?.isNotEmpty ?? false)
+                              Center(
+                                child: ElevatedButton(
+                                  onPressed: () {
+                                    context.pushNamed(
+                                      'cropdetails',
+                                      extra: proposalNumber,
+                                    );
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: const Color.fromARGB(
+                                      212,
+                                      5,
+                                      8,
+                                      205,
+                                    ),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 22,
+                                      vertical: 12,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize:
+                                        MainAxisSize.min, // shrink to content
+                                    children: const [
+                                      Text(
+                                        'Next Page',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                      SizedBox(width: 8),
+                                      Icon(
+                                        Icons.arrow_forward,
+                                        color: Colors.white,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
                           ],
                         ),
                       ),

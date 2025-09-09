@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:newsee/AppData/app_constants.dart';
 import 'package:newsee/Utils/download_util.dart';
 import 'package:newsee/feature/pdf_viewer/presentation/pages/pdf_viewer_page.dart';
@@ -17,7 +18,9 @@ import 'package:path_provider/path_provider.dart';
 */
 
 class CicCheckPage extends StatelessWidget {
-  const CicCheckPage({super.key});
+  final String? applicantName;
+  final String? propNo;
+  const CicCheckPage({super.key, this.applicantName, this.propNo});
 
   @override
   Widget build(BuildContext context) {
@@ -516,6 +519,47 @@ class CicCheckPage extends StatelessWidget {
                   ],
                 ),
               ),
+            ),
+            const SizedBox(height: 16),
+            ValueListenableBuilder<bool>(
+              valueListenable: applicantCibilCheck,
+              builder: (context, cibilChecked, _) {
+                return ValueListenableBuilder<bool>(
+                  valueListenable: applicantCrifCheck,
+                  builder: (context, crifChecked, _) {
+                    if (cibilChecked || crifChecked) {
+                      return ElevatedButton(
+                        onPressed: () async {
+                          context.pop();
+                          context.pushNamed(
+                            'landholdings',
+                            extra: {
+                              'applicantName': applicantName,
+                              'proposalNumber': propNo,
+                            },
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color.fromARGB(255, 3, 9, 110),
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 20,
+                            vertical: 10,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                        ),
+                        child: const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [SizedBox(width: 8), Text('Next')],
+                        ),
+                      );
+                    }
+                    return const SizedBox.shrink();
+                  },
+                );
+              },
             ),
           ],
         ),

@@ -5,6 +5,8 @@
   @param      : LeadEvent, LeadState
 */
 
+import 'dart:convert';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:newsee/AppData/app_api_constants.dart';
@@ -16,6 +18,7 @@ import 'package:newsee/feature/leadInbox/domain/modal/get_lead_response.dart';
 import 'package:newsee/feature/leadInbox/domain/modal/group_lead_inbox.dart';
 import 'package:newsee/feature/leadInbox/domain/modal/lead_request.dart';
 import 'package:newsee/feature/leadInbox/domain/repository/lead_repository.dart';
+import 'package:newsee/feature/leadInbox/lead_cache_service.dart';
 import 'package:newsee/feature/leadsubmit/data/repository/proposal_repo_impl.dart';
 import 'package:newsee/feature/leadsubmit/domain/modal/proposal_creation_request.dart';
 
@@ -37,38 +40,139 @@ class LeadBloc extends Bloc<LeadEvent, LeadState> {
     SearchLeadEvent event,
     Emitter<LeadState> emit,
   ) async {
-    emit(state.copyWith(status: LeadStatus.loading));
-    UserDetails? userDetails = await loadUser();
-    LeadInboxRequest request = LeadInboxRequest(
-      userid: userDetails!.LPuserID,
-      pageNo: event.pageNo,
-      pageCount: event.pageCount,
-      token: ApiConstants.api_qa_token,
-    );
+    final page = event.pageNo;
+    print('pageno: $page, ${state.currentPage}, ${event.isRefresh}');
 
-    final response = await leadRepository.searchLead(request);
-    // check if response i success and contains valid data , success status is emitted
+    // if (state.status == LeadStatus.success &&
+    //     state.currentPage == page &&
+    //     event.isRefresh != true) {
+    //   return;
+    // }
 
-    if (response.isRight()) {
+    final cachedLeads = LeadCacheService.getPage('lead', page);
+
+    if (cachedLeads != null &&
+        cachedLeads.isNotEmpty &&
+        event.isRefresh != true) {
+      print('cachedLeads $cachedLeads');
+      final leadsList =
+          (cachedLeads['leads'] as List).map((list) {
+            Map<String, dynamic> map;
+
+            if (list is String) {
+              map = json.decode(list) as Map<String, dynamic>;
+            } else {
+              map = Map<String, dynamic>.from(list);
+            }
+
+            if (map.containsKey('finalList') && map['finalList'] is Map) {
+              map = Map<String, dynamic>.from(map['finalList']);
+            }
+
+            return GroupLeadInbox.fromMap(map);
+          }).toList();
+
       emit(
         state.copyWith(
           status: LeadStatus.success,
-          leadResponseModel: response.right.listOfApplication,
-          currentPage: event.pageNo,
-          totApplication: response.right.totalApplication,
+          leadResponseModel: leadsList,
+          currentPage: page,
+          totApplication: cachedLeads['total'],
+          fromCache: true,
         ),
       );
-    } else {
-      print('Lead failure response.left');
-      emit(
-        state.copyWith(
-          currentPage: event.pageNo,
-          status: LeadStatus.failure,
-          errorMessage: response.left.message,
-        ),
+      return;
+    }
+
+    await fetchFromApi(page, event.pageCount, emit);
+  }
+
+  Future<void> fetchFromApi(
+    int page,
+    int pageCount,
+    Emitter<LeadState> emit,
+  ) async {
+    print('searajh');
+    try {
+      emit(state.copyWith(status: LeadStatus.loading));
+
+      UserDetails? userDetails = await loadUser();
+      LeadInboxRequest request = LeadInboxRequest(
+        userid: userDetails!.LPuserID,
+        pageNo: page,
+        pageCount: pageCount,
+        token: ApiConstants.api_qa_token,
       );
+
+      final response = await leadRepository.searchLead(request);
+
+      if (response.isRight()) {
+        final leads = response.right.listOfApplication;
+        print('leads $leads');
+        emit(
+          state.copyWith(
+            status: LeadStatus.success,
+            leadResponseModel: leads,
+            currentPage: page,
+            totApplication: response.right.totalApplication,
+            fromCache: false,
+          ),
+        );
+        final leadsList = (leads as List).map((e) => e.toJson()).toList();
+        await LeadCacheService.savePage('lead', page, {
+          'leads': leadsList,
+          'total': response.right.totalApplication,
+        });
+      } else {
+        emit(
+          state.copyWith(
+            currentPage: page,
+            status: LeadStatus.failure,
+            errorMessage: response.left.message,
+          ),
+        );
+      }
+    } catch (e) {
+      print('searchLeads: $e');
     }
   }
+
+  // Future<void> onSearchLead(
+  //   SearchLeadEvent event,
+  //   Emitter<LeadState> emit,
+  // ) async {
+  //   emit(state.copyWith(status: LeadStatus.loading));
+  //   UserDetails? userDetails = await loadUser();
+  //   LeadInboxRequest request = LeadInboxRequest(
+  //     userid: userDetails!.LPuserID,
+  //     pageNo: event.pageNo,
+  //     pageCount: event.pageCount,
+  //     token: ApiConstants.api_qa_token,
+  //   );
+
+  //   final response = await leadRepository.searchLead(request);
+  //   // check if response i success and contains valid data , success status is emitted
+
+  //   if (response.isRight()) {
+  //     emit(
+  //       state.copyWith(
+  //         status: LeadStatus.success,
+  //         leadResponseModel: response.right.listOfApplication,
+  //         currentPage: event.pageNo,
+  //         totApplication: response.right.totalApplication,
+  //       ),
+  //     );
+  //   } else {
+  //     print('Lead failure response.left');
+  //     emit(
+  //       state.copyWith(
+  //         currentPage: event.pageNo,
+  //         status: LeadStatus.failure,
+  //         errorMessage: response.left.message,
+  //       ),
+  //     );
+  //   }
+  // }
 
   Future<void> onCreateProposalRequest(
     CreateProposalLeadEvent event,
@@ -114,48 +218,37 @@ class LeadBloc extends Bloc<LeadEvent, LeadState> {
   Future<void> onGetLeadData(GetLeadDataEvent event, Emitter emit) async {
     try {
       emit(state.copyWith(getLeaStatus: SaveStatus.loading));
-      final req = {
-        'LeadId': event.leadId,
-        'token': ApiConstants.api_qa_token,
-      };
+      final req = {'LeadId': event.leadId, 'token': ApiConstants.api_qa_token};
       final response = await leadRepository.getLeadData(req);
 
       if (response.isRight()) {
         emit(
           state.copyWith(
             getLeaStatus: SaveStatus.success,
-            getleadData: response.right
-          )
+            getleadData: response.right,
+          ),
         );
       } else {
         emit(
           state.copyWith(
             getLeaStatus: SaveStatus.failure,
-            errorMessage: response.left.message
-          )
+            errorMessage: response.left.message,
+          ),
         );
       }
 
       Future.delayed(Duration(seconds: 2));
-      emit(
-        state.copyWith(
-          getLeaStatus: SaveStatus.update
-        )
-      );
-    } catch(error) {
+      emit(state.copyWith(getLeaStatus: SaveStatus.update));
+    } catch (error) {
       print('Proposal Creation Request Error => $error');
       emit(
         state.copyWith(
           getLeaStatus: SaveStatus.failure,
-          errorMessage: error.toString()
-        )
+          errorMessage: error.toString(),
+        ),
       );
       Future.delayed(Duration(seconds: 2));
-      emit(
-        state.copyWith(
-          getLeaStatus: SaveStatus.update
-        )
-      );
+      emit(state.copyWith(getLeaStatus: SaveStatus.update));
     }
   }
 }

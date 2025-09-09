@@ -8,7 +8,8 @@ abstract class LeadEvent {
 class SearchLeadEvent extends LeadEvent {
   final int pageNo;
   final int pageCount;
-  const SearchLeadEvent({this.pageNo = 0, this.pageCount = 20});
+  final bool? isRefresh;
+  const SearchLeadEvent({this.pageNo = 0, this.pageCount = 20, this.isRefresh});
 }
 
 class CreateProposalLeadEvent extends LeadEvent {

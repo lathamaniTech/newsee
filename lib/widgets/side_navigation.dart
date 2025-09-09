@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:newsee/Utils/shared_preference_utils.dart';
 import 'package:newsee/feature/auth/domain/model/user_details.dart';
+import 'package:newsee/feature/leadInbox/lead_cache_service.dart';
 import 'package:newsee/pages/home_page.dart';
 
 class Sidenavigationbar extends StatelessWidget {
@@ -119,7 +120,8 @@ class Sidenavigationbar extends StatelessWidget {
                           child: const Text('Cancel'),
                         ),
                         TextButton(
-                          onPressed: () {
+                          onPressed: () async {
+                            await LeadCacheService.clearCache();
                             Navigator.of(dialogcontext).pop(true);
                           },
                           child: const Text('Yes'),

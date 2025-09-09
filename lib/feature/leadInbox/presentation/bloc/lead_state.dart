@@ -22,6 +22,8 @@ class LeadState extends Equatable {
   final SaveStatus? getLeaStatus;
   final GetLeadResponse? getleadData;
 
+  final bool fromCache;
+
   const LeadState({
     this.status = LeadStatus.initial,
     this.leadResponseModel,
@@ -31,7 +33,9 @@ class LeadState extends Equatable {
     this.proposalNo,
     this.proposalSubmitStatus,
     this.getLeaStatus,
-    this.getleadData
+    this.getleadData,
+
+    this.fromCache = false,
   });
 
   factory LeadState.init() => const LeadState();
@@ -45,7 +49,9 @@ class LeadState extends Equatable {
     String? proposalNo,
     SaveStatus? proposalSubmitStatus,
     SaveStatus? getLeaStatus,
-    GetLeadResponse? getleadData
+    GetLeadResponse? getleadData,
+
+    bool? fromCache,
   }) {
     return LeadState(
       status: status ?? this.status,
@@ -56,7 +62,9 @@ class LeadState extends Equatable {
       proposalNo: proposalNo ?? this.proposalNo,
       proposalSubmitStatus: proposalSubmitStatus ?? this.proposalSubmitStatus,
       getLeaStatus: getLeaStatus ?? this.getLeaStatus,
-      getleadData: getleadData ?? this.getleadData
+      getleadData: getleadData ?? this.getleadData,
+
+      fromCache: fromCache ?? this.fromCache,
     );
   }
 
@@ -69,6 +77,40 @@ class LeadState extends Equatable {
     proposalNo,
     proposalSubmitStatus,
     getLeaStatus,
-    getleadData
+    getleadData,
   ];
+}
+
+class LeadPerformanceStats {
+  static final LeadPerformanceStats _instance =
+      LeadPerformanceStats._internal();
+  factory LeadPerformanceStats() => _instance;
+  LeadPerformanceStats._internal();
+
+  DateTime? startTime;
+
+  Duration? beforeCacheTime;
+  Duration? afterCacheTime;
+  int? beforeCacheCount;
+  int? afterCacheCount;
+
+  void fetchStart() {
+    startTime = DateTime.now();
+  }
+
+  void fetchEnd({required bool fromCache, required int count}) {
+    if (startTime == null) return;
+
+    final duration = DateTime.now().difference(startTime!);
+
+    if (fromCache) {
+      startTime = DateTime.now();
+      afterCacheTime = duration;
+      afterCacheCount = count;
+    } else {
+      beforeCacheTime = duration;
+      beforeCacheCount = count;
+      startTime = DateTime.now();
+    }
+  }
 }

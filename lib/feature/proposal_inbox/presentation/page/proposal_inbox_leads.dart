@@ -36,100 +36,109 @@ class ProposalInbox extends StatelessWidget {
       context: context,
       barrierDismissible: false,
       builder:
-        (_) => SysmoAlert.failure(
-          message: message.toString(),
-          onButtonPressed: () {
-            Navigator.pop(context);
-          },
-        ),
+          (_) => SysmoAlert.failure(
+            message: message.toString(),
+            onButtonPressed: () {
+              Navigator.pop(context);
+            },
+          ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create:
-          (context) =>
-              ProposalInboxBloc()..add(
-                SearchProposalInboxEvent(
-                  request: LeadInboxRequest(userid: '', token: ''),
-                ),
-              ),
-      child: BlocConsumer<ProposalInboxBloc, ProposalInboxState>(
-        listener: (context, state) {
-          if (state.applicationStatus == SaveStatus.success) {
-            _showBottomSheet(context, state.currentApplication!, state.applicationStatusResponse!);
-          } else if(state.applicationStatus == SaveStatus.failure) {
-            showAlert(context, state.errorMessage);
-          }
-        },
-        builder: (context, state) {
-          final globalLoadingBloc = context.read<GlobalLoadingBloc>();
-          Future<void> onRefresh() async {
-            context.read<ProposalInboxBloc>().add(
-              SearchProposalInboxEvent(
-                request: LeadInboxRequest(userid: '', token: '', pageNo: state.currentPage),
-              ),
-            );
-          }
-
-          if (state.status == ProposalInboxStatus.loading) {
-            return RefreshIndicator(
-              onRefresh: onRefresh,
-              child: ListView.builder(
-                itemCount: 4,
-                itemBuilder: (context, index) {
-                  return LeadTileCardShimmer(
-                    icon: Icons.person,
-                    color: Colors.teal,
-                  );
-                },
-              ),
-            );
-          }
-
-          if (state.status == ProposalInboxStatus.failure) {
-            return renderWhenNoItems(onRefresh, state, context);
-          }
-
-          if (state.applicationStatus == SaveStatus.loading) {
-            globalLoadingBloc.add(ShowLoading(message: 'Fetching Status...'));
-          } else {
-            globalLoadingBloc.add(HideLoading());
-          }
-
-          // final allLeads =
-          //     state.proposalResponseModel
-          //         ?.expand((model) => model.proposalDetails)
-          //         .toList();
-
-          // // logic for search functionaluty , when user type search query
-          // // in searchbar
-          // List<Map<String, dynamic>>? filteredLeads = onSearchApplicationInbox(
-          //   items: allLeads,
-          //   searchQuery: searchQuery,
-          // );
-
-          final List<GroupProposalInbox>? allLeads =
-              state.proposalResponseModel;
-
-          // logic for search functionaluty , when user type search query
-          // in searchbar
-          List<GroupProposalInbox>? filteredLeads = onSearchApplicationInbox(
-            items: allLeads,
-            searchQuery: searchQuery,
+    // return BlocProvider(
+    //   create:
+    //       (context) =>
+    //           ProposalInboxBloc()..add(
+    //             SearchProposalInboxEvent(
+    //               request: LeadInboxRequest(userid: '', token: ''),
+    //               isRefresh: initLeads,
+    //             ),
+    //           ),
+    return BlocConsumer<ProposalInboxBloc, ProposalInboxState>(
+      listener: (context, state) {
+        if (state.applicationStatus == SaveStatus.success) {
+          _showBottomSheet(
+            context,
+            state.currentApplication!,
+            state.applicationStatusResponse!,
           );
-          if (filteredLeads == null || filteredLeads.isEmpty) {
-            return renderWhenNoItems(onRefresh, state, context);
-          } else {
-            // final totalPages = (filteredLeads.length / itemsPerPage).ceil();
-            return renderItems(state, filteredLeads, onRefresh, context);
-          }
+        } else if (state.applicationStatus == SaveStatus.failure) {
+          showAlert(context, state.errorMessage);
+        }
+      },
+      builder: (context, state) {
+        final globalLoadingBloc = context.read<GlobalLoadingBloc>();
+        Future<void> onRefresh() async {
+          context.read<ProposalInboxBloc>().add(
+            SearchProposalInboxEvent(
+              request: LeadInboxRequest(
+                userid: '',
+                token: '',
+                pageNo: state.currentPage,
+              ),
+              isRefresh: true,
+            ),
+          );
+        }
 
-          // comments
-        },
-      ),
+        if (state.status == ProposalInboxStatus.loading) {
+          return RefreshIndicator(
+            onRefresh: onRefresh,
+            child: ListView.builder(
+              itemCount: 4,
+              itemBuilder: (context, index) {
+                return LeadTileCardShimmer(
+                  icon: Icons.person,
+                  color: Colors.teal,
+                );
+              },
+            ),
+          );
+        }
+
+        if (state.status == ProposalInboxStatus.failure) {
+          return renderWhenNoItems(onRefresh, state, context);
+        }
+
+        if (state.applicationStatus == SaveStatus.loading) {
+          globalLoadingBloc.add(ShowLoading(message: 'Fetching Status...'));
+        } else {
+          globalLoadingBloc.add(HideLoading());
+        }
+
+        // final allLeads =
+        //     state.proposalResponseModel
+        //         ?.expand((model) => model.proposalDetails)
+        //         .toList();
+
+        // // logic for search functionaluty , when user type search query
+        // // in searchbar
+        // List<Map<String, dynamic>>? filteredLeads = onSearchApplicationInbox(
+        //   items: allLeads,
+        //   searchQuery: searchQuery,
+        // );
+
+        final List<GroupProposalInbox>? allLeads = state.proposalResponseModel;
+
+        // logic for search functionaluty , when user type search query
+        // in searchbar
+        List<GroupProposalInbox>? filteredLeads = onSearchApplicationInbox(
+          items: allLeads,
+          searchQuery: searchQuery,
+        );
+        if (filteredLeads == null || filteredLeads.isEmpty) {
+          return renderWhenNoItems(onRefresh, state, context);
+        } else {
+          // final totalPages = (filteredLeads.length / itemsPerPage).ceil();
+          return renderItems(state, filteredLeads, onRefresh, context);
+        }
+
+        // comments
+      },
     );
+    // );
   }
 
   RefreshIndicator renderItems(
@@ -168,7 +177,7 @@ class ProposalInbox extends StatelessWidget {
                   loanamount: proposal['loanAmount']?.toString() ?? '',
                   onTap: () {
                     context.read<ProposalInboxBloc>().add(
-                      ApplicationStatusCheckEvent(currentApplication: proposal)
+                      ApplicationStatusCheckEvent(currentApplication: proposal),
                     );
                   },
                 );
@@ -273,7 +282,11 @@ class ProposalInbox extends StatelessWidget {
     );
   }
 
-  void _showBottomSheet(BuildContext context, Map<String, dynamic> proposal, ApplicationStatusResponse status) {
+  void _showBottomSheet(
+    BuildContext context,
+    Map<String, dynamic> proposal,
+    ApplicationStatusResponse status,
+  ) {
     openBottomSheet(context, 0.6, 0.4, 0.9, (context, scrollController) {
       return SingleChildScrollView(
         controller: scrollController,
@@ -289,7 +302,13 @@ class ProposalInbox extends StatelessWidget {
                 context.pop();
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => CicCheckPage()),
+                  MaterialPageRoute(
+                    builder:
+                        (context) => CicCheckPage(
+                          applicantName: proposal['applicantName'],
+                          propNo: proposal['propNo'],
+                        ),
+                  ),
                 );
               },
             ),

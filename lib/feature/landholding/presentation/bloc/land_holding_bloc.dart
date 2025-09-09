@@ -4,6 +4,7 @@ import 'package:newsee/AppData/DBConstants/table_key_geographymaster.dart';
 import 'package:newsee/AppData/app_api_constants.dart';
 import 'package:newsee/AppData/app_constants.dart';
 import 'package:newsee/Utils/geographymaster_response_mapper.dart';
+import 'package:newsee/Utils/hive_cache_service.dart';
 import 'package:newsee/core/api/AsyncResponseHandler.dart';
 import 'package:newsee/core/db/db_config.dart';
 import 'package:newsee/feature/addressdetails/data/repository/citylist_repo_impl.dart';
@@ -33,15 +34,107 @@ final class LandHoldingBloc extends Bloc<LandHoldingEvent, LandHoldingState> {
     on<LandDetailsDeleteEvent>(_onDelete);
   }
 
-  Future initLandHoldingDetails(
+  // Future initLandHoldingDetails(
+  //   LandHoldingInitEvent event,
+  //   Emitter emit,
+  // ) async {
+  //   Database _db = await DBConfig().database;
+  //   List<Lov> listOfLov = await LovCrudRepo(_db).getAll();
+  //   List<GeographyMaster> stateCityMaster = await GeographymasterCrudRepo(
+  //     _db,
+  //   ).getByColumnNames(
+  //     columnNames: [
+  //       TableKeysGeographyMaster.stateId,
+  //       TableKeysGeographyMaster.cityId,
+  //     ],
+  //     columnValues: ['0', '0'],
+  //   );
+  //   final cachedData = HiveCacheService.getPage('land');
+  //   print('cachedData $cachedData');
+  //   if (cachedData == null || event.isRefresh == true) {
+  //     final LandHoldingRepository landHoldingRepository =
+  //         LandHoldingRespositoryImpl();
+
+  //     final response = await landHoldingRepository.getLandholding(
+  //       event.proposalNumber,
+  //     );
+
+  //     if (response.isRight()) {
+  //       List<LandData> landData =
+  //           response.right.agriLandHoldingsList
+  //               .map((e) => LandData.fromMap(e))
+  //               .toList();
+  //       print("LandData from response at get=> $landData");
+
+  //       List<GeographyMaster>? cityMaster = [];
+
+  //       for (var i = 0; i < landData.length; i++) {
+  //         List<GeographyMaster>? coappCityList = await getCityMaster(
+  //           landData[i].lslLandState,
+  //           null,
+  //         );
+  //         cityMaster.addAll(coappCityList ?? []);
+  //       }
+  //       print(response.right.agriLandHoldingsList);
+  //       await HiveCacheService.savePage('land', {
+  //         'landRes': response.right.agriLandHoldingsList,
+  //       });
+
+  //       emit(
+  //         state.copyWith(
+  //           lovlist: listOfLov,
+  //           status: SaveStatus.init,
+  //           stateCityMaster: stateCityMaster,
+  //           cityMaster: cityMaster,
+  //           landData: landData,
+  //         ),
+  //       );
+  //     } else {
+  //       emit(
+  //         state.copyWith(
+  //           lovlist: listOfLov,
+  //           status: SaveStatus.init,
+  //           stateCityMaster: stateCityMaster,
+  //         ),
+  //       );
+  //     }
+  //   } else {
+  //     print(cachedData['landRes']);
+  //     List<LandData> landData =
+  //         (cachedData['landRes'] as List)
+  //             .map((e) => LandData.fromMap(Map<String, dynamic>.from(e)))
+  //             .toList();
+  //     print("LandData from response at get=> $landData");
+
+  //     List<GeographyMaster>? cityMaster = [];
+
+  //     for (var i = 0; i < landData.length; i++) {
+  //       List<GeographyMaster>? coappCityList = await getCityMaster(
+  //         landData[i].lslLandState,
+  //         null,
+  //       );
+  //       cityMaster.addAll(coappCityList ?? []);
+  //     }
+  //     emit(
+  //       state.copyWith(
+  //         lovlist: listOfLov,
+  //         status: SaveStatus.init,
+  //         stateCityMaster: stateCityMaster,
+  //         cityMaster: cityMaster,
+  //         landData: landData,
+  //       ),
+  //     );
+  //   }
+  // }
+
+  Future<void> initLandHoldingDetails(
     LandHoldingInitEvent event,
     Emitter emit,
   ) async {
-    Database _db = await DBConfig().database;
-    List<Lov> listOfLov = await LovCrudRepo(_db).getAll();
-    List<GeographyMaster> stateCityMaster = await GeographymasterCrudRepo(
-      _db,
-    ).getByColumnNames(
+    final db = await DBConfig().database;
+
+    final listOfLov = await LovCrudRepo(db).getAll();
+    final stateCityMaster = await GeographymasterCrudRepo(db).getByColumnNames(
       columnNames: [
         TableKeysGeographyMaster.stateId,
         TableKeysGeographyMaster.cityId,
@@ -49,46 +142,70 @@ final class LandHoldingBloc extends Bloc<LandHoldingEvent, LandHoldingState> {
       columnValues: ['0', '0'],
     );
 
-    final LandHoldingRepository landHoldingRepository =
-          LandHoldingRespositoryImpl();
+    final cachedData = HiveCacheService.getPage('land', event.proposalNumber);
+    print('cachedData $cachedData');
 
-    final response = await landHoldingRepository.getLandholding(event.proposalNumber);
-    
-    if(response.isRight()) {
-      List<LandData> landData =
-          response.right.agriLandHoldingsList
-              .map((e) => LandData.fromMap(e))
-              .toList();
-      print("LandData from response at get=> $landData");
+    List<LandData> landData = [];
+    List<GeographyMaster> cityMaster = [];
 
-      List<GeographyMaster>? cityMaster = [];
+    if (cachedData == null || event.isRefresh == true) {
+      emit(state.copyWith(status: SaveStatus.loading));
+      final repo = LandHoldingRespositoryImpl();
+      final response = await repo.getLandholding(event.proposalNumber);
 
-      for(var i=0; i < landData.length; i++) {
-        List<GeographyMaster>? coappCityList = await getCityMaster(landData[i].lslLandState, null);
-        cityMaster.addAll(coappCityList ?? []);
+      if (response.isRight()) {
+        final respLandData = response.right.agriLandHoldingsList;
+        landData = mapToLandData(respLandData);
+        cityMaster = await getCityMasterCall(landData);
+
+        print("LandData from API => $landData");
+
+        await HiveCacheService.savePage('land', event.proposalNumber, {
+          'landRes': respLandData,
+          'proposal': event.proposalNumber,
+        });
+
+        emit(state.copyWith(status: SaveStatus.success));
+      } else {
+        emit(state.copyWith(status: SaveStatus.success));
+        await HiveCacheService.savePage('land', event.proposalNumber, {
+          'landRes': [],
+          'proposal': event.proposalNumber,
+        });
       }
-
-      
-
-      emit(
-        state.copyWith(
-          lovlist: listOfLov,
-          status: SaveStatus.init,
-          stateCityMaster: stateCityMaster,
-          cityMaster: cityMaster,
-          landData: landData,
-        ),
-      );
     } else {
-      emit(
-        state.copyWith(
-          lovlist: listOfLov,
-          status: SaveStatus.init,
-          stateCityMaster: stateCityMaster,
-        ),
-      );
+      final landRes = cachedData['landRes'] as List;
+      landData = landRes.isNotEmpty ? mapToLandData(landRes) : [];
+      cityMaster = landData.isNotEmpty ? await getCityMasterCall(landData) : [];
+      print("LandData from cache => $landData");
     }
-    
+
+    emit(
+      state.copyWith(
+        lovlist: listOfLov,
+        status: SaveStatus.init,
+        stateCityMaster: stateCityMaster,
+        cityMaster: cityMaster,
+        landData: landData,
+      ),
+    );
+  }
+
+  List<LandData> mapToLandData(List rawData) {
+    return rawData
+        .map((e) => LandData.fromMap(Map<String, dynamic>.from(e)))
+        .toList();
+  }
+
+  Future<List<GeographyMaster>> getCityMasterCall(
+    List<LandData> landData,
+  ) async {
+    final result = <GeographyMaster>[];
+    for (final land in landData) {
+      final coappCityList = await getCityMaster(land.lslLandState, null);
+      result.addAll(coappCityList ?? []);
+    }
+    return result;
   }
 
   // Save new land data
@@ -107,7 +224,8 @@ final class LandHoldingBloc extends Bloc<LandHoldingEvent, LandHoldingState> {
       LandHoldingRequest req = LandHoldingRequest(
         proposalNumber: event.proposalNumber,
         applicantName: event.landData['applicantName'] ?? '',
-        LandOwnedByApplicant: event.landData['landOwnedByApplicant'] ? 'Y' : 'N',
+        LandOwnedByApplicant:
+            event.landData['landOwnedByApplicant'] ? 'Y' : 'N',
         LocationOfFarm: event.landData['locationOfFarm'] ?? '',
         DistanceFromBranch: event.landData['distanceFromBranch'] ?? '',
         State: event.landData['state'] ?? '',
@@ -122,9 +240,13 @@ final class LandHoldingBloc extends Bloc<LandHoldingEvent, LandHoldingState> {
         NatureOfIrrigation: event.landData['irrigationFacilities'] ?? '',
         LandsSituatedCompactBlocks: event.landData['compactBlocks'] ? '1' : '2',
         landCeilingEnactments: event.landData['affectedByCeiling'] ? '1' : '2',
-        villageOfficersCertificate: event.landData['villageOfficerCertified'] ? '1' : '2',
+        villageOfficersCertificate:
+            event.landData['villageOfficerCertified'] ? '1' : '2',
         LandAgriculturellyActive: event.landData['landAgriActive'] ? '1' : '2',
-        rowId: event.landData['lslLandRowid'] != null ? int.parse(event.landData['lslLandRowid']) : null,
+        rowId:
+            event.landData['lslLandRowid'] != null
+                ? int.parse(event.landData['lslLandRowid'])
+                : null,
         token: ApiConstants.api_qa_token,
       );
 
@@ -137,9 +259,9 @@ final class LandHoldingBloc extends Bloc<LandHoldingEvent, LandHoldingState> {
 
       if (response.isRight()) {
         List<LandData> landData =
-          response.right.agriLandHoldingsList
-              .map((e) => LandData.fromMap(e))
-              .toList();
+            response.right.agriLandHoldingsList
+                .map((e) => LandData.fromMap(e))
+                .toList();
 
         print("LandData from response => $landData");
         emit(
@@ -147,18 +269,20 @@ final class LandHoldingBloc extends Bloc<LandHoldingEvent, LandHoldingState> {
             status: SaveStatus.success,
             landData: landData,
             selectedLandData: null,
-            errorMessage: null
+            errorMessage: null,
           ),
         );
+        await HiveCacheService.savePage('land', event.proposalNumber, {
+          'landRes': response.right.agriLandHoldingsList,
+        });
       } else {
         emit(
           state.copyWith(
             status: SaveStatus.failure,
-            errorMessage: response.left.message
+            errorMessage: response.left.message,
           ),
         );
       }
-      
     } catch (e) {
       print("Error in LandDetailsSaveEvent: $e");
       emit(
@@ -174,7 +298,7 @@ final class LandHoldingBloc extends Bloc<LandHoldingEvent, LandHoldingState> {
       state.copyWith(
         status: SaveStatus.update,
         selectedLandData: event.landData,
-        errorMessage: null
+        errorMessage: null,
       ),
     );
   }
@@ -184,38 +308,39 @@ final class LandHoldingBloc extends Bloc<LandHoldingEvent, LandHoldingState> {
       emit(state.copyWith(status: SaveStatus.loading));
       final LandHoldingDeleteRequest landDeleteReq = LandHoldingDeleteRequest(
         proposalNumber: event.landData.lslPropNo.toString(),
-        rowId: event.landData.lslLandRowid.toString(), 
+        rowId: event.landData.lslLandRowid.toString(),
         token: ApiConstants.api_qa_token,
       );
 
       final LandHoldingRepository landHoldingRepository =
           LandHoldingRespositoryImpl();
-      final response = await landHoldingRepository.deleteLandHoldingData(landDeleteReq);
+      final response = await landHoldingRepository.deleteLandHoldingData(
+        landDeleteReq,
+      );
       if (response.isRight()) {
         List<LandData> landDetailsList = state.landData!;
         landDetailsList.removeAt(event.index);
         print("final landDetailsList $landDetailsList");
         emit(
           state.copyWith(
-            status: SaveStatus.delete, 
+            status: SaveStatus.delete,
             errorMessage: response.right,
-            landData: landDetailsList
+            landData: landDetailsList,
           ),
         );
       } else {
         emit(
           state.copyWith(
-            status: SaveStatus.failure, 
-            errorMessage: response.left.message
+            status: SaveStatus.failure,
+            errorMessage: response.left.message,
           ),
         );
       }
-
-    } catch(error) {
+    } catch (error) {
       emit(
         state.copyWith(
-          status: SaveStatus.failure, 
-          errorMessage: error.toString()
+          status: SaveStatus.failure,
+          errorMessage: error.toString(),
         ),
       );
       print("LandDetailsDeleteEvent-error $error");
@@ -278,15 +403,15 @@ final class LandHoldingBloc extends Bloc<LandHoldingEvent, LandHoldingState> {
       Map<String, dynamic> _resp = response.right as Map<String, dynamic>;
 
       List<GeographyMaster> cityMaster =
-        _resp['cityMaster'] != null && _resp['cityMaster'].isNotEmpty
-            ? _resp['cityMaster'] as List<GeographyMaster>
-            : [];
-    List<GeographyMaster> districtMaster =
-        _resp['districtMaster'] != null && _resp['districtMaster'].isNotEmpty
-            ? _resp['districtMaster'] as List<GeographyMaster>
-            : [];
-      
-      if(cityCode == null) {
+          _resp['cityMaster'] != null && _resp['cityMaster'].isNotEmpty
+              ? _resp['cityMaster'] as List<GeographyMaster>
+              : [];
+      List<GeographyMaster> districtMaster =
+          _resp['districtMaster'] != null && _resp['districtMaster'].isNotEmpty
+              ? _resp['districtMaster'] as List<GeographyMaster>
+              : [];
+
+      if (cityCode == null) {
         return cityMaster;
       } else {
         return districtMaster;

@@ -15,8 +15,9 @@ import '../widgets/search_bar.dart';
 
 class HomePage extends StatefulWidget {
   int? tabdata;
+  bool? initLeads;
 
-  HomePage({Key? key, this.tabdata}) : super(key: key);
+  HomePage({Key? key, this.tabdata, this.initLeads}) : super(key: key);
 
   @override
   State<HomePage> createState() => HomePageState();
@@ -26,6 +27,7 @@ class HomePageState extends State<HomePage> {
   int selectedIndex = 0;
   String searchQuery = "";
   bool loading = false;
+  bool initLeads = true;
   final TextEditingController searchController = TextEditingController();
 
   @override
@@ -49,7 +51,10 @@ class HomePageState extends State<HomePage> {
   Widget getPage() {
     switch (selectedIndex) {
       case 0:
-        return LeadTabBar(searchQuery: searchQuery);
+        return LeadTabBar(
+          searchQuery: searchQuery,
+          initLeads: widget.initLeads,
+        );
       case 1:
         return Center(
           child: Text("Field Visit Inbox", style: TextStyle(fontSize: 24)),

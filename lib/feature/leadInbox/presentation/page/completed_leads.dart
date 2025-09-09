@@ -28,121 +28,131 @@ class CompletedLeads extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => LeadBloc()..add(SearchLeadEvent()),
-      child: BlocConsumer<LeadBloc, LeadState>(
-        listener: (context, state) {
-          if (state.proposalSubmitStatus == SaveStatus.loading) {
-            presentLoading(context, 'Creating Proposal...');
-          } else if (state.proposalSubmitStatus == SaveStatus.success ||
-              state.proposalSubmitStatus == SaveStatus.failure) {
-            dismissLoading(context);
-          }
-          if (state.getLeaStatus == SaveStatus.loading) {
-            presentLoading(context, 'Fetching Lead Details...');
-          } else if (state.getLeaStatus == SaveStatus.success || state.getLeaStatus == SaveStatus.failure) {
-            dismissLoading(context);
-          }
+    // return BlocProvider(
+    // create:
+    //     (context) => LeadBloc()..add(SearchLeadEvent(isRefresh: initLeads)),
+    return BlocConsumer<LeadBloc, LeadState>(
+      listener: (context, state) {
+        if (state.status == LeadStatus.loading) {
+          LeadPerformanceStats().fetchStart();
+        }
 
-          if (state.proposalSubmitStatus == SaveStatus.success &&
-              state.proposalNo != null) {
-            showSuccessBottomSheet(
-              context: context,
-              headerTxt: ApiConstants.api_response_success,
-              lead: "Proposal No : ${state.proposalNo}",
-              message: "Proposal successfully Created",
-              onPressedLeftButton: () {
-                if (Navigator.canPop(context)) Navigator.pop(context);
-              },
-              onPressedRightButton: () {
-                context.pop();
-                final tabController = DefaultTabController.of(context);
-                if (tabController.index < tabController.length - 1) {
-                  tabController.animateTo(tabController.index + 1);
-                }
-              },
-              leftButtonLabel: 'Cancel',
-              rightButtonLabel: 'Go To Application',
-            );
-          }
-
-          if (state.proposalSubmitStatus == SaveStatus.failure) {
-            showDialog(
-              context: context,
-              builder:
-                  (_) => SysmoAlert.failure(
-                    message: "Proposal Creation Failed",
-                    onButtonPressed: () {
-                      Navigator.pop(context);
-                    },
-                  ),
-            );
-          }
-
-          if(state.getLeaStatus == SaveStatus.loading) {
-
-          } else if(state.getLeaStatus == SaveStatus.success) {
-            context.pushNamed('newlead', extra: {'leadData': state.getleadData});
-          } else if(state.getLeaStatus == SaveStatus.failure) {
-            showDialog(
-              context: context,
-              builder:
-                  (_) => SysmoAlert.failure(
-                    message: state.errorMessage.toString(),
-                    onButtonPressed: () {
-                      Navigator.pop(context);
-                    },
-                  ),
-            );
-          }
-        },
-        builder: (context, state) {
-          Future<void> onRefresh() async {
-            context.read<LeadBloc>().add(
-              SearchLeadEvent(
-                pageNo: state.currentPage 
-              )
-            );
-          }
-
-          if (state.status == LeadStatus.loading) {
-            return RefreshIndicator(
-              onRefresh: onRefresh,
-              child: ListView.builder(
-                itemCount: 4,
-                itemBuilder: (context, index) {
-                  return LeadTileCardShimmer(
-                    icon: Icons.person,
-                    color: Colors.teal,
-                  );
-                },
-              ),
-            );
-          }
-
-          if (state.status == LeadStatus.failure) {
-            return renderWhenNoItems(onRefresh, state, context);
-          }
-
-          final List<GroupLeadInbox>? allLeads = state.leadResponseModel;
-
-          // logic for search functionaluty , when user type search query
-          // in searchbar
-          List<GroupLeadInbox>? filteredLeads = onSearchLeadInbox(
-            items: allLeads,
-            searchQuery: searchQuery,
+        if (state.status == LeadStatus.success) {
+          LeadPerformanceStats().fetchEnd(
+            fromCache: state.fromCache, // <-- from LeadState
+            count: state.leadResponseModel?.length ?? 0,
           );
-          if (filteredLeads == null || filteredLeads.isEmpty) {
-            return renderWhenNoItems(onRefresh, state, context);
-          } else {
-            // final totalPages = (filteredLeads.length / itemsPerPage).ceil();
-            return renderItems(state, filteredLeads, onRefresh, context);
-          }
+        }
 
-          // comments
-        },
-      ),
+        if (state.proposalSubmitStatus == SaveStatus.loading) {
+          presentLoading(context, 'Creating Proposal...');
+        } else if (state.proposalSubmitStatus == SaveStatus.success ||
+            state.proposalSubmitStatus == SaveStatus.failure) {
+          dismissLoading(context);
+        }
+        if (state.getLeaStatus == SaveStatus.loading) {
+          presentLoading(context, 'Fetching Lead Details...');
+        } else if (state.getLeaStatus == SaveStatus.success ||
+            state.getLeaStatus == SaveStatus.failure) {
+          dismissLoading(context);
+        }
+
+        if (state.proposalSubmitStatus == SaveStatus.success &&
+            state.proposalNo != null) {
+          showSuccessBottomSheet(
+            context: context,
+            headerTxt: ApiConstants.api_response_success,
+            lead: "Proposal No : ${state.proposalNo}",
+            message: "Proposal successfully Created",
+            onPressedLeftButton: () {
+              if (Navigator.canPop(context)) Navigator.pop(context);
+            },
+            onPressedRightButton: () {
+              context.pop();
+              final tabController = DefaultTabController.of(context);
+              if (tabController.index < tabController.length - 1) {
+                tabController.animateTo(tabController.index + 2);
+              }
+            },
+            leftButtonLabel: 'Cancel',
+            rightButtonLabel: 'Go To Application',
+          );
+        }
+
+        if (state.proposalSubmitStatus == SaveStatus.failure) {
+          showDialog(
+            context: context,
+            builder:
+                (_) => SysmoAlert.failure(
+                  message: "Proposal Creation Failed",
+                  onButtonPressed: () {
+                    Navigator.pop(context);
+                  },
+                ),
+          );
+        }
+
+        if (state.getLeaStatus == SaveStatus.loading) {
+        } else if (state.getLeaStatus == SaveStatus.success) {
+          context.pushNamed('newlead', extra: {'leadData': state.getleadData});
+        } else if (state.getLeaStatus == SaveStatus.failure) {
+          showDialog(
+            context: context,
+            builder:
+                (_) => SysmoAlert.failure(
+                  message: state.errorMessage.toString(),
+                  onButtonPressed: () {
+                    Navigator.pop(context);
+                  },
+                ),
+          );
+        }
+      },
+      builder: (context, state) {
+        Future<void> onRefresh() async {
+          context.read<LeadBloc>().add(
+            SearchLeadEvent(pageNo: state.currentPage, isRefresh: true),
+          );
+        }
+
+        if (state.status == LeadStatus.loading) {
+          return RefreshIndicator(
+            onRefresh: onRefresh,
+            child: ListView.builder(
+              itemCount: 4,
+              itemBuilder: (context, index) {
+                return LeadTileCardShimmer(
+                  icon: Icons.person,
+                  color: Colors.teal,
+                );
+              },
+            ),
+          );
+        }
+
+        if (state.status == LeadStatus.failure) {
+          return renderWhenNoItems(onRefresh, state, context);
+        }
+
+        final List<GroupLeadInbox>? allLeads = state.leadResponseModel;
+
+        // logic for search functionaluty , when user type search query
+        // in searchbar
+        List<GroupLeadInbox>? filteredLeads = onSearchLeadInbox(
+          items: allLeads,
+          searchQuery: searchQuery,
+        );
+        if (filteredLeads == null || filteredLeads.isEmpty) {
+          return renderWhenNoItems(onRefresh, state, context);
+        } else {
+          // final totalPages = (filteredLeads.length / itemsPerPage).ceil();
+          return renderItems(state, filteredLeads, onRefresh, context);
+        }
+
+        // comments
+      },
     );
+    // );
   }
 
   RefreshIndicator renderItems(
@@ -183,8 +193,9 @@ class CompletedLeads extends StatelessWidget {
                   location: lead['lleadprefbrnch'] ?? 'N/A',
                   loanamount: lead['lldLoanamtRequested']?.toString() ?? '',
                   onTap: () {
-                    context.read<LeadBloc>().add(GetLeadDataEvent(leadId: lead['lleadid']));
-                    
+                    context.read<LeadBloc>().add(
+                      GetLeadDataEvent(leadId: lead['lleadid']),
+                    );
                   },
                   showarrow: false,
                   button: TextButton(

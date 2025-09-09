@@ -28,7 +28,7 @@ class CompletedLeads extends StatelessWidget {
       child: BlocBuilder<LeadBloc, LeadState>(
         builder: (context, state) {
           Future<void> onRefresh() async {
-            context.read<LeadBloc>().add(SearchLeadEvent());
+            context.read<LeadBloc>().add(SearchLeadEvent(isRefresh: true));
           }
 
           if (state.status == LeadStatus.loading) {

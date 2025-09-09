@@ -19,6 +19,7 @@ import 'package:newsee/feature/documentupload/presentation/pages/document_page.d
 import 'package:newsee/feature/documentupload/presentation/widget/image_view.dart';
 import 'package:newsee/feature/landholding/presentation/page/land_holding_page.dart';
 import 'package:newsee/feature/leadInbox/domain/modal/get_lead_response.dart';
+import 'package:newsee/feature/leadInbox/lead_cache_service.dart';
 import 'package:newsee/feature/masters/data/repository/master_repo_impl.dart';
 import 'package:newsee/feature/masters/domain/modal/master_version.dart';
 import 'package:newsee/feature/masters/domain/repository/master_repo.dart';
@@ -104,14 +105,19 @@ final routes = GoRouter(
                         child: Text('Cancel'),
                       ),
                       TextButton(
-                        onPressed: () => Navigator.of(dialogcontext).pop(true),
+                        onPressed: () async {
+                          await LeadCacheService.clearCache();
+                          Navigator.of(dialogcontext).pop(true);
+                        },
                         child: Text('Yes'),
                       ),
                     ],
                   ),
             );
             if (shouldPop ?? false) {
-              context.push('/login');
+              // context.push('/login');
+              await LeadCacheService.clearCache();
+              context.go('/login');
               // closes the app
               // context.go('/'); // Navigate back using GoRouter
             }
@@ -119,7 +125,10 @@ final routes = GoRouter(
           child: Scaffold(
             body: BlocProvider(
               create: (_) => AuthBloc(authRepository: AuthRepository),
-              child: tabdata == null ? HomePage() : HomePage(tabdata: tabdata),
+              child:
+                  tabdata == null
+                      ? HomePage(initLeads: true)
+                      : HomePage(tabdata: tabdata),
             ),
           ),
         );

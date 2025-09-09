@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:newsee/feature/leadInbox/lead_cache_service.dart';
 
 /* 
 @author   : karthick.d 04/06/2025
@@ -34,7 +35,10 @@ class CustomBackButtonDispatcher extends RootBackButtonDispatcher {
                   child: Text('No'),
                 ),
                 TextButton(
-                  onPressed: () => _router.pop(true),
+                  onPressed: () async {
+                    await LeadCacheService.clearCache();
+                    _router.pop(true);
+                  },
                   child: Text('Yes'),
                 ),
               ],

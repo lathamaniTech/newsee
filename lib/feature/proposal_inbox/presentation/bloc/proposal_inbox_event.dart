@@ -7,8 +7,8 @@ abstract class ProposalInboxEvent {
 
 class SearchProposalInboxEvent extends ProposalInboxEvent {
   final LeadInboxRequest request;
-
-  const SearchProposalInboxEvent({required this.request});
+  final bool? isRefresh;
+  const SearchProposalInboxEvent({required this.request, this.isRefresh});
 }
 
 class ApplicationStatusCheckEvent extends ProposalInboxEvent {
