@@ -101,14 +101,36 @@ class Personal extends StatelessWidget {
 
   void datamapperCif(val) {
     try {
-      form.control('firstName').updateValue(val.lleadfrstname!);
-      form.control('middleName').updateValue(val.lleadmidname!);
-      form.control('lastName').updateValue(val.lleadlastname!);
-      form.control('dob').updateValue(getDateFormat(val.lleaddob!));
-      form.control('primaryMobileNumber').updateValue(val.lleadmobno!);
-      form.control('email').updateValue(val.lleademailid!);
-      form.control('panNumber').updateValue(val.lleadpanno!);
-      form.control('aadharRefNo').updateValue(val.lleadadharno!);
+      String mobileno = '';
+      if (val.lleadmobno!.length == 12 && val.lleadmobno!.startsWith("91")) {
+        mobileno = val.lleadmobno!.substring(2);
+      } else {
+        mobileno = val.lleadmobno!;
+      }
+      form.control('firstName')
+        ..updateValue(val.lleadfrstname!)
+        ..markAsDisabled();
+      form.control('middleName')
+        ..updateValue(val.lleadmidname!)
+        ..markAsDisabled();
+      form.control('lastName')
+        ..updateValue(val.lleadlastname!)
+        ..markAsDisabled();
+      form.control('dob')
+        ..updateValue(getDateFormat(val.lleaddob!))
+        ..markAsDisabled();
+      form.control('primaryMobileNumber')
+        ..updateValue(mobileno)
+        ..markAsDisabled();
+      form.control('email')
+        ..updateValue(val.lleademailid!)
+        ..markAsDisabled();
+      form.control('panNumber')
+        ..updateValue(val.lleadpanno!)
+        ..markAsDisabled();
+      form.control('aadharRefNo')
+        ..updateValue(val.lleadadharno!)
+        ..markAsDisabled();
       if (val.lleadadharno != null) {
         refAadhaar = true;
       }
@@ -157,7 +179,7 @@ class Personal extends StatelessWidget {
       print("mapPersonalData-catch-error $error");
     }
   }
-  
+
   /* 
     @author : karthick.d  
     @desc   : scroll to error field which identified first in the widget tree
@@ -301,7 +323,9 @@ class Personal extends StatelessWidget {
                                   lov.optvalue ==
                                       dedupeState?.cifResponse?.lleadtitle,
                             );
-                            form.controls['title']?.updateValue(lov?.optvalue);
+                            form.controls['title']
+                              ?..updateValue(lov?.optvalue)
+                              ..markAsDisabled();
                             return lov;
                           } else if (state.personalData != null) {
                             Lov? lov = state.lovList?.firstWhere(
