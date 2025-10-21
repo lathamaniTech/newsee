@@ -198,6 +198,12 @@ class _CoApplicantPageState extends State<CoApplicantPage> {
                         ),
                       ),
                       onPressed: () {
+                        context.read<CoappDetailsBloc>().add(
+                          IsCoAppOrGurantorAdd(
+                            addapplicants: 'N',
+                            onNext: true,
+                          ),
+                        );
                         goToNextTab(context: context);
                       },
                       child: const Text('Next'),
