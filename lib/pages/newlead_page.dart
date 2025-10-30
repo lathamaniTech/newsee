@@ -254,6 +254,7 @@ class NewLeadPage extends StatelessWidget {
                                 // );
                               }
                             },
+
                             tabs:
                                 fullLeadData == null || tabType == 'draft'
                                     ? <Widget>[
@@ -330,6 +331,7 @@ class NewLeadPage extends StatelessWidget {
                   ? null
                   : Sidenavigationbar(pageContext: context),
           body: TabBarView(
+            physics: NeverScrollableScrollPhysics(),
             children:
                 fullLeadData == null
                     ? [

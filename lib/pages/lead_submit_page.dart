@@ -203,7 +203,7 @@ class LeadSubmitPage extends StatelessWidget {
           );
           Dedupe dedupeData = Dedupe(
             existingCustomer: dedupeState?.isNewCustomer != null ? false : true,
-            cifNumber: dedupeState?.cifResponse?.lldCbsid,
+            cifNumber: dedupeState?.cifResponse?.custId,
             constitution: dedupeState?.constitution,
           );
           PersonalData? personalData = personalState?.personalData;

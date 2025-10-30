@@ -6,6 +6,7 @@
  */
 
 import 'package:newsee/AppData/DBConstants/dbconstants.dart';
+import 'package:newsee/AppData/DBConstants/table_key_cibil_reports.dart';
 import 'package:newsee/AppData/DBConstants/table_key_geographymaster.dart';
 import 'package:newsee/AppData/DBConstants/table_key_products.dart';
 import 'package:newsee/AppData/DBConstants/table_key_productschema.dart';
@@ -58,6 +59,8 @@ class DBConfig {
       printTableCreateSuccess(TableKeyMasterversion.tableName);
       await db.execute(TableKeysGeographyMaster.createTableQuery);
       printTableCreateSuccess(TableKeysGeographyMaster.tableName);
+      await db.execute(TableKeysCibilReports.createTableQuery);
+      printTableCreateSuccess(TableKeysCibilReports.tableName);
     } catch (e) {
       // db creation failure - > log u r exception
 

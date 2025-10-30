@@ -1,7 +1,5 @@
-import 'dart:io';
-
+import 'dart:convert';
 import 'package:dio/dio.dart';
-import 'package:flutter/services.dart';
 import 'package:newsee/AppData/app_constants.dart';
 import 'package:newsee/AppData/globalconfig.dart';
 import 'package:newsee/Utils/offline_data_provider.dart';
@@ -17,8 +15,6 @@ import 'package:newsee/feature/cif/domain/model/user/cif_request.dart';
 import 'package:newsee/feature/cif/domain/model/user/cif_response.dart';
 import 'package:newsee/feature/cif/domain/repository/cif_repository.dart';
 
-import 'dart:convert';
-
 class CifRepositoryImpl implements CifRepository {
   @override
   Future<AsyncResponseHandler<Failure, CifResponse>> searchCif(
@@ -27,7 +23,8 @@ class CifRepositoryImpl implements CifRepository {
     try {
       print('CIF Search request payload => $req');
       final payload = req.toJson();
-
+      print('CIF Search request payload => $payload');
+      // Call remote or offline data source
       var response =
           Globalconfig.isOffline
               ? await offlineDataProvider(path: AppConstants.cifResponsonse)
@@ -35,35 +32,45 @@ class CifRepositoryImpl implements CifRepository {
                 dio: ApiClient().getDio(),
               ).searchCif(payload);
 
-      if (response.data[ApiConfig.API_RESPONSE_SUCCESS_KEY]) {
-        final cifResponse = CifResponse.fromJson(
-          response.data[ApiConfig
-              .API_RESPONSE_RESPONSE_KEY]['lpretLeadDetails'],
-        );
-        String depositAmount =
-            response.data[ApiConfig.API_RESPONSE_RESPONSE_KEY]['depositAmount'];
-        String depositCount =
-            response.data[ApiConfig.API_RESPONSE_RESPONSE_KEY]['depositCount'];
-        String liabilityCount =
-            response.data[ApiConfig
-                .API_RESPONSE_RESPONSE_KEY]['liabilityCount'];
-        String liabilityAmount =
-            response.data[ApiConfig
-                .API_RESPONSE_RESPONSE_KEY]['liabilityAmount'];
-        String cifFlag =
-            response.data[ApiConfig.API_RESPONSE_RESPONSE_KEY]['cifFlag'];
+      // Normalize response
+      final data = response.data;
+      print('Raw CIF API response => $data');
+      if (response.data[ApiConfig.API_RESPONSE_ErrorFlag_KEY]) {
+        final responseContent = data[ApiConfig.API_RESPONSE_KEY];
+        final responseJson =
+            responseContent is String
+                ? json.decode(responseContent)
+                : responseContent ?? {};
 
-        CifResponse _cifresponse = cifResponse.copyWith(
-          cifFlag: cifFlag,
-          liabilityCount: liabilityCount,
-          liabilityAmount: liabilityAmount,
-          depositCount: depositCount,
-          depositAmount: depositAmount,
+        print('cif responseJson: $responseJson');
+
+        final cifResponse = CifResponse.fromJson(
+          responseJson['data']['ApplicantDetails'],
         );
-        print('ChifResponseModel => ${_cifresponse.toString()}');
-        return AsyncResponseHandler.right(_cifresponse);
+
+        String loanAcctNum =
+            responseJson['data']['ApplicantDetails']['LoanDetails']['loanAcctNum'];
+        String custId = responseJson['data']['RelativePartyDetails']['custId'];
+        String sectorDesc =
+            responseJson['data']['KCCLoanAccountDetails']['sectorDesc'];
+        String sectorCode =
+            responseJson['data']['KCCLoanAccountDetails']['sectorCode'];
+        String relCifid =
+            responseJson['data']['KCCLoanAccountDetails']['RelatedPartyDet']['relCifid'];
+
+        CifResponse cifresponse = cifResponse.copyWith(
+          loanAcctNum: loanAcctNum,
+          custId: custId,
+          sectorCode: sectorCode,
+          sectorDesc: sectorDesc,
+          relCifid: relCifid,
+        );
+
+        print('Parsed CIFResponseModel => $cifresponse');
+        return AsyncResponseHandler.right(cifresponse);
       } else {
-        var errorMessage = response.data['ErrorMessage'] ?? "Unknown error";
+        final String errorMessage =
+            data[ApiConfig.API_RESPONSE_ERRORMESSAGE_KEY] ?? 'Unknown error';
         print('CIF Search error => $errorMessage');
         return AsyncResponseHandler.left(AuthFailure(message: errorMessage));
       }
@@ -72,7 +79,7 @@ class CifRepositoryImpl implements CifRepository {
           DioHttpExceptionParser(exception: e).parse();
       return AsyncResponseHandler.left(failure);
     } catch (error) {
-      print("cifResponseHandler-> $error");
+      print("cifResponseHandler -> $error");
       return AsyncResponseHandler.left(
         HttpConnectionFailure(message: "Unexpected Failure during CIF Search"),
       );

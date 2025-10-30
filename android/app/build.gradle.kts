@@ -33,6 +33,12 @@ android {
 
     buildTypes {
         release {
+            // TODO: uncomment thi below three lines before for the release build.
+            // This obfuscates Java/Kotlin code.
+            // minifyEnabled true
+            // shrinkResources true
+            // proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig = signingConfigs.getByName("debug")

@@ -135,7 +135,7 @@ class LoanproductBloc extends Bloc<LoanproductEvent, LoanproductState> {
     Database db,
     Emitter<dynamic> emit,
   ) async {
-    Product product = event.field as Product;
+    // Product product = event.field as Product;
 
     // if mainCategoryId is zero then maincategory is selected
     // subcategoryproducts will be fetched
@@ -237,7 +237,7 @@ class LoanproductBloc extends Bloc<LoanproductEvent, LoanproductState> {
           await ProductSchemaCrudRepo(db).getAll();
       List<ProductMaster> productMasterList =
           await ProductMasterCrudRepo(db).getAll();
-      List<Product> productList = await ProductsCrudRepo(db).getAll();
+      // List<Product> productList = await ProductsCrudRepo(db).getAll();
       print('productSchemaList from DB => ${productSchemaList.length}');
       print('loanDraft => ${event.leadDetails}');
 

@@ -50,25 +50,27 @@ final class LandHoldingBloc extends Bloc<LandHoldingEvent, LandHoldingState> {
     );
 
     final LandHoldingRepository landHoldingRepository =
-          LandHoldingRespositoryImpl();
+        LandHoldingRespositoryImpl();
 
-    final response = await landHoldingRepository.getLandholding(event.proposalNumber);
-    
-    if(response.isRight()) {
-      List<LandData> landData =
-          response.right.agriLandHoldingsList
-              .map((e) => LandData.fromMap(e))
-              .toList();
+    final response = await landHoldingRepository.getLandholding(
+      event.proposalNumber,
+    );
+
+    if (response.isRight()) {
+      List<LandData> landData = response.right.agriLandHoldingsList;
+      // .map((e) => LandData.fromMap(e))
+      // .toList();
       print("LandData from response at get=> $landData");
 
       List<GeographyMaster>? cityMaster = [];
 
-      for(var i=0; i < landData.length; i++) {
-        List<GeographyMaster>? coappCityList = await getCityMaster(landData[i].lslLandState, null);
+      for (var i = 0; i < landData.length; i++) {
+        List<GeographyMaster>? coappCityList = await getCityMaster(
+          landData[i].lslLandState,
+          null,
+        );
         cityMaster.addAll(coappCityList ?? []);
       }
-
-      
 
       emit(
         state.copyWith(
@@ -88,7 +90,6 @@ final class LandHoldingBloc extends Bloc<LandHoldingEvent, LandHoldingState> {
         ),
       );
     }
-    
   }
 
   // Save new land data
@@ -100,31 +101,32 @@ final class LandHoldingBloc extends Bloc<LandHoldingEvent, LandHoldingState> {
       emit(state.copyWith(status: SaveStatus.loading));
       // final newList = [...?state.landData, event.landData as LandData];
       print("event.landData not a map => ${event.landData}");
-      final landdata = event.landData;
-      final proposalNo = event.proposalNumber;
-      print("event.landData => $landdata");
+      // final landdata = event.landData;
+      // final proposalNo = event.proposalNumber;
+      // print("event.landData => $landdata");
 
       LandHoldingRequest req = LandHoldingRequest(
         proposalNumber: event.proposalNumber,
-        applicantName: event.landData['applicantName'] ?? '',
-        LandOwnedByApplicant: event.landData['landOwnedByApplicant'] ? 'Y' : 'N',
-        LocationOfFarm: event.landData['locationOfFarm'] ?? '',
-        DistanceFromBranch: event.landData['distanceFromBranch'] ?? '',
-        State: event.landData['state'] ?? '',
-        District: event.landData['district'] ?? '',
-        Taluk: event.landData['taluk'] ?? '',
-        Village: event.landData['village'] ?? '',
-        Firka: event.landData['firka'] ?? '',
-        SurveyNo: event.landData['surveyNo'] ?? '',
-        TotalAcreage: event.landData['totalAcreage'] ?? '',
-        NatureOfRight: event.landData['natureOfRight'] ?? '',
-        OutOfTotalAcreage: event.landData['irrigatedLand'] ?? '',
-        NatureOfIrrigation: event.landData['irrigationFacilities'] ?? '',
-        LandsSituatedCompactBlocks: event.landData['compactBlocks'] ? '1' : '2',
-        landCeilingEnactments: event.landData['affectedByCeiling'] ? '1' : '2',
-        villageOfficersCertificate: event.landData['villageOfficerCertified'] ? '1' : '2',
-        LandAgriculturellyActive: event.landData['landAgriActive'] ? '1' : '2',
-        rowId: event.landData['lslLandRowid'] != null ? int.parse(event.landData['lslLandRowid']) : null,
+        state: event.landData['state'] ?? '',
+        district: event.landData['district'] ?? '',
+        taluk: event.landData['taluk'] ?? '',
+        village: event.landData['village'] ?? '',
+        surveyNo: event.landData['surveyNo'] ?? '',
+        khasraNo: event.landData['khasraNo'] ?? '',
+        uccCode: event.landData['uccCode'] ?? '',
+        totAcre: event.landData['totAcre'] ?? '',
+        landType: event.landData['landType'] ?? '',
+        particulars: event.landData['particulars'] ?? '',
+        sourceofIrrigation: event.landData['sourceofIrrig'] ?? '',
+        farmDistance: event.landData['farmDistance'] ?? '',
+        otherbanks: event.landData['otherbanks'] ? 'Y' : 'N',
+        farmercategory: event.landData['farmercategory'] ?? '',
+        primaryoccupation: event.landData['primaryoccupation'] ?? '',
+        sumOfTotalAcreage: event.landData['sumOfTotalAcreage'] ?? '',
+        rowId: event.landData['rowId'],
+        // event.landData['rowId'] != null
+        //     ? int.parse(event.landData['rowId'])
+        //     : null,
         token: ApiConstants.api_qa_token,
       );
 
@@ -136,10 +138,9 @@ final class LandHoldingBloc extends Bloc<LandHoldingEvent, LandHoldingState> {
       final response = await landHoldingRepository.submitLandHolding(landReq);
 
       if (response.isRight()) {
-        List<LandData> landData =
-          response.right.agriLandHoldingsList
-              .map((e) => LandData.fromMap(e))
-              .toList();
+        List<LandData> landData = response.right.agriLandHoldingsList;
+        // .map((e) => LandData.fromMap(e))
+        // .toList();
 
         print("LandData from response => $landData");
         emit(
@@ -147,18 +148,17 @@ final class LandHoldingBloc extends Bloc<LandHoldingEvent, LandHoldingState> {
             status: SaveStatus.success,
             landData: landData,
             selectedLandData: null,
-            errorMessage: null
+            errorMessage: null,
           ),
         );
       } else {
         emit(
           state.copyWith(
             status: SaveStatus.failure,
-            errorMessage: response.left.message
+            errorMessage: response.left.message,
           ),
         );
       }
-      
     } catch (e) {
       print("Error in LandDetailsSaveEvent: $e");
       emit(
@@ -174,7 +174,7 @@ final class LandHoldingBloc extends Bloc<LandHoldingEvent, LandHoldingState> {
       state.copyWith(
         status: SaveStatus.update,
         selectedLandData: event.landData,
-        errorMessage: null
+        errorMessage: null,
       ),
     );
   }
@@ -184,38 +184,39 @@ final class LandHoldingBloc extends Bloc<LandHoldingEvent, LandHoldingState> {
       emit(state.copyWith(status: SaveStatus.loading));
       final LandHoldingDeleteRequest landDeleteReq = LandHoldingDeleteRequest(
         proposalNumber: event.landData.lslPropNo.toString(),
-        rowId: event.landData.lslLandRowid.toString(), 
+        rowId: event.landData.lklRowid.toString(),
         token: ApiConstants.api_qa_token,
       );
 
       final LandHoldingRepository landHoldingRepository =
           LandHoldingRespositoryImpl();
-      final response = await landHoldingRepository.deleteLandHoldingData(landDeleteReq);
+      final response = await landHoldingRepository.deleteLandHoldingData(
+        landDeleteReq,
+      );
       if (response.isRight()) {
         List<LandData> landDetailsList = state.landData!;
         landDetailsList.removeAt(event.index);
         print("final landDetailsList $landDetailsList");
         emit(
           state.copyWith(
-            status: SaveStatus.delete, 
+            status: SaveStatus.delete,
             errorMessage: response.right,
-            landData: landDetailsList
+            landData: landDetailsList,
           ),
         );
       } else {
         emit(
           state.copyWith(
-            status: SaveStatus.failure, 
-            errorMessage: response.left.message
+            status: SaveStatus.failure,
+            errorMessage: response.left.message,
           ),
         );
       }
-
-    } catch(error) {
+    } catch (error) {
       emit(
         state.copyWith(
-          status: SaveStatus.failure, 
-          errorMessage: error.toString()
+          status: SaveStatus.failure,
+          errorMessage: error.toString(),
         ),
       );
       print("LandDetailsDeleteEvent-error $error");
@@ -241,27 +242,32 @@ final class LandHoldingBloc extends Bloc<LandHoldingEvent, LandHoldingState> {
                               citydistrictrequest,
                           );
     */
-
-    emit(state.copyWith(status: SaveStatus.loading));
-    final CityDistrictRequest citydistrictrequest = CityDistrictRequest(
-      stateCode: event.stateCode,
-      cityCode: event.cityCode,
-    );
-    Cityrepository cityrepository = CitylistRepoImpl();
-    AsyncResponseHandler response = await cityrepository.fetchCityList(
-      citydistrictrequest,
-    );
-    GeographymasterResponseMapper landHoldingState =
-        GeographymasterResponseMapper(state).mapResponse(response);
-    LandHoldingState _landHoldingState =
-        landHoldingState.state as LandHoldingState;
-    emit(
-      state.copyWith(
-        status: _landHoldingState.status,
-        cityMaster: _landHoldingState.cityMaster,
-        districtMaster: _landHoldingState.districtMaster,
-      ),
-    );
+    try {
+      emit(state.copyWith(status: SaveStatus.loading));
+      final CityDistrictRequest citydistrictrequest = CityDistrictRequest(
+        stateCode: event.stateCode,
+        cityCode: event.cityCode,
+      );
+      Cityrepository cityrepository = CitylistRepoImpl();
+      AsyncResponseHandler response = await cityrepository.fetchCityList(
+        citydistrictrequest,
+      );
+      print('responsecity: $response');
+      GeographymasterResponseMapper landHoldingState =
+          GeographymasterResponseMapper(state).mapResponse(response);
+      LandHoldingState _landHoldingState =
+          landHoldingState.state as LandHoldingState;
+      emit(
+        state.copyWith(
+          status: _landHoldingState.status,
+          cityMaster: _landHoldingState.cityMaster,
+          districtMaster: _landHoldingState.districtMaster,
+        ),
+      );
+    } catch (e) {
+      print('getcitymasterLans: $e');
+      emit(state.copyWith(status: SaveStatus.failure));
+    }
   }
 
   Future<List<GeographyMaster>?> getCityMaster(stateCode, cityCode) async {
@@ -278,15 +284,15 @@ final class LandHoldingBloc extends Bloc<LandHoldingEvent, LandHoldingState> {
       Map<String, dynamic> _resp = response.right as Map<String, dynamic>;
 
       List<GeographyMaster> cityMaster =
-        _resp['cityMaster'] != null && _resp['cityMaster'].isNotEmpty
-            ? _resp['cityMaster'] as List<GeographyMaster>
-            : [];
-    List<GeographyMaster> districtMaster =
-        _resp['districtMaster'] != null && _resp['districtMaster'].isNotEmpty
-            ? _resp['districtMaster'] as List<GeographyMaster>
-            : [];
-      
-      if(cityCode == null) {
+          _resp['cityMaster'] != null && _resp['cityMaster'].isNotEmpty
+              ? _resp['cityMaster'] as List<GeographyMaster>
+              : [];
+      List<GeographyMaster> districtMaster =
+          _resp['districtMaster'] != null && _resp['districtMaster'].isNotEmpty
+              ? _resp['districtMaster'] as List<GeographyMaster>
+              : [];
+
+      if (cityCode == null) {
         return cityMaster;
       } else {
         return districtMaster;

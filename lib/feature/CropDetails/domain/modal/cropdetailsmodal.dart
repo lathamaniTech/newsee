@@ -1,179 +1,206 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
+
 import 'dart:convert';
 
 class CropDetailsModal {
-  final String lasSeqno;
-  final String? lasSeason;
-  final String? lasCrop;
-  final String? lasAreaofculti;
-  final int? lasEligibleamt;
-  final String? lasTypOfLand;
-  final String? lasScaloffin;
-  final int? lasReqScaloffin;
-  final bool? notifiedCropFlag;
-  final String? lasPrePerAcre;
-  final String? lasPreToCollect;
+  int? lcdRowId;
+  int? lcdProposalNo;
+  String? lcdSeason;
+  String? lcdCropType;
+  String? lcdCropName;
+  String? lcdCulAreaLand;
+  int? lcdCulAreaSize;
+  String? lcdTypeOfLand;
+  int? lcdScaOfFin;
+  int? lcdAddSofByRo;
+  int? lcdCostOfCul;
+  String? lcdCovOfCrop;
+  String? lcdCropIns;
+  int? lcdAddSofAmount;
+  int? lcdInsPre;
+  String? lcdDueDateOfRepay;
+
   CropDetailsModal({
-    this.lasSeqno = '0',
-    this.lasSeason,
-    this.lasCrop,
-    this.lasAreaofculti,
-    this.lasEligibleamt,
-    this.lasTypOfLand,
-    this.lasScaloffin,
-    this.lasReqScaloffin,
-    this.notifiedCropFlag,
-    this.lasPrePerAcre,
-    this.lasPreToCollect,
+    this.lcdRowId,
+    this.lcdProposalNo,
+    this.lcdSeason,
+    this.lcdCropType,
+    this.lcdCropName,
+    this.lcdCulAreaLand,
+    this.lcdCulAreaSize,
+    this.lcdTypeOfLand,
+    this.lcdScaOfFin,
+    this.lcdAddSofByRo,
+    this.lcdCostOfCul,
+    this.lcdCovOfCrop,
+    this.lcdCropIns,
+    this.lcdAddSofAmount,
+    this.lcdInsPre,
+    this.lcdDueDateOfRepay,
   });
 
   CropDetailsModal copyWith({
-    String? lasSeqno,
-    String? lasSeason,
-    String? lasCrop,
-    String? lasAreaofculti,
-    int? lasEligibleamt,
-    String? lasTypOfLand,
-    String? lasScaloffin,
-    int? lasReqScaloffin,
-    bool? notifiedCropFlag,
-    String? lasPrePerAcre,
-    String? lasPreToCollect,
+    int? lcdRowId,
+    int? lcdProposalNo,
+    String? lcdSeason,
+    String? lcdCropType,
+    String? lcdCropName,
+    String? lcdCulAreaLand,
+    int? lcdCulAreaSize,
+    String? lcdTypeOfLand,
+    int? lcdScaOfFin,
+    int? lcdAddSofByRo,
+    int? lcdCostOfCul,
+    String? lcdCovOfCrop,
+    String? lcdCropIns,
+    int? lcdAddSofAmount,
+    int? lcdInsPre,
+    String? lcdDueDateOfRepay,
   }) {
     return CropDetailsModal(
-      lasSeqno: lasSeqno ?? this.lasSeqno,
-      lasSeason: lasSeason ?? this.lasSeason,
-      lasCrop: lasCrop ?? this.lasCrop,
-      lasAreaofculti: lasAreaofculti ?? this.lasAreaofculti,
-      lasEligibleamt: lasEligibleamt ?? this.lasEligibleamt,
-      lasTypOfLand: lasTypOfLand ?? this.lasTypOfLand,
-      lasScaloffin: lasScaloffin ?? this.lasScaloffin,
-      lasReqScaloffin: lasReqScaloffin ?? this.lasReqScaloffin,
-      notifiedCropFlag: notifiedCropFlag ?? this.notifiedCropFlag,
-      lasPrePerAcre: lasPrePerAcre ?? this.lasPrePerAcre,
-      lasPreToCollect: lasPreToCollect ?? this.lasPreToCollect,
+      lcdRowId: lcdRowId ?? this.lcdRowId,
+      lcdProposalNo: lcdProposalNo ?? this.lcdProposalNo,
+      lcdSeason: lcdSeason ?? this.lcdSeason,
+      lcdCropType: lcdCropType ?? this.lcdCropType,
+      lcdCropName: lcdCropName ?? this.lcdCropName,
+      lcdCulAreaLand: lcdCulAreaLand ?? this.lcdCulAreaLand,
+      lcdCulAreaSize: lcdCulAreaSize ?? this.lcdCulAreaSize,
+      lcdTypeOfLand: lcdTypeOfLand ?? this.lcdTypeOfLand,
+      lcdScaOfFin: lcdScaOfFin ?? this.lcdScaOfFin,
+      lcdAddSofByRo: lcdAddSofByRo ?? this.lcdAddSofByRo,
+      lcdCostOfCul: lcdCostOfCul ?? this.lcdCostOfCul,
+      lcdCovOfCrop: lcdCovOfCrop ?? this.lcdCovOfCrop,
+      lcdCropIns: lcdCropIns ?? this.lcdCropIns,
+      lcdAddSofAmount: lcdAddSofAmount ?? this.lcdAddSofAmount,
+      lcdInsPre: lcdInsPre ?? this.lcdInsPre,
+      lcdDueDateOfRepay: lcdDueDateOfRepay ?? this.lcdDueDateOfRepay,
     );
   }
 
-  Map<String, dynamic> toMap() {
+  /// Converts this object into a form-friendly Map (string values preferred)
+  Map<String, dynamic> toForm() {
     return <String, dynamic>{
-      'lasSeqno': lasSeqno,
-      'lasSeason': lasSeason,
-      'lasCrop': lasCrop,
-      'lasAreaofculti': lasAreaofculti,
-      'lasEligibleamt': lasEligibleamt,
-      'lasTypOfLand': lasTypOfLand,
-      'lasScaloffin': lasScaloffin,
-      'lasReqScaloffin': lasReqScaloffin,
-      'notifiedCropFlag': notifiedCropFlag,
-      'lasPrePerAcre': lasPrePerAcre,
-      'lasPreToCollect': lasPreToCollect,
+      'rowId': lcdRowId?.toString(),
+      'season': lcdSeason,
+      'cropType': lcdCropType,
+      'cropName': lcdCropName,
+      'covOfCrop': lcdCovOfCrop,
+      'typeOfLand': lcdTypeOfLand,
+      'culAreaLand': lcdCulAreaLand,
+      'culAreaSize': lcdCulAreaSize?.toString(),
+      'scaOfFin': lcdScaOfFin?.toString(),
+      'addSofByRo': lcdAddSofByRo?.toString(),
+      'addSofAmount': lcdAddSofAmount?.toString(),
+      'costOfCul': lcdCostOfCul?.toString(),
+      'cropIns': lcdCropIns,
+      'insPre': lcdInsPre?.toString(),
+      'dueDateOfRepay': lcdDueDateOfRepay,
     };
   }
 
-  Map<String, dynamic> toForm() {
+  /// Creates a modal instance from a form map (all dynamic values)
+  factory CropDetailsModal.fromForm(Map<String, dynamic> form) {
+    return CropDetailsModal(
+      lcdRowId: _toInt(form['rowId']),
+      lcdSeason: form['season']?.toString(),
+      lcdCropType: form['cropType']?.toString(),
+      lcdCropName: form['cropName']?.toString(),
+      lcdCovOfCrop: form['covOfCrop']?.toString(),
+      lcdTypeOfLand: form['typeOfLand']?.toString(),
+      lcdCulAreaLand: form['culAreaLand']?.toString(),
+      lcdCulAreaSize: _toInt(form['culAreaSize']),
+      lcdScaOfFin: _toInt(form['scaOfFin']),
+      lcdAddSofByRo: _toInt(form['addSofByRo']),
+      lcdAddSofAmount: _toInt(form['addSofAmount']),
+      lcdCostOfCul: _toInt(form['costOfCul']),
+      lcdCropIns: form['cropIns']?.toString(),
+      lcdInsPre: _toInt(form['insPre']),
+      lcdDueDateOfRepay: form['dueDateOfRepay']?.toString(),
+    );
+  }
+
+  /// Factory for API response mapping
+  factory CropDetailsModal.fromGetApi(Map<String, dynamic> map) {
+    return CropDetailsModal(
+      lcdRowId: _toInt(map['lcdRowId']),
+      lcdProposalNo: _toInt(map['lcdProposalNo']),
+      lcdSeason: map['lcdSeason']?.toString(),
+      lcdCropType: map['lcdCropType']?.toString(),
+      lcdCropName: map['lcdCropName']?.toString(),
+      lcdTypeOfLand: map['lcdTypeOfLand']?.toString(),
+      lcdCulAreaLand: map['lcdCulAreaLand']?.toString(),
+      lcdCulAreaSize: _toInt(map['lcdCulAreaSize']),
+      lcdAddSofByRo: _toInt(map['lcdAddSofByRo']),
+      lcdAddSofAmount: _toInt(map['lcdAddSofAmount']),
+      lcdCostOfCul: _toInt(map['lcdCostOfCul']),
+      lcdCovOfCrop: map['lcdCovOfCrop']?.toString(),
+      lcdCropIns: map['lcdCropIns']?.toString(),
+      lcdInsPre: _toInt(map['lcdInsPre']),
+      lcdDueDateOfRepay: map['lcdDueDateOfRepay']?.toString(),
+      lcdScaOfFin: _toInt(map['lcdScaOfFin']),
+    );
+  }
+
+  /// Converts this object into a database or JSON-friendly map
+  Map<String, dynamic> toMap() {
     return <String, dynamic>{
-      'lasSeqno': lasSeqno.toString(),
-      'lasSeason': lasSeason,
-      'lasCrop': lasCrop,
-      'lasAreaofculti': lasAreaofculti,
-      'lasEligibleamt': lasEligibleamt,
-      'lasTypOfLand': lasTypOfLand,
-      'lasScaloffin': lasScaloffin,
-      'lasReqScaloffin': lasReqScaloffin.toString(),
-      'notifiedCropFlag': notifiedCropFlag,
-      'lasPrePerAcre': lasPrePerAcre,
-      'lasPreToCollect': lasPreToCollect,
+      'lcdRowId': lcdRowId,
+      'lcdProposalNo': lcdProposalNo,
+      'lcdSeason': lcdSeason,
+      'lcdCropType': lcdCropType,
+      'lcdCropName': lcdCropName,
+      'lcdCulAreaLand': lcdCulAreaLand,
+      'lcdCulAreaSize': lcdCulAreaSize,
+      'lcdTypeOfLand': lcdTypeOfLand,
+      'lcdScaOfFin': lcdScaOfFin,
+      'lcdAddSofByRo': lcdAddSofByRo,
+      'lcdCostOfCul': lcdCostOfCul,
+      'lcdCovOfCrop': lcdCovOfCrop,
+      'lcdCropIns': lcdCropIns,
+      'lcdAddSofAmount': lcdAddSofAmount,
+      'lcdInsPre': lcdInsPre,
+      'lcdDueDateOfRepay': lcdDueDateOfRepay,
     };
   }
 
   factory CropDetailsModal.fromMap(Map<String, dynamic> map) {
     return CropDetailsModal(
-      lasSeqno: map['lasSeqno'],
-      lasSeason: map['lasSeason'] != null ? map['lasSeason'] as String : null,
-      lasCrop: map['lasCrop'] != null ? map['lasCrop'] as String : null,
-      lasAreaofculti: map['lasAreaofculti'] != null ? map['lasAreaofculti'] as String : null,
-      lasEligibleamt: map['lasReqScaloffin'] != null ? map['lasReqScaloffin'] as int : null,
-      lasTypOfLand: map['lasTypOfLand'] != null ? map['lasTypOfLand'] as String : null,
-      lasScaloffin: map['lasScaloffin'] != null ? map['lasScaloffin'] as String : null,
-      lasReqScaloffin: map['lasReqScaloffin'] != null ? map['lasReqScaloffin'] as int : null,
-      notifiedCropFlag: map['notifiedCropFlag'] != null ? map['notifiedCropFlag'] as bool : null,
-      lasPrePerAcre: map['lasPrePerAcre'] != null ? map['lasPrePerAcre'] as String : null,
-      lasPreToCollect: map['lasPreToCollect'] != null ? map['lasPreToCollect'] as String : null,
-    );
-  }
-
-  factory CropDetailsModal.fromForm(Map<String, dynamic> form) {
-    return CropDetailsModal(
-      lasSeqno: form['lasSeqno'] ?? '0',
-      lasSeason: form['lasSeason'] ?? '',
-      lasCrop: form['lasCrop'] ?? '',
-      lasAreaofculti: form['lasAreaofculti'] ?? '',
-      lasEligibleamt: int.parse(form['lasReqScaloffin']),
-      lasTypOfLand: form['lasTypOfLand'] ?? '',
-      lasScaloffin: form['lasScaloffin'] ?? '',
-      lasReqScaloffin: int.parse(form['lasReqScaloffin']),
-      notifiedCropFlag: form['notifiedCropFlag'] ?? false,
-      lasPrePerAcre: form['lasPrePerAcre'] ?? '',
-      lasPreToCollect: form['lasPreToCollect'] ?? '',
-    );
-  }
-
-  factory CropDetailsModal.fromGetApi(Map<String, dynamic> map) {
-    return CropDetailsModal(
-      lasSeqno: map['lasSeqno']?.toString() ?? '0',
-      lasSeason: map['lasSeason']?.toString() ?? '',
-      lasCrop: map['lasCrop']?.toString() ?? '',
-      lasAreaofculti: map['lasAreaofculti']?.toString() ?? '',
-      lasEligibleamt: map['lasReqScaloffin'] != null ? map['lasReqScaloffin'] as int : null,
-      lasTypOfLand: map['lasTypOfLand'] != null ? map['lasTypOfLand'] as String : null,
-      lasScaloffin: map['lasScaloffin']?.toString() ?? '',
-      lasReqScaloffin: map['lasReqScaloffin'] != null ? map['lasReqScaloffin'] as int : null,
-      notifiedCropFlag: 
-        map['notifiedCropFlag'] != null ? 
-        (map['notifiedCropFlag'] == 'true' ? true : false) : null,
-      lasPrePerAcre: map['lasPrePerAcre']?.toString() ?? '',
-      lasPreToCollect: map['lasPreToCollect']?.toString() ?? '',
+      lcdRowId: _toInt(map['lcdRowId']),
+      lcdProposalNo: _toInt(map['lcdProposalNo']),
+      lcdSeason: map['lcdSeason']?.toString(),
+      lcdCropType: map['lcdCropType']?.toString(),
+      lcdCropName: map['lcdCropName']?.toString(),
+      lcdCulAreaLand: map['lcdCulAreaLand']?.toString(),
+      lcdCulAreaSize: _toInt(map['lcdCulAreaSize']),
+      lcdTypeOfLand: map['lcdTypeOfLand']?.toString(),
+      lcdScaOfFin: _toInt(map['lcdScaOfFin']),
+      lcdAddSofByRo: _toInt(map['lcdAddSofByRo']),
+      lcdCostOfCul: _toInt(map['lcdCostOfCul']),
+      lcdCovOfCrop: map['lcdCovOfCrop']?.toString(),
+      lcdCropIns: map['lcdCropIns']?.toString(),
+      lcdAddSofAmount: _toInt(map['lcdAddSofAmount']),
+      lcdInsPre: _toInt(map['lcdInsPre']),
+      lcdDueDateOfRepay: map['lcdDueDateOfRepay']?.toString(),
     );
   }
 
   String toJson() => json.encode(toMap());
 
-  factory CropDetailsModal.fromJson(String source) => CropDetailsModal.fromMap(json.decode(source) as Map<String, dynamic>);
+  factory CropDetailsModal.fromJson(String source) =>
+      CropDetailsModal.fromMap(json.decode(source) as Map<String, dynamic>);
 
   @override
   String toString() {
-    return 'CropDetailsModal(lasSeason: $lasSeason, lasCrop: $lasCrop, lasAreaofculti: $lasAreaofculti, lasEligibleamt: $lasEligibleamt, lasTypOfLand: $lasTypOfLand, lasScaloffin: $lasScaloffin, lasReqScaloffin: $lasReqScaloffin, notifiedCropFlag: $notifiedCropFlag, lasPrePerAcre: $lasPrePerAcre, lasPreToCollect: $lasPreToCollect)';
+    return 'CropDetailsModal(lcdRowId: $lcdRowId, lcdProposalNo: $lcdProposalNo, lcdSeason: $lcdSeason, lcdCropType: $lcdCropType, lcdCropName: $lcdCropName, lcdCulAreaLand: $lcdCulAreaLand, lcdCulAreaSize: $lcdCulAreaSize, lcdTypeOfLand: $lcdTypeOfLand, lcdScaOfFin: $lcdScaOfFin, lcdAddSofByRo: $lcdAddSofByRo, lcdCostOfCul: $lcdCostOfCul, lcdCovOfCrop: $lcdCovOfCrop, lcdCropIns: $lcdCropIns, lcdAddSofAmount: $lcdAddSofAmount, lcdInsPre: $lcdInsPre, lcdDueDateOfRepay: $lcdDueDateOfRepay)';
   }
 
-  @override
-  bool operator ==(covariant CropDetailsModal other) {
-    if (identical(this, other)) return true;
-  
-    return 
-      other.lasSeason == lasSeason &&
-      other.lasCrop == lasCrop &&
-      other.lasAreaofculti == lasAreaofculti &&
-      other.lasEligibleamt == lasEligibleamt &&
-      other.lasTypOfLand == lasTypOfLand &&
-      other.lasScaloffin == lasScaloffin &&
-      other.lasReqScaloffin == lasReqScaloffin &&
-      other.notifiedCropFlag == notifiedCropFlag &&
-      other.lasPrePerAcre == lasPrePerAcre &&
-      other.lasPreToCollect == lasPreToCollect;
-  }
-
-  @override
-  int get hashCode {
-    return lasSeason.hashCode ^
-      lasCrop.hashCode ^
-      lasAreaofculti.hashCode ^
-      lasEligibleamt.hashCode ^
-      lasTypOfLand.hashCode ^
-      lasScaloffin.hashCode ^
-      lasReqScaloffin.hashCode ^
-      notifiedCropFlag.hashCode ^
-      lasPrePerAcre.hashCode ^
-      lasPreToCollect.hashCode;
+  static int? _toInt(dynamic value) {
+    if (value == null) return null;
+    if (value is int) return value;
+    if (value is String && value.trim().isNotEmpty) {
+      return int.tryParse(value);
+    }
+    if (value is double) return value.toInt();
+    return null;
   }
 }

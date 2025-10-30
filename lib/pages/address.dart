@@ -70,9 +70,9 @@ class Address extends StatelessWidget {
 
   mapCifResponse(CifResponse? cifResponse) {
     try {
-      form.control('address1').updateValue(cifResponse?.lleadaddress);
-      form.control('address2').updateValue(cifResponse?.lleadaddresslane1);
-      form.control('address3').updateValue(cifResponse?.lleadaddresslane2);
+      form.control('address1').updateValue(cifResponse?.restAddress);
+      // form.control('address2').updateValue(cifResponse?.lleadaddresslane1);
+      // form.control('address3').updateValue(cifResponse?.lleadaddresslane2);
     } catch (error) {
       print(error);
     }

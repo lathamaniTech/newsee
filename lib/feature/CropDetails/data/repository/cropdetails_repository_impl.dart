@@ -1,4 +1,7 @@
 import 'package:dio/dio.dart';
+import 'package:newsee/AppData/app_constants.dart';
+import 'package:newsee/AppData/globalconfig.dart';
+import 'package:newsee/Utils/offline_data_provider.dart';
 import 'package:newsee/core/api/AsyncResponseHandler.dart';
 import 'package:newsee/core/api/api_client.dart';
 import 'package:newsee/core/api/api_config.dart';
@@ -23,7 +26,11 @@ class CropDetailsRepositoryImpl implements CropDetailsRepository {
       final payload = req.toJson();
       print('Crop Details payload => $payload');
       final endpoint = ApiConfig.CROP_SUBMIT_API_ENDPOINT;
-      var response = await CropDetailsDatasource(
+      var response =
+      // await offlineDataProvider(
+      //   path: AppConstants.cropResponsonse,
+      // );
+      await CropDetailsDatasource(
         dio: ApiClient().getDio(),
       ).callCropAPI(payload, endpoint);
 
@@ -31,14 +38,16 @@ class CropDetailsRepositoryImpl implements CropDetailsRepository {
         var cropDetailsResponse = CropDetailsResponse(
           responseData: response.data['responseData'],
           ErrorMessage: response.data['ErrorMessage'],
-          Success: response.data[ApiConfig.API_RESPONSE_SUCCESS_KEY]
+          Success: response.data[ApiConfig.API_RESPONSE_SUCCESS_KEY],
         );
         print('CropResponseModel => ${cropDetailsResponse.toString()}');
         return AsyncResponseHandler.right(cropDetailsResponse);
       } else {
         var errorMessage = response.data['ErrorMessage'] ?? "Unknown error";
         print('Crop Details Save error => $errorMessage');
-        return AsyncResponseHandler.left(HttpConnectionFailure(message: errorMessage));
+        return AsyncResponseHandler.left(
+          HttpConnectionFailure(message: errorMessage),
+        );
       }
     } on DioException catch (e) {
       HttpConnectionFailure failure =
@@ -47,31 +56,39 @@ class CropDetailsRepositoryImpl implements CropDetailsRepository {
     } catch (error) {
       print("cropDetailsResponseHandler-> $error");
       return AsyncResponseHandler.left(
-        HttpConnectionFailure(message: "Unexpected Failure during Crop Details Save"),
+        HttpConnectionFailure(
+          message: "Unexpected Failure during Crop Details Save",
+        ),
       );
     }
   }
 
   Future<AsyncResponseHandler<Failure, CropGetResponse>> getCrop(
-    String proposalNumber
+    String proposalNumber,
   ) async {
     try {
       final req = {
         "proposalNumber": proposalNumber,
-        "token": ApiConfig.AUTH_TOKEN
+        "token": ApiConfig.AUTH_TOKEN,
       };
       final endpoint = ApiConfig.CROP_GET_API_ENDPOINT;
       final payload = req;
       print('Crop Details payload => $payload');
-      var response = await CropDetailsDatasource(
+      var response =
+      // await offlineDataProvider(
+      //   path: AppConstants.cropGetResponsonse,
+      // );
+      await CropDetailsDatasource(
         dio: ApiClient().getDio(),
       ).callCropAPI(payload, endpoint);
+
       if (response.data[ApiConfig.API_RESPONSE_SUCCESS_KEY]) {
-        List<dynamic> listofvalues = response.data['responseData']['agriCropDetails'];
-        List<CropDetailsModal> listofcrop = listofvalues.map((e) => CropDetailsModal.fromGetApi(e)).toList();
+        List<dynamic> listofvalues =
+            response.data['responseData']['agriCropDetails'];
+        List<CropDetailsModal> listofcrop =
+            listofvalues.map((e) => CropDetailsModal.fromGetApi(e)).toList();
         var cropDetailsResponse = CropGetResponse(
           agriCropDetails: listofcrop,
-          agriLandDetails: response.data['responseData']['agriLandDetails'],
           ErrorMessage: response.data['ErrorMessage'],
         );
         print('CropResponseModel => ${cropDetailsResponse.toString()}');
@@ -79,7 +96,9 @@ class CropDetailsRepositoryImpl implements CropDetailsRepository {
       } else {
         var errorMessage = response.data['ErrorMessage'] ?? "Unknown error";
         print('Crop Details Save error => $errorMessage');
-        return AsyncResponseHandler.left(HttpConnectionFailure(message: errorMessage));
+        return AsyncResponseHandler.left(
+          HttpConnectionFailure(message: errorMessage),
+        );
       }
     } on DioException catch (e) {
       HttpConnectionFailure failure =
@@ -88,13 +107,15 @@ class CropDetailsRepositoryImpl implements CropDetailsRepository {
     } catch (error) {
       print("cropDetailsResponseHandler-> $error");
       return AsyncResponseHandler.left(
-        HttpConnectionFailure(message: "Unexpected Failure during Crop Details Get"),
+        HttpConnectionFailure(
+          message: "Unexpected Failure during Crop Details Get",
+        ),
       );
     }
   }
 
   Future<AsyncResponseHandler<Failure, String>> deleteCrop(
-    CropDeleteRequest req
+    CropDeleteRequest req,
   ) async {
     try {
       final endpoint = ApiConfig.CROP_DELETE_API_ENDPOINT;
@@ -104,23 +125,27 @@ class CropDetailsRepositoryImpl implements CropDetailsRepository {
         dio: ApiClient().getDio(),
       ).callCropAPI(payload, endpoint);
       if (response.data[ApiConfig.API_RESPONSE_SUCCESS_KEY]) {
-        String cropDeleteMessage =response.data[ApiConfig.API_RESPONSE_ERRORMESSAGE_KEY];
+        String cropDeleteMessage =
+            response.data[ApiConfig.API_RESPONSE_ERRORMESSAGE_KEY];
         return AsyncResponseHandler.right(cropDeleteMessage);
       } else {
         var errorMessage = response.data['ErrorMessage'] ?? "Unknown error";
         print('Crop Details Save error => $errorMessage');
-        return AsyncResponseHandler.left(HttpConnectionFailure(message: errorMessage));
+        return AsyncResponseHandler.left(
+          HttpConnectionFailure(message: errorMessage),
+        );
       }
     } on DioException catch (e) {
       HttpConnectionFailure failure =
           DioHttpExceptionParser(exception: e).parse();
       return AsyncResponseHandler.left(failure);
-    } catch(error) {
+    } catch (error) {
       print("cropDetailsResponseHandler-> $error");
       return AsyncResponseHandler.left(
-        HttpConnectionFailure(message: "Unexpected Failure during Crop Details Get"),
+        HttpConnectionFailure(
+          message: "Unexpected Failure during Crop Details Get",
+        ),
       );
     }
   }
 }
-

@@ -19,32 +19,53 @@ import 'package:reactive_forms/reactive_forms.dart';
 import 'package:newsee/widgets/radio.dart';
 import 'package:newsee/widgets/integer_text_field.dart';
 
-class CropDetailsPage extends StatelessWidget {
+class CropDetailsPage extends StatefulWidget {
   final String title;
   final String proposalnumber;
-  final form = AppForms.buildCropDetailsForm();
 
-  final TextEditingController irrigatedController = TextEditingController();
-  final TextEditingController rainfedController = TextEditingController();
-  final ValueNotifier<int> totalNotifier = ValueNotifier<int>(0);
-
-  final ValueNotifier<int> currentIndex = ValueNotifier<int>(0);
-
-  final ValueNotifier<bool> formEdit = ValueNotifier<bool>(false);
-
-  CropDetailsPage({
+  const CropDetailsPage({
     super.key,
     required this.title,
     required this.proposalnumber,
-  }) {
-    irrigatedController.addListener(_updateTotal);
-    rainfedController.addListener(_updateTotal);
+  });
+
+  @override
+  State<CropDetailsPage> createState() => _CropDetailsPageState();
+}
+
+class _CropDetailsPageState extends State<CropDetailsPage> {
+  final form = AppForms.buildCropDetailsForm();
+  final ValueNotifier<int> currentIndex = ValueNotifier<int>(0);
+
+  @override
+  void initState() {
+    super.initState();
+
+    form.control('culAreaLand').valueChanges.listen((_) => getAddSofAmount());
+    form.control('scaOfFin').valueChanges.listen((_) => getAddSofAmount());
+    form.control('addSofByRo').valueChanges.listen((_) => getAddSofAmount());
   }
 
-  void _updateTotal() {
-    final irrigated = int.tryParse(irrigatedController.text) ?? 0;
-    final rainfed = int.tryParse(rainfedController.text) ?? 0;
-    totalNotifier.value = irrigated + rainfed;
+  void getAddSofAmount() {
+    try {
+      final culAreaRaw = form.control('culAreaLand').value?.toString() ?? '0';
+      final sofRaw = form.control('scaOfFin').value?.toString() ?? '0';
+      final addSofRaw = form.control('addSofByRo').value?.toString() ?? '0';
+
+      final culArea = int.tryParse(culAreaRaw) ?? 0;
+      final sof = int.tryParse(sofRaw) ?? 0;
+      final addSOfPercent = int.tryParse(addSofRaw) ?? 0;
+
+      final baseTotal = culArea * sof;
+      final addSofValue = baseTotal * addSOfPercent;
+
+      form
+          .control('addSofAmount')
+          .patchValue(addSofValue.toStringAsFixed(2), emitEvent: true);
+      print('addSofValue: ${form.value}');
+    } catch (e) {
+      print('getaddsof: $e');
+    }
   }
 
   bool isFormCompletelyEmpty(FormGroup form) {
@@ -79,53 +100,25 @@ class CropDetailsPage extends StatelessWidget {
   }
 
   void handleSave(BuildContext context, CropyieldpageState state) {
-    if (irrigatedController.text.isNotEmpty &&
-        rainfedController.text.isNotEmpty) {
-      if (form.valid) {
-        var scaleOfFinance = removeSpecialCharacters(
-          form.control('lasScaloffin').value,
-        );
-        var reqScaleOfFinance = removeSpecialCharacters(
-          form.control('lasReqScaloffin').value,
-        );
-        var prePerAcre = removeSpecialCharacters(
-          form.control('lasPrePerAcre').value,
-        );
-        var premiumCollecte = removeSpecialCharacters(
-          form.control('lasPreToCollect').value,
-        );
+    if (form.valid) {
+      print("handleSave =>  ${form.value}");
 
-        form.control('lasScaloffin').updateValue(scaleOfFinance);
-        form.control('lasReqScaloffin').updateValue(reqScaleOfFinance);
-        form.control('lasPrePerAcre').updateValue(prePerAcre);
-        form.control('lasPreToCollect').updateValue(premiumCollecte);
-
-        print("handleSave =>  ${form.value}");
-
-        final cropFormData = CropDetailsModal.fromForm(form.rawValue);
-        context.read<CropyieldpageBloc>().add(
-          CropFormSaveEvent(cropData: cropFormData),
-        );
-      } else {
-        form.markAllAsTouched();
-      }
+      final cropFormData = CropDetailsModal.fromForm(form.rawValue);
+      context.read<CropyieldpageBloc>().add(
+        CropFormSaveEvent(cropData: cropFormData),
+      );
     } else {
-      showSnack(context, message: 'Please Enter Irrigated and Rainfed fields');
+      form.markAllAsTouched();
     }
   }
 
   void handleSubmit(BuildContext context) async {
-    final irrigated = int.tryParse(irrigatedController.text) ?? 0;
-    final rainfed = int.tryParse(rainfedController.text) ?? 0;
     UserDetails? userDetails = await loadUser();
 
     context.read<CropyieldpageBloc>().add(
       CropDetailsSubmitEvent(
-        proposalNumber: proposalnumber,
+        proposalNumber: widget.proposalnumber,
         userid: userDetails!.LPuserID,
-        irrigated: irrigated,
-        rainfed: rainfed,
-        total: totalNotifier.value,
       ),
     );
   }
@@ -136,24 +129,6 @@ class CropDetailsPage extends StatelessWidget {
 
   void handleUpdate(BuildContext context, CropyieldpageState state) {
     if (form.valid) {
-      var scaleOfFinance = removeSpecialCharacters(
-        form.control('lasScaloffin').value,
-      );
-      var reqScaleOfFinance = removeSpecialCharacters(
-        form.control('lasReqScaloffin').value,
-      );
-      var prePerAcre = removeSpecialCharacters(
-        form.control('lasPrePerAcre').value,
-      );
-      var premiumCollecte = removeSpecialCharacters(
-        form.control('lasPreToCollect').value,
-      );
-
-      form.control('lasScaloffin').updateValue(scaleOfFinance);
-      form.control('lasReqScaloffin').updateValue(reqScaleOfFinance);
-      form.control('lasPrePerAcre').updateValue(prePerAcre);
-      form.control('lasPreToCollect').updateValue(premiumCollecte);
-
       final cropFormData = CropDetailsModal.fromForm(form.rawValue);
       context.read<CropyieldpageBloc>().add(
         CropDetailsUpdateEvent(
@@ -175,7 +150,7 @@ class CropDetailsPage extends StatelessWidget {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
-      builder: (_) { 
+      builder: (_) {
         final showSubmitButton = state.showSubmit;
         print("showSubmitButton $showSubmitButton");
         return BlocProvider<CropyieldpageBloc>.value(
@@ -190,7 +165,7 @@ class CropDetailsPage extends StatelessWidget {
                     "Note: Scroll left or right to delete land detail",
                     style: TextStyle(
                       color: Colors.red,
-                      fontWeight: FontWeight.bold
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                   Expanded(
@@ -206,40 +181,53 @@ class CropDetailsPage extends StatelessWidget {
                                 print("full item data $item");
                                 final landname = lovlist!.firstWhere(
                                   (v) =>
-                                      v.Header == 'TypeOfLand' &&
-                                      v.optvalue == item.lasTypOfLand,
+                                      v.Header == 'CropTypeOfLand' &&
+                                      v.optvalue == item.lcdTypeOfLand,
                                 );
                                 print("landname $landname");
                                 final cropname = lovlist.firstWhere(
                                   (v) =>
-                                      v.Header == 'NameOfTheCrop' &&
-                                      v.optvalue == item.lasCrop,
+                                      v.Header == 'CropName' &&
+                                      v.optvalue == item.lcdCropName,
                                 );
                                 print("cropname $cropname");
                                 return Slidable(
-                                  key: ValueKey(item.lasSeqno),
+                                  key: ValueKey(item.lcdRowId),
                                   endActionPane: ActionPane(
                                     motion: ScrollMotion(),
-                                    extentRatio: 0.25, // Controls width of action pane
+                                    extentRatio:
+                                        0.25, // Controls width of action pane
                                     children: [
                                       SlidableAction(
                                         onPressed: (slidableContext) {
                                           try {
-                                            if (item.lasSeqno != '') {
-                                              slidableContext.read<CropyieldpageBloc>().add(
-                                                CropDetailsDeleteEvent(
-                                                  proposalNumber: proposalnumber,
-                                                  rowId: item.lasSeqno ?? '',
-                                                  index: index
-                                                ),
-                                              );
+                                            if (item.lcdRowId != '' ||
+                                                item.lcdRowId != null) {
+                                              slidableContext
+                                                  .read<CropyieldpageBloc>()
+                                                  .add(
+                                                    CropDetailsDeleteEvent(
+                                                      proposalNumber:
+                                                          widget.proposalnumber,
+                                                      rowId:
+                                                          item.lcdRowId
+                                                              .toString(),
+                                                      index: index,
+                                                    ),
+                                                  );
                                             } else {
-                                              slidableContext.read<CropyieldpageBloc>().add(
-                                                CropDetailsRemoveEvent(index: index),
-                                              );
+                                              slidableContext
+                                                  .read<CropyieldpageBloc>()
+                                                  .add(
+                                                    CropDetailsRemoveEvent(
+                                                      index: index,
+                                                    ),
+                                                  );
                                             }
-                                          } catch(error) {
-                                            print("deleteLandData-error $error");
+                                          } catch (error) {
+                                            print(
+                                              "deleteLandData-error $error",
+                                            );
                                           }
                                         },
                                         backgroundColor: Colors.red,
@@ -250,49 +238,24 @@ class CropDetailsPage extends StatelessWidget {
                                     ],
                                   ),
                                   child: OptionsSheet(
-                                icon: Icons.agriculture,
-                                title: 'LandType - ${landname.optDesc}',
-                                details: [
-                                  cropname.optDesc
-                                ],
-                                detailsName: [
-                                  "Name of the Crop",
-                                ],
-                                onTap: () {
-                                  currentIndex.value = index;
-                                  Navigator.pop(context);
-                                  context.read<CropyieldpageBloc>().add(
-                                    CropDetailsSetEvent(cropData: item),
-                                  );
-                                },
-                              ),
-                                  // ListTile(
-                                  //   leading: Icon(
-                                  //     Icons.agriculture,
-                                  //     size: 30,
-                                  //     color: Colors.teal,
-                                  //   ),
-                                  //   title: Text('LandType - ${landname.optDesc}'),
-                                  //   subtitle: Text(
-                                  //     'Name of the Crop - ${cropname.optDesc}',
-                                  //   ),
-                                  //   trailing: const Icon(
-                                  //     Icons.arrow_forward_ios,
-                                  //     size: 16,
-                                  //   ),
-                                  //   onTap: () {
-                                  //     currentIndex.value = index;
-                                  //     Navigator.pop(context);
-                                  //     context.read<CropyieldpageBloc>().add(
-                                  //       CropDetailsSetEvent(cropData: item),
-                                  //     );
-                                  //   },
-                                  // ),
+                                    icon: Icons.agriculture,
+                                    title: 'LandType - ${landname.optDesc}',
+                                    details: [cropname.optDesc],
+                                    detailsName: ["Name of the Crop"],
+                                    onTap: () {
+                                      currentIndex.value = index;
+                                      Navigator.pop(context);
+                                      context.read<CropyieldpageBloc>().add(
+                                        CropDetailsSetEvent(cropData: item),
+                                      );
+                                    },
+                                  ),
                                 );
                               },
                             ),
                   ),
-                  (entries.isNotEmpty && context.read<CropyieldpageBloc>().state.showSubmit)
+                  (entries.isNotEmpty &&
+                          context.read<CropyieldpageBloc>().state.showSubmit)
                       ? Center(
                         child: Padding(
                           padding: const EdgeInsets.all(10),
@@ -337,11 +300,10 @@ class CropDetailsPage extends StatelessWidget {
                       : SizedBox.shrink(),
                 ],
               ),
-              
             ),
           ),
         );
-      }
+      },
     );
   }
 
@@ -367,7 +329,7 @@ class CropDetailsPage extends StatelessWidget {
 
                 children: [
                   Text(
-                    title,
+                    widget.title,
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
@@ -415,7 +377,7 @@ class CropDetailsPage extends StatelessWidget {
                           child: Padding(
                             padding: const EdgeInsets.all(5),
                             child: Text(
-                              proposalnumber ?? 'N/A',
+                              widget.proposalnumber ?? 'N/A',
 
                               style: TextStyle(
                                 color: Colors.white,
@@ -431,76 +393,15 @@ class CropDetailsPage extends StatelessWidget {
                   ),
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.only(top: 10, bottom: 20),
-                child: Center(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Text(
-                        "Irrigated: ",
-                        style: TextStyle(fontSize: 14, color: Colors.white),
-                      ),
-                      SizedBox(
-                        width: 50,
-                        height: 30,
-                        child: TextField(
-                          controller: irrigatedController,
-                          keyboardType: TextInputType.number,
-                          style: TextStyle(color: Colors.white, fontSize: 14),
-                          decoration: const InputDecoration(
-                            contentPadding: EdgeInsets.symmetric(horizontal: 8),
-                            border: OutlineInputBorder(),
-                            filled: true,
-                            fillColor: Colors.white24,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-
-                      const Text(
-                        "Rainfed: ",
-                        style: TextStyle(fontSize: 14, color: Colors.white),
-                      ),
-                      SizedBox(
-                        width: 50,
-                        height: 30,
-                        child: TextField(
-                          controller: rainfedController,
-                          keyboardType: TextInputType.number,
-                          style: TextStyle(color: Colors.white, fontSize: 14),
-                          decoration: const InputDecoration(
-                            contentPadding: EdgeInsets.symmetric(horizontal: 8),
-                            border: OutlineInputBorder(),
-                            filled: true,
-                            fillColor: Colors.white24,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      ValueListenableBuilder<int>(
-                        valueListenable: totalNotifier,
-                        builder:
-                            (context, value, _) => Text(
-                              "Total: $value (Acres)",
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.white,
-                              ),
-                            ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
             ],
           ),
         ),
         body: BlocProvider(
           create:
               (_) =>
-                  CropyieldpageBloc()
-                    ..add(CropPageInitialEvent(proposalNumber: proposalnumber)),
+                  CropyieldpageBloc()..add(
+                    CropPageInitialEvent(proposalNumber: widget.proposalnumber),
+                  ),
           // lazy: true,
           child: BlocConsumer<CropyieldpageBloc, CropyieldpageState>(
             listener: (context, state) {
@@ -513,17 +414,19 @@ class CropDetailsPage extends StatelessWidget {
                 showSnack(
                   context,
                   message: 'Crop Details Deleted Successfully',
-                ); 
-              } 
+                );
+              }
 
               if (state.status == SaveStatus.init) {
-                globalLoadingBloc.add(
-                  HideLoading(),
-                );
-                if ((state.cropData != null && state.cropData!.isNotEmpty) && (state.landDetails != null && state.landDetails!.isNotEmpty)) {
-                  irrigatedController.text = state.landDetails!['lpAgriPcIrrigated'].toString();
-                  rainfedController.text = state.landDetails!['lpAgriPcRainfed'].toString();
-                }
+                globalLoadingBloc.add(HideLoading());
+                // if ((state.cropData != null && state.cropData!.isNotEmpty) &&
+                //     (state.landDetails != null &&
+                //         state.landDetails!.isNotEmpty)) {
+                //   irrigatedController.text =
+                //       state.landDetails!['lpAgriPcIrrigated'].toString();
+                //   rainfedController.text =
+                //       state.landDetails!['lpAgriPcRainfed'].toString();
+                // }
               } else if (state.status == SaveStatus.mastersucess) {
                 form.reset();
               } else if (state.status == SaveStatus.reset) {
@@ -536,38 +439,28 @@ class CropDetailsPage extends StatelessWidget {
                   context,
                   message: 'Crop Details Submitted Successfully',
                 );
-              } else if (state.status == SaveStatus.failure && state.errorMessage != null) {
+              } else if (state.status == SaveStatus.failure &&
+                  state.errorMessage != null) {
                 globalLoadingBloc.add(HideLoading());
-                ScaffoldMessenger.of(
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(state.errorMessage.toString())),
+                );
+                showSnack(
                   context,
-                ).showSnackBar(SnackBar(content: Text(state.errorMessage.toString())));
+                  message: 'Crop Details Submitted Successfully',
+                );
               }
             },
             builder: (context, state) {
               print("state.showSubmit-builer ${state.showSubmit}");
-              if (state.status == SaveStatus.update && state.selectedCropData != null) {
-                print("currently current selected cropdetails index is ${currentIndex.value}");
+              if (state.status == SaveStatus.update &&
+                  state.selectedCropData != null) {
+                print(
+                  "currently current selected cropdetails index is ${currentIndex.value}",
+                );
                 print("state.selectedCropData is => ${state.selectedCropData}");
                 form.patchValue(state.selectedCropData!.toForm());
-                if (state.selectedCropData!.notifiedCropFlag!) {
-                  form.control('lasPrePerAcre').markAsEnabled();
-                  form.control('lasPrePerAcre').setValidators([
-                    Validators.required,
-                  ]);
 
-                  form.control('lasPreToCollect').markAsEnabled();
-                  form.control('lasPreToCollect').setValidators([
-                    Validators.required,
-                  ]);
-                } else {
-                  form.control('lasPrePerAcre').updateValue(null);
-                  form.control('lasPrePerAcre').markAsDisabled();
-                  form.control('lasPrePerAcre').clearValidators();
-
-                  form.control('lasPreToCollect').updateValue(null);
-                  form.control('lasPreToCollect').markAsDisabled();
-                  form.control('lasPreToCollect').clearValidators();
-                }
                 form.updateValueAndValidity();
               }
 
@@ -591,25 +484,8 @@ class CropDetailsPage extends StatelessWidget {
                                 padding: const EdgeInsets.all(16),
                                 child: Column(
                                   children: [
-                                    // Row(
-                                    //   children: [
-                                    //     Text('Proposal Number: '),
-                                    //     SizedBox(width: 20,),
-                                    //     Text(
-                                    //       proposalnumber,
-                                    //       style: TextStyle(
-                                    //         color: Colors.teal
-                                    //       ),
-                                    //     ),
-                                    //   ],
-                                    // ),
-                                    // Dropdown(
-                                    //   controlName: 'serveynumber',
-                                    //   label: 'Survey Number',
-                                    //   items: state.landData.lslLandSurveyNo
-                                    // ),
                                     SearchableDropdown<Lov>(
-                                      controlName: 'lasSeason',
+                                      controlName: 'season',
                                       label: 'Season',
                                       items:
                                           state.lovlist!
@@ -618,13 +494,13 @@ class CropDetailsPage extends StatelessWidget {
                                               )
                                               .toList(),
                                       onChangeListener: (Lov val) {
-                                        form.controls['lasSeason']?.updateValue(
+                                        form.controls['season']?.updateValue(
                                           val.optvalue,
                                         );
                                       },
                                       selItem: () {
                                         final value =
-                                            form.control('lasSeason').value;
+                                            form.control('season').value;
                                         return state.lovlist!
                                             .where((v) => v.Header == 'Season')
                                             .firstWhere(
@@ -640,33 +516,31 @@ class CropDetailsPage extends StatelessWidget {
                                       },
                                     ),
                                     SearchableDropdown<Lov>(
-                                      controlName: 'lasCrop',
-                                      label: 'Name of the Crop',
+                                      controlName: 'cropType',
+                                      label: 'Crop Type',
                                       items:
                                           state.lovlist!
                                               .where(
-                                                (v) =>
-                                                    v.Header == 'NameOfTheCrop',
+                                                (v) => v.Header == 'CropType',
                                               )
                                               .toList(),
                                       onChangeListener: (Lov val) {
-                                        form.controls['lasCrop']?.updateValue(
+                                        form.controls['cropType']?.updateValue(
                                           val.optvalue,
                                         );
                                       },
                                       selItem: () {
                                         final value =
-                                            form.control('lasCrop').value;
+                                            form.control('cropType').value;
                                         return state.lovlist!
                                             .where(
-                                              (v) =>
-                                                  v.Header == 'NameOfTheCrop',
+                                              (v) => v.Header == 'CropType',
                                             )
                                             .firstWhere(
                                               (lov) => lov.optvalue == value,
                                               orElse:
                                                   () => Lov(
-                                                    Header: 'NameOfTheCrop',
+                                                    Header: 'CropType',
                                                     optDesc: '',
                                                     optvalue: '',
                                                     optCode: '',
@@ -674,36 +548,106 @@ class CropDetailsPage extends StatelessWidget {
                                             );
                                       },
                                     ),
-                                    IntegerTextField(
-                                      controlName: 'lasAreaofculti',
-                                      label: 'Acres Cultivated ',
-                                      mantatory: true,
-                                    ),
+
                                     SearchableDropdown<Lov>(
-                                      controlName: 'lasTypOfLand',
+                                      controlName: 'cropName',
+                                      label: 'Crop Name',
+                                      items:
+                                          state.lovlist!
+                                              .where(
+                                                (v) => v.Header == 'CropName',
+                                              )
+                                              .toList(),
+                                      onChangeListener: (Lov val) {
+                                        form.controls['cropName']?.updateValue(
+                                          val.optvalue,
+                                        );
+                                      },
+                                      selItem: () {
+                                        final value =
+                                            form.control('cropName').value;
+                                        return state.lovlist!
+                                            .where(
+                                              (v) => v.Header == 'CropName',
+                                            )
+                                            .firstWhere(
+                                              (lov) => lov.optvalue == value,
+                                              orElse:
+                                                  () => Lov(
+                                                    Header: 'CropName',
+                                                    optDesc: '',
+                                                    optvalue: '',
+                                                    optCode: '',
+                                                  ),
+                                            );
+                                      },
+                                    ),
+
+                                    SearchableDropdown<Lov>(
+                                      controlName: 'covOfCrop',
+                                      label: 'Coverage of Crop',
+                                      items:
+                                          state.lovlist!
+                                              .where(
+                                                (v) =>
+                                                    v.Header ==
+                                                    'CoverageOfCorp',
+                                              )
+                                              .toList(),
+                                      onChangeListener: (Lov val) {
+                                        form.controls['covOfCrop']?.updateValue(
+                                          val.optvalue,
+                                        );
+                                      },
+                                      selItem: () {
+                                        final value =
+                                            form.control('covOfCrop').value;
+                                        return state.lovlist!
+                                            .where(
+                                              (v) =>
+                                                  v.Header == 'CoverageOfCorp',
+                                            )
+                                            .firstWhere(
+                                              (lov) => lov.optvalue == value,
+                                              orElse:
+                                                  () => Lov(
+                                                    Header: 'CoverageOfCorp',
+                                                    optDesc: '',
+                                                    optvalue: '',
+                                                    optCode: '',
+                                                  ),
+                                            );
+                                      },
+                                    ),
+
+                                    SearchableDropdown<Lov>(
+                                      controlName: 'typeOfLand',
                                       label: 'Type of Land',
                                       items:
                                           state.lovlist!
                                               .where(
-                                                (v) => v.Header == 'TypeOfLand',
+                                                (v) =>
+                                                    v.Header ==
+                                                    'CropTypeOfLand',
                                               )
                                               .toList(),
                                       onChangeListener: (Lov val) {
-                                        form.controls['lasTypOfLand']
+                                        form.controls['typeOfLand']
                                             ?.updateValue(val.optvalue);
                                       },
                                       selItem: () {
                                         final value =
-                                            form.control('lasTypOfLand').value;
+                                            form.control('typeOfLand').value;
                                         return state.lovlist!
                                             .where(
-                                              (v) => v.Header == 'TypeOfLand',
+                                              (v) =>
+                                                  v.Header == 'CropTypeOfLand',
                                             )
                                             .firstWhere(
                                               (lov) => lov.optvalue == value,
                                               orElse:
                                                   () => Lov(
-                                                    Header: 'TypeOfLand',
+                                                    Header: 'CropTypeOfLand',
                                                     optDesc: '',
                                                     optvalue: '',
                                                     optCode: '',
@@ -712,135 +656,188 @@ class CropDetailsPage extends StatelessWidget {
                                       },
                                     ),
                                     IntegerTextField(
-                                      controlName: 'lasScaloffin',
-                                      label:
-                                          'Scale of Finance (including crop insurance)',
+                                      controlName: 'culAreaLand',
+                                      label: 'Area Of Cultivated (Acre)',
                                       mantatory: true,
-                                      isRupeeFormat: true,
                                     ),
                                     IntegerTextField(
-                                      controlName: 'lasReqScaloffin',
-                                      label:
-                                          'Requirement as per Scale of Finance',
+                                      controlName: 'scaOfFin',
+                                      label: 'Scale of Finance (per Acre)',
                                       mantatory: true,
-                                      isRupeeFormat: true,
                                     ),
-                                    RadioButton(
-                                      label: 'Notified Crop',
-                                      controlName: 'notifiedCropFlag',
-                                      optionOne: 'Yes',
-                                      optionTwo: 'No',
-                                      onChangeListener: (bool val) {
-                                        print("Radiobutton onchangedata $val");
-                                        if (val) {
-                                          form
-                                              .control('lasPrePerAcre')
-                                              .updateValue('');
-                                          form
-                                              .control('lasPreToCollect')
-                                              .updateValue('');
-                                          form
-                                              .control('lasPrePerAcre')
-                                              .markAsEnabled();
-                                          form
-                                              .control('lasPreToCollect')
-                                              .markAsEnabled();
-                                          form
-                                              .control('lasPrePerAcre')
-                                              .setValidators([
-                                                Validators.required,
-                                              ]);
-                                          form
-                                              .control('lasPreToCollect')
-                                              .setValidators([
-                                                Validators.required,
-                                              ]);
-                                        } else {
-                                          form
-                                              .control('lasPrePerAcre')
-                                              .updateValue('');
-                                          form
-                                              .control('lasPreToCollect')
-                                              .updateValue('');
-                                          form
-                                              .control('lasPrePerAcre')
-                                              .markAsDisabled();
-                                          form
-                                              .control('lasPreToCollect')
-                                              .markAsDisabled();
-                                          form
-                                              .control('lasPrePerAcre')
-                                              .clearValidators();
-                                          form
-                                              .control('lasPreToCollect')
-                                              .clearValidators();
-                                        }
+                                    IntegerTextField(
+                                      controlName: 'addSofByRo',
+                                      label: 'Additional SOF %',
+                                      mantatory: true,
+                                    ),
+                                    IntegerTextField(
+                                      controlName: 'addSofAmount',
+                                      label: 'Additonal Amount SOF',
+                                      mantatory: true,
+                                    ),
+                                    IntegerTextField(
+                                      controlName: 'culAreaSize',
+                                      label: 'Cultivated Area Size',
+                                      mantatory: true,
+                                    ),
+                                    IntegerTextField(
+                                      controlName: 'costOfCul',
+                                      label: 'Cost Of Cultivation',
+                                      mantatory: true,
+                                    ),
+                                    SearchableDropdown<Lov>(
+                                      controlName: 'cropIns',
+                                      label: 'Crop Insurance',
+                                      items:
+                                          state.lovlist!
+                                              .where(
+                                                (v) =>
+                                                    v.Header == 'CorpInsurance',
+                                              )
+                                              .toList(),
+                                      onChangeListener: (Lov val) {
+                                        form.controls['cropIns']?.updateValue(
+                                          val.optvalue,
+                                        );
+                                      },
+                                      selItem: () {
+                                        final value =
+                                            form.control('cropIns').value;
+                                        return state.lovlist!
+                                            .where(
+                                              (v) =>
+                                                  v.Header == 'CorpInsurance',
+                                            )
+                                            .firstWhere(
+                                              (lov) => lov.optvalue == value,
+                                              orElse:
+                                                  () => Lov(
+                                                    Header: 'CorpInsurance',
+                                                    optDesc: '',
+                                                    optvalue: '',
+                                                    optCode: '',
+                                                  ),
+                                            );
                                       },
                                     ),
                                     IntegerTextField(
-                                      controlName: 'lasPrePerAcre',
-                                      label: 'Premium Per Acre',
+                                      controlName: 'insPre',
+                                      label: 'Insurance Premium',
                                       mantatory: true,
-                                      isRupeeFormat: true,
                                     ),
-                                    IntegerTextField(
-                                      controlName: 'lasPreToCollect',
-                                      label: 'Premium to be collected',
-                                      mantatory: true,
-                                      isRupeeFormat: true,
-                                    ),
-                                    Center(
-                                      child: 
-                                      state.status == SaveStatus.update || state.status == SaveStatus.edit ?
-                                      ElevatedButton.icon(
-                                        onPressed: () => handleUpdate(context, state),
-                                        icon: const Icon(Icons.save, color: Colors.white),
-                                        label: const Text(
-                                          'Update',
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.white,
+                                    Padding(
+                                      padding: const EdgeInsets.all(12.0),
+                                      child: ReactiveTextField<String>(
+                                        formControlName: 'dueDateOfRepay',
+                                        validationMessages: {
+                                          ValidationMessage.required:
+                                              (error) =>
+                                                  'Due Date Of Repayment is required',
+                                        },
+                                        readOnly: true,
+                                        decoration: InputDecoration(
+                                          labelText: 'Due Date Of Repayment',
+                                          suffixIcon: Icon(
+                                            Icons.calendar_today,
                                           ),
                                         ),
-                                        style: ElevatedButton.styleFrom(
-                                          // backgroundColor: const Color.fromARGB(
-                                          //   212,
-                                          //   5,
-                                          //   8,
-                                          //   205,
-                                          // ),
-                                          backgroundColor: Colors.teal,
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 32,
-                                            vertical: 14,
-                                          ),
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(8),
-                                          ),
-                                        ),
-                                      ) :
-                                      ElevatedButton.icon(
-                                        onPressed: () => handleSave(context, state),
-                                        icon: const Icon(Icons.save, color: Colors.white),
-                                        label: const Text(
-                                          'Save',
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.white,
-                                          ),
-                                        ),
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: Colors.teal,
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 32,
-                                            vertical: 14,
-                                          ),
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(8),
-                                          ),
-                                        ),
+                                        onTap: (control) async {
+                                          final DateTime? pickedDate =
+                                              await showDatePicker(
+                                                context: context,
+                                                initialDate: DateTime.now(),
+                                                firstDate: DateTime(1900),
+                                                lastDate: DateTime.now(),
+                                              );
+                                          if (pickedDate != null) {
+                                            final formatted =
+                                                "${pickedDate.year}-"
+                                                "${pickedDate.month.toString().padLeft(2, '0')}-"
+                                                "${pickedDate.day.toString().padLeft(2, '0')}";
+                                            form
+                                                .control('dueDateOfRepay')
+                                                .value = formatted;
+                                          }
+                                        },
                                       ),
-                                    )
+                                    ),
+
+                                    Center(
+                                      child:
+                                          state.status == SaveStatus.update ||
+                                                  state.status ==
+                                                      SaveStatus.edit
+                                              ? ElevatedButton.icon(
+                                                onPressed:
+                                                    () => handleUpdate(
+                                                      context,
+                                                      state,
+                                                    ),
+                                                icon: const Icon(
+                                                  Icons.save,
+                                                  color: Colors.white,
+                                                ),
+                                                label: const Text(
+                                                  'Update',
+                                                  style: TextStyle(
+                                                    fontWeight: FontWeight.bold,
+                                                    color: Colors.white,
+                                                  ),
+                                                ),
+                                                style: ElevatedButton.styleFrom(
+                                                  // backgroundColor: const Color.fromARGB(
+                                                  //   212,
+                                                  //   5,
+                                                  //   8,
+                                                  //   205,
+                                                  // ),
+                                                  backgroundColor: Colors.teal,
+                                                  padding:
+                                                      const EdgeInsets.symmetric(
+                                                        horizontal: 32,
+                                                        vertical: 14,
+                                                      ),
+                                                  shape: RoundedRectangleBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                          8,
+                                                        ),
+                                                  ),
+                                                ),
+                                              )
+                                              : ElevatedButton.icon(
+                                                onPressed:
+                                                    () => handleSave(
+                                                      context,
+                                                      state,
+                                                    ),
+                                                icon: const Icon(
+                                                  Icons.save,
+                                                  color: Colors.white,
+                                                ),
+                                                label: const Text(
+                                                  'Save',
+                                                  style: TextStyle(
+                                                    fontWeight: FontWeight.bold,
+                                                    color: Colors.white,
+                                                  ),
+                                                ),
+                                                style: ElevatedButton.styleFrom(
+                                                  backgroundColor: Colors.teal,
+                                                  padding:
+                                                      const EdgeInsets.symmetric(
+                                                        horizontal: 32,
+                                                        vertical: 14,
+                                                      ),
+                                                  shape: RoundedRectangleBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                          8,
+                                                        ),
+                                                  ),
+                                                ),
+                                              ),
+                                    ),
                                   ],
                                 ),
                               ),
@@ -848,72 +845,6 @@ class CropDetailsPage extends StatelessWidget {
                           ],
                         ),
                       ),
-                      //   Positioned(
-                      //     bottom: 5,
-                      //     left: 0,
-                      //     right: 0,
-                      //     child: Column(
-                      //       children: [
-                      //         Center(
-                      //           child:
-                      //           state.status == CropPageStatus.set ?
-                      //           ElevatedButton.icon(
-                      //             onPressed: () => handleUpdate(context, state),
-                      //             icon: const Icon(Icons.save, color: Colors.white),
-                      //             label: const Text(
-                      //               'Update',
-                      //               style: TextStyle(
-                      //                 fontWeight: FontWeight.bold,
-                      //                 color: Colors.white,
-                      //               ),
-                      //             ),
-                      //             style: ElevatedButton.styleFrom(
-                      //               backgroundColor: const Color.fromARGB(
-                      //                 212,
-                      //                 5,
-                      //                 8,
-                      //                 205,
-                      //               ),
-                      //               padding: const EdgeInsets.symmetric(
-                      //                 horizontal: 32,
-                      //                 vertical: 14,
-                      //               ),
-                      //               shape: RoundedRectangleBorder(
-                      //                 borderRadius: BorderRadius.circular(8),
-                      //               ),
-                      //             ),
-                      //           ) :
-                      //           ElevatedButton.icon(
-                      //             onPressed: () => handleSave(context, state),
-                      //             icon: const Icon(Icons.save, color: Colors.white),
-                      //             label: const Text(
-                      //               'Save',
-                      //               style: TextStyle(
-                      //                 fontWeight: FontWeight.bold,
-                      //                 color: Colors.white,
-                      //               ),
-                      //             ),
-                      //             style: ElevatedButton.styleFrom(
-                      //               backgroundColor: const Color.fromARGB(
-                      //                 212,
-                      //                 5,
-                      //                 8,
-                      //                 205,
-                      //               ),
-                      //               padding: const EdgeInsets.symmetric(
-                      //                 horizontal: 32,
-                      //                 vertical: 14,
-                      //               ),
-                      //               shape: RoundedRectangleBorder(
-                      //                 borderRadius: BorderRadius.circular(8),
-                      //               ),
-                      //             ),
-                      //           ),
-                      //         )
-                      //       ],
-                      //     ),
-                      //   ),
-                      // FAB with badge on top
                       Positioned(
                         bottom: 10,
                         right: 10,

@@ -14,9 +14,9 @@ void cifSearch(BuildContext context, FormGroup form, String? applicantType) {
   final String type = applicantType == 'C' ? 'coapplicant' : 'guarantor';
   if (form.control('cifNumber').valid) {
     final req = CIFRequest(
-      cifId: form.control('cifNumber').value,
-      type: 'borrower',
-      token: ApiConstants.api_qa_token,
+      custId: form.control('cifNumber').value,
+      // type: 'borrower',
+      // token: ApiConstants.api_qa_token,
     );
     context.read<CoappDetailsBloc>().add(
       CoAppGurantorSearchCifEvent(request: req),

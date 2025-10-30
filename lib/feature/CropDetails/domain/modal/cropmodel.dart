@@ -2,154 +2,170 @@
 import 'dart:convert';
 
 class CropModal {
-  String? taluk;
-  String? agriCultivated;
-  String? state;
-  String? firka;
-  String? distanceFromBranch;
-  int? irrigated;
-  String? natureOfRight;
-  String? district;
-  String? village;
-  int? rainfed;
-  int? total;
-  String? cropsCultivatedOrProposedCrops;
-  String? surveyNo;
-  String? farmDistance;
+  String? rowId;
+  String? season;
+  String? cropType;
+  String? cropName;
+  String? culAreaLand;
+  int? culAreaSize;
+  String? typeOfLand;
+  int? scaOfFin;
+  int? addSofByRo;
+  int? costOfCul;
+  String? covOfCrop;
+  String? cropIns;
+  int? addSofAmount;
+  int? insPre;
+  String? dueDateOfRepay;
+
   CropModal({
-    this.taluk,
-    this.agriCultivated,
-    this.state,
-    this.firka,
-    this.distanceFromBranch,
-    this.irrigated,
-    this.natureOfRight,
-    this.district,
-    this.village,
-    this.rainfed,
-    this.total,
-    this.cropsCultivatedOrProposedCrops,
-    this.surveyNo,
-    this.farmDistance,
+    this.rowId,
+    this.season,
+    this.cropType,
+    this.cropName,
+    this.culAreaLand,
+    this.culAreaSize,
+    this.typeOfLand,
+    this.scaOfFin,
+    this.addSofByRo,
+    this.costOfCul,
+    this.covOfCrop,
+    this.cropIns,
+    this.addSofAmount,
+    this.insPre,
+    this.dueDateOfRepay,
   });
 
   CropModal copyWith({
-    String? taluk,
-    String? agriCultivated,
-    String? state,
-    String? firka,
-    String? distanceFromBranch,
-    int? irrigated,
-    String? natureOfRight,
-    String? district,
-    String? village,
-    int? rainfed,
-    int? total,
-    String? cropsCultivatedOrProposedCrops,
-    String? surveyNo,
-    String? farmDistance,
+    String? rowId,
+    String? season,
+    String? cropType,
+    String? cropName,
+    String? culAreaLand,
+    int? culAreaSize,
+    String? typeOfLand,
+    int? scaOfFin,
+    int? addSofByRo,
+    int? costOfCul,
+    String? covOfCrop,
+    String? cropIns,
+    int? addSofAmount,
+    int? insPre,
+    String? dueDateOfRepay,
   }) {
     return CropModal(
-      taluk: taluk ?? this.taluk,
-      agriCultivated: agriCultivated ?? this.agriCultivated,
-      state: state ?? this.state,
-      firka: firka ?? this.firka,
-      distanceFromBranch: distanceFromBranch ?? this.distanceFromBranch,
-      irrigated: irrigated ?? this.irrigated,
-      natureOfRight: natureOfRight ?? this.natureOfRight,
-      district: district ?? this.district,
-      village: village ?? this.village,
-      rainfed: rainfed ?? this.rainfed,
-      total: total ?? this.total,
-      cropsCultivatedOrProposedCrops: cropsCultivatedOrProposedCrops ?? this.cropsCultivatedOrProposedCrops,
-      surveyNo: surveyNo ?? this.surveyNo,
-      farmDistance: farmDistance ?? this.farmDistance,
+      rowId: rowId ?? this.rowId,
+      season: season ?? this.season,
+      cropType: cropType ?? this.cropType,
+      cropName: cropName ?? this.cropName,
+      culAreaLand: culAreaLand ?? this.culAreaLand,
+      culAreaSize: culAreaSize ?? this.culAreaSize,
+      typeOfLand: typeOfLand ?? this.typeOfLand,
+      scaOfFin: scaOfFin ?? this.scaOfFin,
+      addSofByRo: addSofByRo ?? this.addSofByRo,
+      costOfCul: costOfCul ?? this.costOfCul,
+      covOfCrop: covOfCrop ?? this.covOfCrop,
+      cropIns: cropIns ?? this.cropIns,
+      addSofAmount: addSofAmount ?? this.addSofAmount,
+      insPre: insPre ?? this.insPre,
+      dueDateOfRepay: dueDateOfRepay ?? this.dueDateOfRepay,
     );
   }
 
   Map<String, dynamic> toMap() {
-    return <String, dynamic>{
-      'taluk': taluk,
-      'agriCultivated': agriCultivated,
-      'state': state,
-      'firka': firka,
-      'distanceFromBranch': distanceFromBranch,
-      'irrigated': irrigated,
-      'natureOfRight': natureOfRight,
-      'district': district,
-      'village': village,
-      'rainfed': rainfed,
-      'total': total,
-      'cropsCultivatedOrProposedCrops': cropsCultivatedOrProposedCrops,
-      'surveyNo': surveyNo,
-      'farmDistance': farmDistance,
+    return {
+      'rowId': rowId ?? '',
+      'season': season ?? '',
+      'cropType': cropType ?? '',
+      'cropName': cropName ?? '',
+      'culAreaLand': culAreaLand ?? '',
+      'culAreaSize': culAreaSize ?? 0,
+      'typeOfLand': typeOfLand ?? '',
+      'scaOfFin': scaOfFin ?? 0,
+      'addSofByRo': addSofByRo ?? 0,
+      'costOfCul': costOfCul ?? 0,
+      'covOfCrop': covOfCrop ?? '',
+      'cropIns': cropIns ?? '',
+      'addSofAmount': addSofAmount ?? 0,
+      'insPre': insPre ?? 0,
+      'dueDateOfRepay': dueDateOfRepay ?? '',
     };
   }
 
   factory CropModal.fromMap(Map<String, dynamic> map) {
     return CropModal(
-      taluk: map['taluk'] != null ? map['taluk'] as String : null,
-      agriCultivated: map['agriCultivated'] != null ? map['agriCultivated'] as String : null,
-      state: map['state'] != null ? map['state'] as String : null,
-      firka: map['firka'] != null ? map['firka'] as String : null,
-      distanceFromBranch: map['distanceFromBranch'] != null ? map['distanceFromBranch'] as String : null,
-      irrigated: map['irrigated'] != null ? map['irrigated'] as int : null,
-      natureOfRight: map['natureOfRight'] != null ? map['natureOfRight'] as String : null,
-      district: map['district'] != null ? map['district'] as String : null,
-      village: map['village'] != null ? map['village'] as String : null,
-      rainfed: map['rainfed'] != null ? map['rainfed'] as int : null,
-      total: map['total'] != null ? map['total'] as int : null,
-      cropsCultivatedOrProposedCrops: map['cropsCultivatedOrProposedCrops'] != null ? map['cropsCultivatedOrProposedCrops'] as String : null,
-      surveyNo: map['surveyNo'] != null ? map['surveyNo'] as String : null,
-      farmDistance: map['farmDistance'] != null ? map['farmDistance'] as String : null,
+      rowId: map['rowId'] != null ? map['rowId'] as String : null,
+      season: map['season'] != null ? map['season'] as String : null,
+      cropType: map['cropType'] != null ? map['cropType'] as String : null,
+      cropName: map['cropName'] != null ? map['cropName'] as String : null,
+      culAreaLand:
+          map['culAreaLand'] != null ? map['culAreaLand'] as String : null,
+      culAreaSize:
+          map['culAreaSize'] != null ? map['culAreaSize'] as int : null,
+      typeOfLand:
+          map['typeOfLand'] != null ? map['typeOfLand'] as String : null,
+      scaOfFin: map['scaOfFin'] != null ? map['scaOfFin'] as int : null,
+      addSofByRo: map['addSofByRo'] != null ? map['addSofByRo'] as int : null,
+      costOfCul: map['costOfCul'] != null ? map['costOfCul'] as int : null,
+      covOfCrop: map['covOfCrop'] != null ? map['covOfCrop'] as String : null,
+      cropIns: map['cropIns'] != null ? map['cropIns'] as String : null,
+      addSofAmount:
+          map['addSofAmount'] != null ? map['addSofAmount'] as int : null,
+      insPre: map['insPre'] != null ? map['insPre'] as int : null,
+      dueDateOfRepay:
+          map['dueDateOfRepay'] != null
+              ? map['dueDateOfRepay'] as String
+              : null,
     );
   }
 
   String toJson() => json.encode(toMap());
 
-  factory CropModal.fromJson(String source) => CropModal.fromMap(json.decode(source) as Map<String, dynamic>);
+  factory CropModal.fromJson(String source) =>
+      CropModal.fromMap(json.decode(source) as Map<String, dynamic>);
 
   @override
   String toString() {
-    return 'CropModal(taluk: $taluk, agriCultivated: $agriCultivated, state: $state, firka: $firka, distanceFromBranch: $distanceFromBranch, irrigated: $irrigated, natureOfRight: $natureOfRight, district: $district, village: $village, rainfed: $rainfed, total: $total, cropsCultivatedOrProposedCrops: $cropsCultivatedOrProposedCrops, surveyNo: $surveyNo, farmDistance: $farmDistance)';
+    return 'CropModal(rowId: $rowId, season: $season, cropType: $cropType, cropName: $cropName, culAreaLand: $culAreaLand, culAreaSize: $culAreaSize, typeOfLand: $typeOfLand, scaOfFin: $scaOfFin, addSofByRo: $addSofByRo, costOfCul: $costOfCul, covOfCrop: $covOfCrop, cropIns: $cropIns, addSofAmount: $addSofAmount, insPre: $insPre, dueDateOfRepay: $dueDateOfRepay)';
   }
 
   @override
   bool operator ==(covariant CropModal other) {
     if (identical(this, other)) return true;
-  
-    return 
-      other.taluk == taluk &&
-      other.agriCultivated == agriCultivated &&
-      other.state == state &&
-      other.firka == firka &&
-      other.distanceFromBranch == distanceFromBranch &&
-      other.irrigated == irrigated &&
-      other.natureOfRight == natureOfRight &&
-      other.district == district &&
-      other.village == village &&
-      other.rainfed == rainfed &&
-      other.total == total &&
-      other.cropsCultivatedOrProposedCrops == cropsCultivatedOrProposedCrops &&
-      other.surveyNo == surveyNo &&
-      other.farmDistance == farmDistance;
+
+    return other.rowId == rowId &&
+        other.season == season &&
+        other.cropType == cropType &&
+        other.cropName == cropName &&
+        other.culAreaLand == culAreaLand &&
+        other.culAreaSize == culAreaSize &&
+        other.typeOfLand == typeOfLand &&
+        other.scaOfFin == scaOfFin &&
+        other.addSofByRo == addSofByRo &&
+        other.costOfCul == costOfCul &&
+        other.covOfCrop == covOfCrop &&
+        other.cropIns == cropIns &&
+        other.addSofAmount == addSofAmount &&
+        other.insPre == insPre &&
+        other.dueDateOfRepay == dueDateOfRepay;
   }
 
   @override
   int get hashCode {
-    return taluk.hashCode ^
-      agriCultivated.hashCode ^
-      state.hashCode ^
-      firka.hashCode ^
-      distanceFromBranch.hashCode ^
-      irrigated.hashCode ^
-      natureOfRight.hashCode ^
-      district.hashCode ^
-      village.hashCode ^
-      rainfed.hashCode ^
-      total.hashCode ^
-      cropsCultivatedOrProposedCrops.hashCode ^
-      surveyNo.hashCode ^
-      farmDistance.hashCode;
+    return rowId.hashCode ^
+        season.hashCode ^
+        cropType.hashCode ^
+        cropName.hashCode ^
+        culAreaLand.hashCode ^
+        culAreaSize.hashCode ^
+        typeOfLand.hashCode ^
+        scaOfFin.hashCode ^
+        addSofByRo.hashCode ^
+        costOfCul.hashCode ^
+        covOfCrop.hashCode ^
+        cropIns.hashCode ^
+        addSofAmount.hashCode ^
+        insPre.hashCode ^
+        dueDateOfRepay.hashCode;
   }
 }

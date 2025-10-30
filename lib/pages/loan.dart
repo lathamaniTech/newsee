@@ -92,23 +92,40 @@ class Loan extends StatelessWidget {
                   itemBuilder: (context, index) {
                     final product = state.productmasterList[index];
                     return Padding(
-                      padding: EdgeInsets.all(5.0),
-                      child: InkWell(
-                        // card widget for showing products
-                        onTap: () {
-                          ProductMaster selectedProduct = product;
-                          ctxt.read<LoanproductBloc>().add(
-                            ResetShowBottomSheet(
-                              selectedProduct: selectedProduct,
+                      padding: const EdgeInsets.only(
+                        top: 10.0,
+                        left: 10.0,
+                        bottom: 4.0,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Please tap any product to select and proceed',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.deepOrange,
                             ),
-                          );
-                        },
-                        child: ProductCard(
-                          productId: product.prdCode,
-                          productDescription: product.prdDesc,
-                          amountFrom: formatAmount(product.prdamtFromRange),
-                          amountTo: formatAmount(product.prdamtToRange),
-                        ),
+                          ),
+                          const SizedBox(height: 8),
+                          InkWell(
+                            onTap: () {
+                              ProductMaster selectedProduct = product;
+                              ctxt.read<LoanproductBloc>().add(
+                                ResetShowBottomSheet(
+                                  selectedProduct: selectedProduct,
+                                ),
+                              );
+                            },
+                            child: ProductCard(
+                              productId: product.prdCode,
+                              productDescription: product.prdDesc,
+                              amountFrom: formatAmount(product.prdamtFromRange),
+                              amountTo: formatAmount(product.prdamtToRange),
+                            ),
+                          ),
+                        ],
                       ),
                     );
                   },

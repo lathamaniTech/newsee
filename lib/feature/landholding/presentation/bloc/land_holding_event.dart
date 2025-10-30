@@ -12,12 +12,15 @@ class LandHoldingInitEvent extends LandHoldingEvent {
 class LandDetailsSaveEvent extends LandHoldingEvent {
   final String proposalNumber;
   final Map<String, dynamic> landData;
-  const LandDetailsSaveEvent({required this.proposalNumber, required this.landData});
+  const LandDetailsSaveEvent({
+    required this.proposalNumber,
+    required this.landData,
+  });
 }
 
 class LandDetailsLoadEvent extends LandHoldingEvent {
   final LandData landData;
-  const LandDetailsLoadEvent({ required this.landData});
+  const LandDetailsLoadEvent({required this.landData});
 }
 
 class LandDetailsDeleteEvent extends LandHoldingEvent {

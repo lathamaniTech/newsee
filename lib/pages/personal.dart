@@ -6,6 +6,7 @@ import 'package:newsee/Model/personal_data.dart';
 import 'package:newsee/Utils/qr_nav_utils.dart';
 import 'package:newsee/Utils/utils.dart';
 import 'package:newsee/feature/aadharvalidation/domain/modal/aadharvalidate_request.dart';
+import 'package:newsee/feature/cif/domain/model/user/cif_response.dart';
 import 'package:newsee/feature/dedupe/presentation/bloc/dedupe_bloc.dart';
 import 'package:newsee/feature/draft/draft_service.dart';
 import 'package:newsee/feature/draft/presentation/pages/draft_inbox.dart';
@@ -95,67 +96,113 @@ class Personal extends StatelessWidget {
     @desc       : map cif response in personal form
     @param      : {CifResponse val} - cifresponse
   */
-  mapCifDate(val) {
-    datamapperCif(val);
+  mapCifDate(val, lovList) {
+    datamapperCif(val, lovList);
   }
 
-  void datamapperCif(val) {
+  void datamapperCif(CifResponse val, List<Lov>? lovList) {
     try {
-      String mobileno = '';
-      if (val.lleadmobno!.length == 12 && val.lleadmobno!.startsWith("91")) {
-        mobileno = val.lleadmobno!.substring(2);
-      } else {
-        mobileno = val.lleadmobno!;
+      String? formatMobile(String? phoneNum) {
+        if (phoneNum == null || phoneNum.isEmpty) return null;
+        return (phoneNum.length == 12 && phoneNum.startsWith("91"))
+            ? phoneNum.substring(2)
+            : phoneNum;
       }
-      form.control('firstName')
-        ..updateValue(val.lleadfrstname!)
-        ..markAsDisabled();
-      form.control('middleName')
-        ..updateValue(val.lleadmidname!)
-        ..markAsDisabled();
-      form.control('lastName')
-        ..updateValue(val.lleadlastname!)
-        ..markAsDisabled();
-      form.control('dob')
-        ..updateValue(getDateFormat(val.lleaddob!))
-        ..markAsDisabled();
-      form.control('primaryMobileNumber')
-        ..updateValue(mobileno)
-        ..markAsDisabled();
-      form.control('email')
-        ..updateValue(val.lleademailid!)
-        ..markAsDisabled();
-      form.control('panNumber')
-        ..updateValue(val.lleadpanno!)
-        ..markAsDisabled();
-      form.control('aadharRefNo')
-        ..updateValue(val.lleadadharno!)
-        ..markAsDisabled();
-      if (val.lleadadharno != null) {
-        refAadhaar = true;
+
+      Lov? findLov(String header, String? target) {
+        if (lovList == null || target == null || target.isEmpty) return null;
+        return lovList.firstWhere(
+          (lov) =>
+              lov.Header == header &&
+              (lov.optvalue.toUpperCase() == target.toUpperCase() ||
+                  lov.optDesc.toUpperCase() == target.toUpperCase()),
+          orElse: () => Lov(Header: '', optvalue: '', optDesc: '', optCode: ''),
+        );
       }
-    } catch (error) {
-      print("autoPopulateData-catch-error $error");
+
+      void setControl(String controlName, dynamic value) {
+        final control = form.control(controlName);
+        if (value != null && value.toString().trim().isNotEmpty) {
+          control.updateValue(value);
+          control.markAsDisabled();
+        } else {
+          control.markAsEnabled();
+        }
+      }
+
+      final mobile = formatMobile(val.mobilNum);
+      // get find values from list
+      final religionLov = findLov('Religion', val.communityName);
+      final casteLov = findLov('Caste', val.casteName);
+      final genderLov = findLov('Gender', val.gender);
+
+      // set values to form controls
+      setControl('firstName', val.firstName);
+      setControl('middleName', val.secondName);
+      setControl('lastName', val.lastName);
+      setControl(
+        'dob',
+        val.dateOfBirth != null ? getDateFormat(val.dateOfBirth!) : null,
+      );
+      setControl('primaryMobileNumber', mobile);
+      setControl('email', val.email);
+      setControl('panNumber', val.panNo);
+      setControl('aadharRefNo', val.aadharNum);
+      setControl('religion', religionLov?.optvalue);
+      setControl('caste', casteLov?.optvalue);
+      setControl('gender', genderLov?.optvalue);
+
+      // aadhaar flag
+      refAadhaar = val.aadharNum?.isNotEmpty == true;
+    } catch (error, stack) {
+      print("autoPopulateData-catch-error: $error");
+      print(stack);
     }
   }
 
-  // void datamapperCif(val) {
+  // void datamapperCif(CifResponse val, lovList) {
   //   try {
   //     String mobileno = '';
-  //     if (val.lleadmobno!.length == 12 && val.lleadmobno!.startsWith("91")) {
-  //       mobileno = val.lleadmobno!.substring(2);
+  //     if (val.phoneNum!.length == 12 && val.phoneNum!.startsWith("91")) {
+  //       mobileno = val.phoneNum!.substring(2);
   //     } else {
-  //       mobileno = val.lleadmobno!;
+  //       mobileno = val.phoneNum!;
   //     }
-  //     form.control('firstName').updateValue(val.lleadfrstname!);
-  //     form.control('middleName').updateValue(val.lleadmidname!);
-  //     form.control('lastName').updateValue(val.lleadlastname!);
-  //     form.control('dob').updateValue(getDateFormat(val.lleaddob!));
-  //     form.control('primaryMobileNumber').updateValue(mobileno);
-  //     form.control('email').updateValue(val.lleademailid!);
-  //     form.control('panNumber').updateValue(val.lleadpanno!);
-  //     form.control('aadharRefNo').updateValue(val.lleadadharno!);
-  //     if (val.lleadadharno != null) {
+  //     final Lov lov = lovList?.firstWhere(
+  //       (lov) =>
+  //           lov.Header == 'Religion' &&
+  //           (lov.optvalue.toUpperCase() == val.communityName?.toUpperCase() ||
+  //               lov.optDesc.toUpperCase() == val.communityName?.toUpperCase()),
+  //     );
+
+  //     form.control('firstName')
+  //       ..updateValue(val.firstName!)
+  //       ..markAsDisabled();
+  //     form.control('middleName')
+  //       ..updateValue(val.secondName!)
+  //       ..markAsDisabled();
+  //     form.control('lastName')
+  //       ..updateValue(val.lastName!)
+  //       ..markAsDisabled();
+  //     form.control('dob')
+  //       ..updateValue(getDateFormat(val.dateOfBirth!))
+  //       ..markAsDisabled();
+  //     form.control('primaryMobileNumber')
+  //       ..updateValue(mobileno)
+  //       ..markAsDisabled();
+  //     form.control('email')
+  //       ..updateValue(val.email!)
+  //       ..markAsDisabled();
+  //     form.control('panNumber')
+  //       ..updateValue(val.panNo!)
+  //       ..markAsDisabled();
+  //     form.control('aadharRefNo')
+  //       ..updateValue(val.aadharNum!)
+  //       ..markAsDisabled();
+  //     form.controls['religion']
+  //       ?..updateValue(lov.optvalue)
+  //       ..markAsDisabled();
+  //     if (val.aadharNum != null) {
   //       refAadhaar = true;
   //     }
   //   } catch (error) {
@@ -305,10 +352,10 @@ class Personal extends StatelessWidget {
               dedupeState = context.watch<DedupeBloc>().state;
               if (dedupeState.cifResponse != null) {
                 print(
-                  'cif response title => ${dedupeState.cifResponse?.lleadtitle}',
+                  'cif response title => ${dedupeState.cifResponse?.custTitle}',
                 );
                 print('state.lovList =>${state.lovList}');
-                mapCifDate(dedupeState.cifResponse);
+                mapCifDate(dedupeState.cifResponse, state.lovList);
               } else if (dedupeState.aadharvalidateResponse != null) {
                 mapAadhaarData(dedupeState.aadharvalidateResponse);
               }
@@ -344,8 +391,12 @@ class Personal extends StatelessWidget {
                             Lov? lov = state.lovList?.firstWhere(
                               (lov) =>
                                   lov.Header == 'Title' &&
-                                  lov.optvalue ==
-                                      dedupeState?.cifResponse?.lleadtitle,
+                                  (lov.optvalue.toUpperCase() ==
+                                          dedupeState?.cifResponse?.custTitle
+                                              ?.toUpperCase() ||
+                                      lov.optDesc.toUpperCase() ==
+                                          dedupeState?.cifResponse?.custTitle
+                                              ?.toUpperCase()),
                             );
                             form.controls['title']?.updateValue(lov?.optvalue);
                             return lov;
@@ -395,7 +446,7 @@ class Personal extends StatelessWidget {
                           },
                           readOnly: true,
                           decoration: InputDecoration(
-                            labelText: 'Date Of Birth',
+                            labelText: 'Date of Birth',
                             suffixIcon: Icon(Icons.calendar_today),
                           ),
                           onTap: (control) async {
@@ -417,6 +468,7 @@ class Personal extends StatelessWidget {
                           },
                         ),
                       ),
+
                       IntegerTextField(
                         fieldKey: _primaryMobileNumberKey,
                         controlName: 'primaryMobileNumber',
@@ -436,13 +488,13 @@ class Personal extends StatelessWidget {
                       CustomTextField(
                         fieldKey: _emailKey,
                         controlName: 'email',
-                        label: 'Email Id',
+                        label: 'Email ID',
                         mantatory: true,
                       ),
                       CustomTextField(
                         fieldKey: _panNumberKey,
                         controlName: 'panNumber',
-                        label: 'Pan No',
+                        label: 'Pan No.',
                         mantatory: true,
                         autoCapitalize: true,
                         maxlength: 10,
@@ -454,7 +506,7 @@ class Personal extends StatelessWidget {
                                 child: IntegerTextField(
                                   fieldKey: _aadharRefNoKey,
                                   controlName: 'aadharRefNo',
-                                  label: 'Aadhaar No',
+                                  label: 'Aadhaar No.',
                                   mantatory: true,
                                   maxlength: 12,
                                   minlength: 12,
@@ -861,7 +913,7 @@ class Personal extends StatelessWidget {
                                 state.getLead == false) {
                               if (form.valid) {
                                 PersonalData personalData =
-                                    PersonalData.fromMap(form.value);
+                                    PersonalData.fromMap(form.rawValue);
                                 PersonalData personalDataFormatted =
                                     personalData.copyWith(
                                       dob: getDateFormatedByProvided(

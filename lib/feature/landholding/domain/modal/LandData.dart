@@ -1,237 +1,201 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:convert';
-
 import 'package:equatable/equatable.dart';
 
 class LandData extends Equatable {
-  final int? lslLandRowid;
+  final int? lklRowid;
   final int? lslPropNo;
-  final String? lslLandApplicantName;
-  final String? lslLandApplicant;
-  final String? lslLandFarmLoc;
-  final int? lslLandFarmDistance;
+  final String? lklApplicantName;
   final String? lslLandState;
   final String? lslLandDistrict;
-  final String? lslLandTaluk;
-  final String? lslLandVillage;
-  final String? lslLandFirka;
-  final String? lslLandSurveyNo;
-  final int? lslLandTotAcre;
-  final String? lslLandNature;
-  final int? lslLandIrriLand;
-  final String? lslLandIrriFaci;
-  final String? lslLandCompact;
-  final String? lslLandCeilingEnact;
-  final String? lslLandOfficeCerti;
-  final String? lslAgriActive;
+  final String? lklTaluk;
+  final String? lklVillage;
+  final String? lklSurveyNo;
+  final String? lklKhasraNo;
+  final String? lklUccCode;
+  final int? lklTotAcre;
+  final String? lklLandType;
+  final String? lklParticulars;
+  final String? lklSourceofIrrigation;
+  final int? lklFarmDistance;
+  final String? lklLandIrriFaci;
+  final String? lklsumOfTotalAcreage;
+  final String? lklfarmercategory;
+  final String? lklfarmertype;
+  final String? lklprimaryoccupation;
+  final String? lklotherbanks;
 
   const LandData({
-    this.lslLandRowid,
+    this.lklRowid,
     this.lslPropNo,
-    required this.lslLandApplicantName,
-    required this.lslLandApplicant,
-    required this.lslLandFarmLoc,
-    required this.lslLandFarmDistance,
-    required this.lslLandState,
-    required this.lslLandDistrict,
-    required this.lslLandTaluk,
-    required this.lslLandVillage,
-    required this.lslLandFirka,
-    required this.lslLandSurveyNo,
-    required this.lslLandTotAcre,
-    this.lslLandNature,
-    required this.lslLandIrriLand,
-    this.lslLandIrriFaci,
-    required this.lslLandCompact,
-    this.lslLandCeilingEnact,
-    this.lslLandOfficeCerti,
-    this.lslAgriActive,
+    this.lklApplicantName,
+    this.lslLandState,
+    this.lslLandDistrict,
+    this.lklTaluk,
+    this.lklVillage,
+    this.lklSurveyNo,
+    this.lklKhasraNo,
+    this.lklUccCode,
+    this.lklTotAcre,
+    this.lklLandType,
+    this.lklParticulars,
+    this.lklSourceofIrrigation,
+    this.lklFarmDistance,
+    this.lklLandIrriFaci,
+    this.lklsumOfTotalAcreage,
+    this.lklfarmercategory,
+    this.lklfarmertype,
+    this.lklprimaryoccupation,
+    this.lklotherbanks,
   });
 
   @override
-  List<Object?> get props {
-    return [
-      lslLandRowid,
-      lslPropNo,
-      lslLandApplicantName,
-      lslLandApplicant,
-      lslLandFarmLoc,
-      lslLandFarmDistance,
-      lslLandState,
-      lslLandDistrict,
-      lslLandTaluk,
-      lslLandVillage,
-      lslLandFirka,
-      lslLandSurveyNo,
-      lslLandTotAcre,
-      lslLandNature,
-      lslLandIrriLand,
-      lslLandIrriFaci,
-      lslLandCompact,
-      lslLandCeilingEnact,
-      lslLandOfficeCerti,
-      lslAgriActive,
-    ];
-  }
+  List<Object?> get props => [
+    lklRowid,
+    lslPropNo,
+    lklApplicantName,
+    lslLandState,
+    lslLandDistrict,
+    lklTaluk,
+    lklVillage,
+    lklSurveyNo,
+    lklKhasraNo,
+    lklUccCode,
+    lklTotAcre,
+    lklLandType,
+    lklParticulars,
+    lklSourceofIrrigation,
+    lklFarmDistance,
+    lklLandIrriFaci,
+    lklsumOfTotalAcreage,
+    lklfarmercategory,
+    lklfarmertype,
+    lklprimaryoccupation,
+    lklotherbanks,
+  ];
 
   LandData copyWith({
-    int? lslLandRowid,
+    int? lklRowid,
     int? lslPropNo,
-    String? lslLandApplicantName,
-    String? lslLandApplicant,
-    String? lslLandFarmLoc,
-    int? lslLandFarmDistance,
+    String? lklApplicantName,
     String? lslLandState,
     String? lslLandDistrict,
-    String? lslLandTaluk,
-    String? lslLandVillage,
-    String? lslLandFirka,
-    String? lslLandSurveyNo,
-    int? lslLandTotAcre,
-    String? lslLandNature,
-    int? lslLandIrriLand,
-    String? lslLandIrriFaci,
-    String? lslLandCompact,
-    String? lslLandCeilingEnact,
-    String? lslLandOfficeCerti,
-    String? lslAgriActive,
+    String? lklTaluk,
+    String? lklVillage,
+    String? lklSurveyNo,
+    String? lklKhasraNo,
+    String? lklUccCode,
+    int? lklTotAcre,
+    String? lklLandType,
+    String? lklParticulars,
+    String? lklSourceofIrrigation,
+    int? lklFarmDistance,
+    String? lklLandIrriFaci,
+    String? lklsumOfTotalAcreage,
+    String? lklfarmercategory,
+    String? lklfarmertype,
+    String? lklprimaryoccupation,
+    String? lklotherbanks,
   }) {
     return LandData(
-      lslLandRowid: lslLandRowid ?? this.lslLandRowid,
+      lklRowid: lklRowid ?? this.lklRowid,
       lslPropNo: lslPropNo ?? this.lslPropNo,
-      lslLandApplicantName: lslLandApplicantName ?? this.lslLandApplicantName,
-      lslLandApplicant: lslLandApplicant ?? this.lslLandApplicant,
-      lslLandFarmLoc: lslLandFarmLoc ?? this.lslLandFarmLoc,
-      lslLandFarmDistance: lslLandFarmDistance ?? this.lslLandFarmDistance,
+      lklApplicantName: lklApplicantName ?? this.lklApplicantName,
       lslLandState: lslLandState ?? this.lslLandState,
       lslLandDistrict: lslLandDistrict ?? this.lslLandDistrict,
-      lslLandTaluk: lslLandTaluk ?? this.lslLandTaluk,
-      lslLandVillage: lslLandVillage ?? this.lslLandVillage,
-      lslLandFirka: lslLandFirka ?? this.lslLandFirka,
-      lslLandSurveyNo: lslLandSurveyNo ?? this.lslLandSurveyNo,
-      lslLandTotAcre: lslLandTotAcre ?? this.lslLandTotAcre,
-      lslLandNature: lslLandNature ?? this.lslLandNature,
-      lslLandIrriLand: lslLandIrriLand ?? this.lslLandIrriLand,
-      lslLandIrriFaci: lslLandIrriFaci ?? this.lslLandIrriFaci,
-      lslLandCompact: lslLandCompact ?? this.lslLandCompact,
-      lslLandCeilingEnact: lslLandCeilingEnact ?? this.lslLandCeilingEnact,
-      lslLandOfficeCerti: lslLandOfficeCerti ?? this.lslLandOfficeCerti,
-      lslAgriActive: lslAgriActive ?? this.lslAgriActive,
+      lklTaluk: lklTaluk ?? this.lklTaluk,
+      lklVillage: lklVillage ?? this.lklVillage,
+      lklSurveyNo: lklSurveyNo ?? this.lklSurveyNo,
+      lklKhasraNo: lklKhasraNo ?? this.lklKhasraNo,
+      lklUccCode: lklUccCode ?? this.lklUccCode,
+      lklTotAcre: lklTotAcre ?? this.lklTotAcre,
+      lklLandType: lklLandType ?? this.lklLandType,
+      lklParticulars: lklParticulars ?? this.lklParticulars,
+      lklSourceofIrrigation:
+          lklSourceofIrrigation ?? this.lklSourceofIrrigation,
+      lklFarmDistance: lklFarmDistance ?? this.lklFarmDistance,
+      lklLandIrriFaci: lklLandIrriFaci ?? this.lklLandIrriFaci,
+      lklsumOfTotalAcreage: lklsumOfTotalAcreage ?? this.lklsumOfTotalAcreage,
+      lklfarmercategory: lklfarmercategory ?? this.lklfarmercategory,
+      lklfarmertype: lklfarmertype ?? this.lklfarmertype,
+      lklprimaryoccupation: lklprimaryoccupation ?? this.lklprimaryoccupation,
+      lklotherbanks: lklotherbanks ?? this.lklotherbanks,
     );
   }
 
   Map<String, dynamic> mapForm() {
     return {
-      'lslLandRowid': lslLandRowid.toString(),
-      'applicantName': lslLandApplicantName,
-      'locationOfFarm': lslLandFarmLoc,
+      'rowId': lklRowid?.toString(),
+      'applicantName': lklApplicantName,
       'state': lslLandState,
-      'taluk': lslLandTaluk,
-      'firka': lslLandFirka,
-      'totalAcreage': lslLandTotAcre.toString(),
-      'irrigatedLand': lslLandIrriLand.toString(),
-      'compactBlocks': lslLandCompact == '1' ? true : false,
-      'landOwnedByApplicant': lslLandApplicant == 'Y' ? true : false,
-      'distanceFromBranch': lslLandFarmDistance.toString(),
       'district': lslLandDistrict,
-      'village': lslLandVillage,
-      'surveyNo': lslLandSurveyNo,
-      'natureOfRight': lslLandNature,
-      'irrigationFacilities': lslLandIrriFaci,
-      'affectedByCeiling': lslLandCeilingEnact == '1' ? true : false,
-      'landAgriActive': lslAgriActive == '1' ? true : false,
-      'villageOfficerCertified': lslLandOfficeCerti == '1' ? true : false,
+      'taluk': lklTaluk,
+      'village': lklVillage,
+      'surveyNo': lklSurveyNo,
+      'khasraNo': lklKhasraNo,
+      'uccCode': lklUccCode,
+      'totAcre': lklTotAcre?.toString(),
+      'landType': lklLandType,
+      'particulars': lklParticulars,
+      'sourceofIrrig': lklSourceofIrrigation,
+      'farmDistance': lklFarmDistance?.toString(),
+      'farmerCategory': lklfarmercategory,
+      'primaryoccupation': lklprimaryoccupation,
+      'sumOfTotalAcreage': lklsumOfTotalAcreage,
+      'otherbanks': lklotherbanks == 'Y' ? true : false,
     };
   }
 
   Map<String, dynamic> toMap() {
-    return <String, dynamic>{
-      'lslLandRowid': lslLandRowid,
+    return {
+      'lklRowid': lklRowid,
       'lslPropNo': lslPropNo,
-      'lslLandApplicantName': lslLandApplicantName,
-      'lslLandApplicant': lslLandApplicant,
-      'lslLandFarmLoc': lslLandFarmLoc,
-      'lslLandFarmDistance': lslLandFarmDistance,
+      'lklApplicantName': lklApplicantName,
       'lslLandState': lslLandState,
       'lslLandDistrict': lslLandDistrict,
-      'lslLandTaluk': lslLandTaluk,
-      'lslLandVillage': lslLandVillage,
-      'lslLandFirka': lslLandFirka,
-      'lslLandSurveyNo': lslLandSurveyNo,
-      'lslLandTotAcre': lslLandTotAcre,
-      'lslLandNature': lslLandNature,
-      'lslLandIrriLand': lslLandIrriLand,
-      'lslLandIrriFaci': lslLandIrriFaci,
-      'lslLandCompact': lslLandCompact,
-      'lslLandCeilingEnact': lslLandCeilingEnact,
-      'lslLandOfficeCerti': lslLandOfficeCerti,
-      'lslAgriActive': lslAgriActive,
+      'lklTaluk': lklTaluk,
+      'lklVillage': lklVillage,
+      'lklSurveyNo': lklSurveyNo,
+      'lklKhasraNo': lklKhasraNo,
+      'lklUccCode': lklUccCode,
+      'lklTotAcre': lklTotAcre,
+      'lklLandType': lklLandType,
+      'lklParticulars': lklParticulars,
+      'lklSourceofIrrigation': lklSourceofIrrigation,
+      'lklFarmDistance': lklFarmDistance,
+      'lklLandIrriFaci': lklLandIrriFaci,
+      'lklsumOfTotalAcreage': lklsumOfTotalAcreage,
+      'lklfarmercategory': lklfarmercategory,
+      'lklfarmertype': lklfarmertype,
+      'lklprimaryoccupation': lklprimaryoccupation,
+      'lklotherbanks': lklotherbanks,
     };
   }
 
   factory LandData.fromMap(Map<String, dynamic> map) {
     return LandData(
-      lslLandRowid:
-          map['lslLandRowid'] != null ? map['lslLandRowid'] as int : null,
+      lklRowid: map['lklRowid'] != null ? map['lklRowid'] as int : null,
       lslPropNo: map['lslPropNo'] != null ? map['lslPropNo'] as int : null,
-      lslLandApplicantName:
-          map['lslLandApplicantName'] != null
-              ? map['lslLandApplicantName'] as String
-              : null,
-      lslLandApplicant:
-          map['lslLandApplicant'] != null
-              ? map['lslLandApplicant'] as String
-              : null,
-      lslLandFarmLoc:
-          map['lslLandFarmLoc'] != null
-              ? map['lslLandFarmLoc'] as String
-              : null,
-      lslLandFarmDistance:
-          map['lslLandFarmDistance'] != null
-              ? map['lslLandFarmDistance'] as int
-              : null,
-      lslLandState:
-          map['lslLandState'] != null ? map['lslLandState'] as String : null,
-      lslLandDistrict:
-          map['lslLandDistrict'] != null
-              ? map['lslLandDistrict'] as String
-              : null,
-      lslLandTaluk:
-          map['lslLandTaluk'] != null ? map['lslLandTaluk'] as String : null,
-      lslLandVillage:
-          map['lslLandVillage'] != null
-              ? map['lslLandVillage'] as String
-              : null,
-      lslLandFirka:
-          map['lslLandFirka'] != null ? map['lslLandFirka'] as String : null,
-      lslLandSurveyNo:
-          map['lslLandSurveyNo'] != null
-              ? map['lslLandSurveyNo'] as String
-              : null,
-      lslLandTotAcre:
-          map['lslLandTotAcre'] != null ? map['lslLandTotAcre'] as int : null,
-      lslLandNature:
-          map['lslLandNature'] != null ? map['lslLandNature'] as String : null,
-      lslLandIrriLand:
-          map['lslLandIrriLand'] != null ? map['lslLandIrriLand'] as int : null,
-      lslLandIrriFaci:
-          map['lslLandIrriFaci'] != null
-              ? map['lslLandIrriFaci'] as String
-              : null,
-      lslLandCompact:
-          map['lslLandCompact'] != null
-              ? map['lslLandCompact'] as String
-              : null,
-      lslLandCeilingEnact:
-          map['lslLandCeilingEnact'] != null
-              ? map['lslLandCeilingEnact'] as String
-              : null,
-      lslLandOfficeCerti:
-          map['lslLandOfficeCerti'] != null
-              ? map['lslLandOfficeCerti'] as String
-              : null,
-      lslAgriActive:
-          map['lslAgriActive'] != null ? map['lslAgriActive'] as String : null,
+      lklApplicantName: map['lklApplicantName'] as String?,
+      lslLandState: map['lslLandState'] as String?,
+      lslLandDistrict: map['lslLandDistrict'] as String?,
+      lklTaluk: map['lklTaluk'] as String?,
+      lklVillage: map['lklVillage'] as String?,
+      lklSurveyNo: map['lklSurveyNo'] as String?,
+      lklKhasraNo: map['lklKhasraNo'] as String?,
+      lklUccCode: map['lklUccCode'] as String?,
+      lklTotAcre: map['lklTotAcre'] != null ? map['lklTotAcre'] as int : null,
+      lklLandType: map['lklLandType'] as String?,
+      lklParticulars: map['lklParticulars'] as String?,
+      lklSourceofIrrigation: map['lklSourceofIrrigation'] as String?,
+      lklFarmDistance:
+          map['lklFarmDistance'] != null ? map['lklFarmDistance'] as int : null,
+      lklLandIrriFaci: map['lklLandIrriFaci'] as String?,
+      lklsumOfTotalAcreage: map['lklsumOfTotalAcreage'] as String?,
+      lklfarmercategory: map['lklfarmercategory'] as String?,
+      lklfarmertype: map['lklfarmertype'] as String?,
+      lklprimaryoccupation: map['lklprimaryoccupation'] as String?,
+      lklotherbanks: map['lklotherbanks'] as String?,
     );
   }
 

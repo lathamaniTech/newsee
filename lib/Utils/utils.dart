@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:newsee/AppData/app_constants.dart';
@@ -33,9 +35,9 @@ String getDateFormat(dynamic value) {
   if (value == null || value.toString().trim().isEmpty) return "";
 
   final formats = [
-    DateFormat("MMM dd, yyyy, hh:mm:ss a"),
-    DateFormat("yyyy-MM-dd"),
     DateFormat("dd-MM-yyyy"),
+    DateFormat("yyyy-MM-dd"),
+    DateFormat("MMM dd, yyyy, hh:mm:ss a"),
   ];
 
   for (var format in formats) {
@@ -43,7 +45,7 @@ String getDateFormat(dynamic value) {
       final date = format.parse(value.toString());
       return DateFormat('dd-MM-yyyy').format(date);
     } catch (e) {
-      print(e);
+      print('dat: $e');
     }
   }
   return "";
@@ -197,30 +199,29 @@ void closeBottomSheetIfExists(BuildContext context) {
 
 CoapplicantData mapCoapplicantDataFromCif(CifResponse response) {
   String mobileno = '';
-  if (response.lleadmobno!.length == 12 &&
-      response.lleadmobno!.startsWith("91")) {
-    mobileno = response.lleadmobno!.substring(2);
+  if (response.mobilNum!.length == 12 && response.mobilNum!.startsWith("91")) {
+    mobileno = response.mobilNum!.substring(2);
   }
 
   CoapplicantData data = CoapplicantData(
-    firstName: response.lleadfrstname,
-    lastName: response.lleadlastname,
-    email: response.lleademailid,
-    primaryMobileNumber: mobileno != '' ? mobileno : response.lleadmobno,
-    panNumber: response.lleadpanno,
-    address1: response.lleadaddress,
-    address2: response.lleadaddresslane1,
-    address3: response.lleadaddresslane2,
-    pincode: response.lleadpinno,
-    cifNumber: response.lldCbsid,
-    aadharRefNo: response.lleadadharno,
-    dob: getDateFormat(response.lleaddob),
-    loanLiabilityCount: response.liabilityCount,
-    loanLiabilityAmount: response.liabilityAmount,
-    depositCount: response.depositCount,
-    depositAmount: response.depositAmount,
-    constitution: response.cifFlag,
-    title: response.lleadtitle,
+    firstName: response.firstName,
+    lastName: response.lastName,
+    email: response.email,
+    primaryMobileNumber: mobileno != '' ? mobileno : response.mobilNum,
+    panNumber: response.panNo,
+    address1: response.restAddress,
+    // address2: response.lleadaddresslane1,
+    // address3: response.lleadaddresslane2,
+    pincode: response.borrowerPostalCode,
+    cifNumber: response.relCifid,
+    aadharRefNo: response.aadharNum,
+    dob: getDateFormat(response.dateOfBirth),
+    // loanLiabilityCount: response.liabilityCount,
+    // loanLiabilityAmount: response.liabilityAmount,
+    // depositCount: response.depositCount,
+    // depositAmount: response.depositAmount,
+    constitution: response.constitutionCode,
+    title: response.custTitle,
   );
 
   print('mapCoapplicantDataFromCif => $data');
@@ -230,12 +231,15 @@ CoapplicantData mapCoapplicantDataFromCif(CifResponse response) {
 /// @desc   : Remove rupee seperator from form value
 /// @param  : {from} - String value from form , {to} will be retured removed comma from string value
 /// @return : {String} - string data
-String? removeSpecialCharacters(String formval) {
+String removeSpecialCharacters(String? formval) {
   try {
-    String raw = formval.replaceAll(RegExp(r'[^\d]'), '');
-    return raw;
+    if (formval == null || formval.isEmpty) return '0';
+    return formval.replaceAll(RegExp(r'[^\d]'), '');
+    // String raw = formval.replaceAll(RegExp(r'[^\d]'), '');
+    // return raw;
   } catch (error) {
     print('removeSpecialCharacters-utilspage => $error');
+    return '0';
   }
 }
 
@@ -275,4 +279,16 @@ List<GroupProposalInbox>? onSearchApplicationInbox({
             loan.contains(searchQuery.toLowerCase());
       }).toList();
   return filteredLeads;
+}
+
+String generateUniqueID() {
+  // Get current timestamp in milliseconds
+  final timestamp = DateTime.now().millisecondsSinceEpoch;
+
+  // Generate random number between 0 and 99999
+  final random = Random().nextInt(100000);
+
+  // Combine timestamp and random number, take last 10 digits
+  final combined = (timestamp + random).toString();
+  return combined.substring(combined.length - 10);
 }

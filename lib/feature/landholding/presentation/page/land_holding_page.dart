@@ -31,7 +31,7 @@ class LandHoldingPage extends StatelessWidget {
   final String applicantName;
   final String title;
 
-  final form = AppForms.buildLandHoldingDetailsForm();
+  final form = AppForms.buildLandHoldingForm();
 
   LandHoldingPage({
     super.key,
@@ -102,7 +102,7 @@ class LandHoldingPage extends StatelessWidget {
                               itemBuilder: (ctx, index) {
                                 final item = entries[index];
                                 return Slidable(
-                                  key: ValueKey(item.lslLandRowid),
+                                  key: ValueKey(item.lklRowid),
                                   endActionPane: ActionPane(
                                     motion: ScrollMotion(),
                                     extentRatio:
@@ -137,11 +137,14 @@ class LandHoldingPage extends StatelessWidget {
                                   ),
                                   child: OptionsSheet(
                                     icon: Icons.grass,
-                                    title: item.lslLandApplicantName.toString(),
+                                    title:
+                                        item.lklApplicantName != null
+                                            ? item.lklApplicantName.toString()
+                                            : applicantName,
                                     details: [
-                                      item.lslLandSurveyNo.toString(),
-                                      item.lslLandVillage.toString(),
-                                      item.lslLandTotAcre.toString(),
+                                      item.lklSurveyNo.toString(),
+                                      item.lklVillage.toString(),
+                                      item.lklTotAcre.toString(),
                                     ],
                                     detailsName: [
                                       "Survey No",
@@ -327,27 +330,41 @@ class LandHoldingPage extends StatelessWidget {
                                         );
                                       },
                                       selItem: () {
-                                        final value = form.control('state').value;
-                                        if (value == null || value.toString().isEmpty) {
+                                        final value =
+                                            form.control('state').value;
+                                        if (value == null ||
+                                            value.toString().isEmpty) {
                                           return null;
                                         }
-                                        if (state.status == SaveStatus.update && state.selectedLandData?.lslLandState != null) {
-                                          String? stateCode = state.selectedLandData?.lslLandState;
+                                        if (state.status == SaveStatus.update &&
+                                            state
+                                                    .selectedLandData
+                                                    ?.lslLandState !=
+                                                null) {
+                                          String? stateCode =
+                                              state
+                                                  .selectedLandData
+                                                  ?.lslLandState;
 
-                                          GeographyMaster? geographyMaster = state
-                                              .stateCityMaster
-                                              ?.firstWhere((val) => val.code == stateCode);
+                                          GeographyMaster? geographyMaster =
+                                              state.stateCityMaster?.firstWhere(
+                                                (val) => val.code == stateCode,
+                                              );
                                           print(geographyMaster);
                                           if (geographyMaster != null) {
-                                            form.controls['state']
-                                                ?.updateValue(geographyMaster.code);
+                                            form.controls['state']?.updateValue(
+                                              geographyMaster.code,
+                                            );
                                             return geographyMaster;
                                           } else {
                                             return <GeographyMaster>[];
                                           }
-                                        } else if (state.stateCityMaster!.isEmpty) {
-                                          form.controls['state']
-                                              ?.updateValue("");
+                                        } else if (state
+                                            .stateCityMaster!
+                                            .isEmpty) {
+                                          form.controls['state']?.updateValue(
+                                            "",
+                                          );
                                           return <GeographyMaster>[];
                                         }
                                       },
@@ -362,25 +379,39 @@ class LandHoldingPage extends StatelessWidget {
                                         );
                                       },
                                       selItem: () {
-                                        final value = form.control('district').value;
-                                        if (value == null || value.toString().isEmpty) {
+                                        final value =
+                                            form.control('district').value;
+                                        if (value == null ||
+                                            value.toString().isEmpty) {
                                           return null;
                                         }
-                                        if (state.status == SaveStatus.update && state.selectedLandData?.lslLandState != null) {
-                                          String? cityCode = state.selectedLandData?.lslLandDistrict;
+                                        if (state.status == SaveStatus.update &&
+                                            state
+                                                    .selectedLandData
+                                                    ?.lslLandState !=
+                                                null) {
+                                          String? cityCode =
+                                              state
+                                                  .selectedLandData
+                                                  ?.lslLandDistrict;
 
-                                          GeographyMaster? geographyMaster = state
-                                              .cityMaster
-                                              ?.firstWhere((val) => val.code == cityCode);
+                                          GeographyMaster? geographyMaster =
+                                              state.cityMaster?.firstWhere(
+                                                (val) => val.code == cityCode,
+                                              );
                                           print(geographyMaster);
                                           if (geographyMaster != null) {
                                             form.controls['district']
-                                                ?.updateValue(geographyMaster.code);
+                                                ?.updateValue(
+                                                  geographyMaster.code,
+                                                );
                                             return geographyMaster;
                                           } else {
                                             return <GeographyMaster>[];
                                           }
-                                        } else if (state.stateCityMaster!.isEmpty) {
+                                        } else if (state
+                                            .stateCityMaster!
+                                            .isEmpty) {
                                           form.controls['district']
                                               ?.updateValue("");
                                           return <GeographyMaster>[];
@@ -403,145 +434,132 @@ class LandHoldingPage extends StatelessWidget {
                                       children: [
                                         Expanded(
                                           child: CustomTextField(
-                                            controlName: 'locationOfFarm',
-                                            label: 'Location of Farm',
+                                            controlName: 'farmDistance',
+                                            label: 'Farm Distance',
                                             mantatory: true,
                                           ),
                                         ),
-                                        const SizedBox(width: 8),
-                                        OutlinedButton.icon(
-                                          onPressed: () async {
-                                            if (form
-                                                    .control('locationOfFarm')
-                                                    .value !=
-                                                null) {
-                                              final position =
-                                                  form
-                                                          .control(
-                                                            'locationOfFarm',
-                                                          )
-                                                          .value
-                                                      as String;
-                                              if (position.contains(',')) {
-                                                final parts = position.split(
-                                                  ",",
-                                                );
-                                                final latitude =
-                                                    double.tryParse(
-                                                      parts[0].trim(),
-                                                    );
-                                                final longitude =
-                                                    double.tryParse(
-                                                      parts[1].trim(),
-                                                    );
-                                                if (latitude != null &&
-                                                    longitude != null) {
-                                                  showGoogleMapsDailog(
-                                                    context,
-                                                    latitude,
-                                                    longitude,
-                                                  );
-                                                }
-                                              }
-                                            } else {
-                                              globalLoadingBloc.add(
-                                                ShowLoading(
-                                                  message: 'Fetching location',
-                                                ),
-                                              );
-                                              try {
-                                                final curposition =
-                                                    await MediaService()
-                                                        .getLocation(context);
-                                                globalLoadingBloc.add(
-                                                  HideLoading(),
-                                                );
-                                                if (curposition.position !=
-                                                    null) {
-                                                  form
-                                                      .control('locationOfFarm')
-                                                      .updateValue(
-                                                        '${curposition.position!.latitude},${curposition.position!.longitude}',
-                                                      );
-                                                  showGoogleMapsDailog(
-                                                    context,
-                                                    curposition
-                                                        .position!
-                                                        .latitude,
-                                                    curposition
-                                                        .position!
-                                                        .longitude,
-                                                  );
-                                                  double calculateDistance =
-                                                      Geolocator.distanceBetween(
-                                                        12.9483,
-                                                        80.2546,
-                                                        curposition
-                                                            .position!
-                                                            .latitude,
-                                                        curposition
-                                                            .position!
-                                                            .longitude,
-                                                      );
-                                                  print(calculateDistance);
-                                                  String value =
-                                                      (calculateDistance / 1000)
-                                                          .round()
-                                                          .toString();
-                                                  print(
-                                                    'calculateDistance----->$value',
-                                                  );
-                                                  form
-                                                      .control(
-                                                        'distanceFromBranch',
-                                                      )
-                                                      .updateValue(value);
-                                                } else {
-                                                  showDialog(
-                                                    context: context,
-                                                    builder:
-                                                        (
-                                                          _,
-                                                        ) => SysmoAlert.warning(
-                                                          message:
-                                                              curposition.error
-                                                                  .toString(),
-                                                          onButtonPressed: () {
-                                                            context.pop();
-                                                          },
-                                                        ),
-                                                  );
-                                                }
-                                              } catch (error) {
-                                                SysmoAlert.warning(
-                                                  message: error.toString(),
-                                                );
-                                              }
-                                            }
-                                          },
-                                          icon: Icon(
-                                            Icons.map,
-                                          ), // Your icon here
-                                          label: Text(
-                                            "location",
-                                          ), // Your text here
-                                          style: OutlinedButton.styleFrom(
-                                            padding: EdgeInsets.symmetric(
-                                              horizontal: 16,
-                                              vertical: 12,
-                                            ),
-                                            textStyle: TextStyle(fontSize: 16),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
 
-                                    IntegerTextField(
-                                      controlName: 'distanceFromBranch',
-                                      label: 'Distance from Branch (in Kms)',
-                                      mantatory: true,
-                                      minlength: 1,
-                                      maxlength: 3
+                                        // const SizedBox(width: 8),
+                                        // OutlinedButton.icon(
+                                        //   onPressed: () async {
+                                        //     if (form
+                                        //             .control('farmDistance')
+                                        //             .value !=
+                                        //         null) {
+                                        //       final position =
+                                        //           form
+                                        //                   .control(
+                                        //                     'farmDistance',
+                                        //                   )
+                                        //                   .value
+                                        //               as String;
+                                        //       if (position.contains(',')) {
+                                        //         final parts = position.split(
+                                        //           ",",
+                                        //         );
+                                        //         final latitude =
+                                        //             double.tryParse(
+                                        //               parts[0].trim(),
+                                        //             );
+                                        //         final longitude =
+                                        //             double.tryParse(
+                                        //               parts[1].trim(),
+                                        //             );
+                                        //         if (latitude != null &&
+                                        //             longitude != null) {
+                                        //           showGoogleMapsDailog(
+                                        //             context,
+                                        //             latitude,
+                                        //             longitude,
+                                        //           );
+                                        //         }
+                                        //       }
+                                        //     } else {
+                                        //       globalLoadingBloc.add(
+                                        //         ShowLoading(
+                                        //           message: 'Fetching location',
+                                        //         ),
+                                        //       );
+                                        //       try {
+                                        //         final curposition =
+                                        //             await MediaService()
+                                        //                 .getLocation(context);
+                                        //         globalLoadingBloc.add(
+                                        //           HideLoading(),
+                                        //         );
+                                        //         if (curposition.position !=
+                                        //             null) {
+                                        //           // form
+                                        //           //     .control('locationOfFarm')
+                                        //           //     .updateValue(
+                                        //           //       '${curposition.position!.latitude},${curposition.position!.longitude}',
+                                        //           //     );
+                                        //           showGoogleMapsDailog(
+                                        //             context,
+                                        //             curposition
+                                        //                 .position!
+                                        //                 .latitude,
+                                        //             curposition
+                                        //                 .position!
+                                        //                 .longitude,
+                                        //           );
+                                        //           double calculateDistance =
+                                        //               Geolocator.distanceBetween(
+                                        //                 12.9483,
+                                        //                 80.2546,
+                                        //                 curposition
+                                        //                     .position!
+                                        //                     .latitude,
+                                        //                 curposition
+                                        //                     .position!
+                                        //                     .longitude,
+                                        //               );
+                                        //           print(calculateDistance);
+                                        //           String value =
+                                        //               (calculateDistance / 1000)
+                                        //                   .round()
+                                        //                   .toString();
+                                        //           print(
+                                        //             'calculateDistance----->$value',
+                                        //           );
+                                        //           form
+                                        //               .control('farmDistance')
+                                        //               .updateValue(value);
+                                        //         } else {
+                                        //           showDialog(
+                                        //             context: context,
+                                        //             builder:
+                                        //                 (
+                                        //                   _,
+                                        //                 ) => SysmoAlert.warning(
+                                        //                   message:
+                                        //                       curposition.error
+                                        //                           .toString(),
+                                        //                   onButtonPressed: () {
+                                        //                     context.pop();
+                                        //                   },
+                                        //                 ),
+                                        //           );
+                                        //         }
+                                        //       } catch (error) {
+                                        //         SysmoAlert.warning(
+                                        //           message: error.toString(),
+                                        //         );
+                                        //       }
+                                        //     }
+                                        //   },
+                                        //   icon: Icon(Icons.map),
+                                        //   label: Text("location"),
+                                        //   style: OutlinedButton.styleFrom(
+                                        //     padding: EdgeInsets.symmetric(
+                                        //       horizontal: 16,
+                                        //       vertical: 12,
+                                        //     ),
+                                        //     textStyle: TextStyle(fontSize: 16),
+                                        //   ),
+                                        // ),
+                                      ],
                                     ),
 
                                     IntegerTextField(
@@ -551,85 +569,57 @@ class LandHoldingPage extends StatelessWidget {
                                     ),
 
                                     IntegerTextField(
-                                      controlName: 'firka',
-                                      label:
-                                          'Firka (as per Adangal/Chitta/Patta)',
+                                      controlName: 'khasraNo',
+                                      label: 'Khasra No',
                                       mantatory: true,
                                     ),
                                     IntegerTextField(
-                                      controlName: 'totalAcreage',
+                                      controlName: 'uccCode',
+                                      label: 'UCC Code',
+                                      mantatory: true,
+                                    ),
+                                    IntegerTextField(
+                                      controlName: 'totAcre',
                                       label: 'Total Acreage (in Acres)',
                                       mantatory: true,
                                       maxlength: 2,
                                       minlength: 1,
                                     ),
-                                    IntegerTextField(
-                                      controlName: 'irrigatedLand',
-                                      label: 'Total Irrigated Land (in Acres)',
-                                      mantatory: true,
-                                      maxlength: 2,
-                                      minlength: 1,
-                                    ),
-                                    RadioButton(
-                                      label: 'Lands situated in compact blocks',
-                                      controlName: 'compactBlocks',
-                                      optionOne: 'Yes',
-                                      optionTwo: 'No',
-                                    ),
-                                    RadioButton(
-                                      label:
-                                          'Do the particulars of the holdings given in the application tally with the particulars given in village officers certificate',
-                                      controlName: 'villageOfficerCertified',
-                                      optionOne: 'Yes',
-                                      optionTwo: 'No',
-                                    ),
-                                    RadioButton(
-                                      label: 'Land owned by the Applicant',
-                                      controlName: 'landOwnedByApplicant',
-                                      optionOne: 'Yes',
-                                      optionTwo: 'No',
-                                    ),
-                                    // Dropdown(
-                                    //   controlName: '',
-                                    //   label: 'Nature of Right',
-                                    //   items: [
-                                    //     '--Select--',
-                                    //     'Owned',natureOfRight
-                                    //     'Leaseholder',
-                                    //     'Ancestral',
-                                    //   ],
-                                    // ),
+
                                     SearchableDropdown<Lov>(
-                                      controlName: 'natureOfRight',
-                                      label: 'Nature of Right',
+                                      controlName: 'landType',
+                                      label: 'Land Type',
                                       items:
                                           state.lovlist!
                                               .where(
-                                                (v) =>
-                                                    v.Header == 'NatureOfRight',
+                                                (v) => v.Header == 'LandType',
                                               )
                                               .toList(),
                                       onChangeListener: (Lov val) {
-                                        form.controls['natureOfRight']
-                                            ?.updateValue(val.optvalue);
+                                        form.controls['landType']?.updateValue(
+                                          val.optvalue,
+                                        );
+                                        final totAcre =
+                                            form.control('totAcre').value;
+                                        form.controls['sumOfTotalAcreage']
+                                            ?.updateValue(totAcre);
                                       },
                                       selItem: () {
                                         final value =
-                                            form.control('natureOfRight').value;
+                                            form.control('landType').value;
                                         if (value == null ||
                                             value.toString().isEmpty) {
                                           return null;
                                         }
                                         return state.lovlist!
                                             .where(
-                                              (v) =>
-                                                  v.Header == 'NatureOfRight',
+                                              (v) => v.Header == 'LandType',
                                             )
                                             .firstWhere(
                                               (lov) => lov.optvalue == value,
                                               orElse:
                                                   () => Lov(
-                                                    Header: 'NatureOfRight',
+                                                    Header: 'LandType',
                                                     optDesc: '',
                                                     optvalue: '',
                                                     optCode: '',
@@ -637,19 +627,10 @@ class LandHoldingPage extends StatelessWidget {
                                             );
                                       },
                                     ),
-                                    // Dropdown(
-                                    //   controlName: 'irrigationFacilities',
-                                    //   label: 'Nature of Irrigation facilities',
-                                    //   items: [
-                                    //     '--Select--',
-                                    //     'Canal',
-                                    //     'Well',
-                                    //     'Tube Wells',
-                                    //   ],
-                                    // ),
+
                                     SearchableDropdown<Lov>(
-                                      controlName: 'irrigationFacilities',
-                                      label: 'Nature of Irrigation facilities',
+                                      controlName: 'sourceofIrrig',
+                                      label: 'Source of Irrigation',
                                       items:
                                           state.lovlist!
                                               .where(
@@ -659,14 +640,12 @@ class LandHoldingPage extends StatelessWidget {
                                               )
                                               .toList(),
                                       onChangeListener: (Lov val) {
-                                        form.controls['irrigationFacilities']
+                                        form.controls['sourceofIrrig']
                                             ?.updateValue(val.optvalue);
                                       },
                                       selItem: () {
                                         final value =
-                                            form
-                                                .control('irrigationFacilities')
-                                                .value;
+                                            form.control('sourceofIrrig').value;
                                         if (value == null ||
                                             value.toString().isEmpty) {
                                           return null;
@@ -688,19 +667,134 @@ class LandHoldingPage extends StatelessWidget {
                                             );
                                       },
                                     ),
+                                    SearchableDropdown<Lov>(
+                                      controlName: 'particulars',
+                                      label: 'Particulars Of Land',
+                                      items:
+                                          state.lovlist!
+                                              .where(
+                                                (v) =>
+                                                    v.Header ==
+                                                    'LandIrrigation',
+                                              )
+                                              .toList(),
+                                      onChangeListener: (Lov val) {
+                                        form.controls['particulars']
+                                            ?.updateValue(val.optvalue);
+                                      },
+                                      selItem: () {
+                                        final value =
+                                            form.control('particulars').value;
+                                        if (value == null ||
+                                            value.toString().isEmpty) {
+                                          return null;
+                                        }
+                                        return state.lovlist!
+                                            .where(
+                                              (v) =>
+                                                  v.Header == 'LandIrrigation',
+                                            )
+                                            .firstWhere(
+                                              (lov) => lov.optvalue == value,
+                                              orElse:
+                                                  () => Lov(
+                                                    Header: 'LandIrrigation',
+                                                    optDesc: '',
+                                                    optvalue: '',
+                                                    optCode: '',
+                                                  ),
+                                            );
+                                      },
+                                    ),
+                                    SearchableDropdown<Lov>(
+                                      controlName: 'farmerCategory',
+                                      label: 'Farmer Category',
+                                      items:
+                                          state.lovlist!
+                                              .where(
+                                                (v) => v.Header == 'FarmerType',
+                                              )
+                                              .toList(),
+                                      onChangeListener: (Lov val) {
+                                        form.controls['farmerCategory']
+                                            ?.updateValue(val.optvalue);
+                                      },
+                                      selItem: () {
+                                        final value =
+                                            form
+                                                .control('farmerCategory')
+                                                .value;
+                                        if (value == null ||
+                                            value.toString().isEmpty) {
+                                          return null;
+                                        }
+                                        return state.lovlist!
+                                            .where(
+                                              (v) => v.Header == 'FarmerType',
+                                            )
+                                            .firstWhere(
+                                              (lov) => lov.optvalue == value,
+                                              orElse:
+                                                  () => Lov(
+                                                    Header: 'FarmerType',
+                                                    optDesc: '',
+                                                    optvalue: '',
+                                                    optCode: '',
+                                                  ),
+                                            );
+                                      },
+                                    ),
+
                                     RadioButton(
-                                      label:
-                                          'Are the Holdings in any way affected by land ceiling enactments',
-                                      controlName: 'affectedByCeiling',
+                                      label: 'Other Banks',
+                                      controlName: 'otherbanks',
                                       optionOne: 'Yes',
                                       optionTwo: 'No',
                                     ),
-                                    RadioButton(
-                                      label:
-                                          'Whether Land Agriculturally Active',
-                                      controlName: 'landAgriActive',
-                                      optionOne: 'Yes',
-                                      optionTwo: 'No',
+
+                                    SearchableDropdown<Lov>(
+                                      controlName: 'primaryoccupation',
+                                      label: 'Primary Occupation',
+                                      items:
+                                          state.lovlist!
+                                              .where(
+                                                (v) =>
+                                                    v.Header == 'AgricultType',
+                                              )
+                                              .toList(),
+                                      onChangeListener: (Lov val) {
+                                        form.controls['primaryoccupation']
+                                            ?.updateValue(val.optvalue);
+                                      },
+                                      selItem: () {
+                                        final value =
+                                            form
+                                                .control('primaryoccupation')
+                                                .value;
+                                        if (value == null ||
+                                            value.toString().isEmpty) {
+                                          return null;
+                                        }
+                                        return state.lovlist!
+                                            .where(
+                                              (v) => v.Header == 'AgricultType',
+                                            )
+                                            .firstWhere(
+                                              (lov) => lov.optvalue == value,
+                                              orElse:
+                                                  () => Lov(
+                                                    Header: 'AgricultType',
+                                                    optDesc: '',
+                                                    optvalue: '',
+                                                    optCode: '',
+                                                  ),
+                                            );
+                                      },
+                                    ),
+                                    IntegerTextField(
+                                      controlName: 'sumOfTotalAcreage',
+                                      label: 'Sum Of Total Acreage',
+                                      mantatory: true,
                                     ),
                                     ElevatedButton.icon(
                                       onPressed:
@@ -741,39 +835,7 @@ class LandHoldingPage extends StatelessWidget {
                           ],
                         ),
                       ),
-                      // Positioned(
-                      //   bottom: 5,
-                      //   left: 0,
-                      //   right: 0,
-                      //   child: Center(
-                      //     child: ElevatedButton.icon(
-                      //       onPressed: () => handleSubmit(context, state),
-                      //       icon: const Icon(Icons.save, color: Colors.white),
-                      //       label: const Text(
-                      //         'Save',
-                      //         style: TextStyle(
-                      //           fontWeight: FontWeight.bold,
-                      //           color: Colors.white,
-                      //         ),
-                      //       ),
-                      //       style: ElevatedButton.styleFrom(
-                      //         backgroundColor: const Color.fromARGB(
-                      //           212,
-                      //           5,
-                      //           8,
-                      //           205,
-                      //         ),
-                      //         padding: const EdgeInsets.symmetric(
-                      //           horizontal: 32,
-                      //           vertical: 14,
-                      //         ),
-                      //         shape: RoundedRectangleBorder(
-                      //           borderRadius: BorderRadius.circular(8),
-                      //         ),
-                      //       ),
-                      //     ),
-                      //   ),
-                      // ),
+
                       // FAB with badge on top
                       Positioned(
                         bottom: 10,

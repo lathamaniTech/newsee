@@ -24,7 +24,7 @@ import 'package:newsee/feature/masters/domain/modal/master_version.dart';
 import 'package:newsee/feature/masters/domain/repository/master_repo.dart';
 import 'package:newsee/feature/masters/presentation/bloc/masters_bloc.dart';
 import 'package:newsee/feature/masters/presentation/page/masters_page.dart';
-import 'package:newsee/feature/cic_check/cic_check_page.dart';
+import 'package:newsee/feature/cic_check/presentation/cic_check_page.dart';
 import 'package:newsee/pages/home_page.dart';
 import 'package:newsee/pages/newlead_page.dart';
 import 'package:newsee/pages/not_found_error.page.dart';
@@ -240,10 +240,9 @@ final routes = GoRouter(
             }
           },
           child: BlocProvider(
-            create:
-                (_) => DocumentBloc(mediaService: MediaService())
-                  ..add(FetchDocumentsEvent(proposalNumber: proposalNumber)),
-            lazy: false,
+            create: (_) => DocumentBloc(mediaService: MediaService()),
+            // ..add(FetchDocumentsEvent(proposalNumber: proposalNumber)),
+            // lazy: false,
             child: DocumentPage(proposalnumber: proposalNumber),
           ),
         );

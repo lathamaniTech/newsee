@@ -55,15 +55,15 @@ class CIFSearch extends StatelessWidget {
           (context, state) => {
             if (state.status == DedupeFetchStatus.success)
               {
-                formattedDate = getDateFormat(state.cifResponse?.lleaddob),
+                formattedDate = getDateFormat(state.cifResponse?.dateOfBirth),
                 dataList = [
                   {
                     "icon": Icons.person,
                     "label": "Name",
                     "value": [
-                      state.cifResponse?.lleadfrstname ?? '',
-                      state.cifResponse?.lleadmidname ?? '',
-                      state.cifResponse?.lleadlastname ?? '',
+                      state.cifResponse?.firstName ?? '',
+                      state.cifResponse?.secondName ?? '',
+                      state.cifResponse?.lastName ?? '',
                     ].where((val) => val.isNotEmpty).join(' '),
                   },
 
@@ -75,31 +75,31 @@ class CIFSearch extends StatelessWidget {
                   {
                     "icon": Icons.call,
                     "label": "Mobile",
-                    "value": state.cifResponse?.lleadmobno,
+                    "value": state.cifResponse?.mobilNum,
                   },
                   {
                     "icon": Icons.chrome_reader_mode_rounded,
                     "label": "PAN",
-                    "value": state.cifResponse?.lleadpanno,
+                    "value": state.cifResponse?.panNo,
                   },
                   {
                     "icon": Icons.elevator_rounded,
                     "label": "AAdhaar",
-                    "value": state.cifResponse?.lleadadharno,
+                    "value": state.cifResponse?.aadharNum,
                   },
                   {
                     "icon": Icons.home,
                     "label": "Address",
                     "value": [
-                      state.cifResponse?.lleadaddress ?? '',
-                      state.cifResponse?.lleadaddresslane1 ?? '',
-                      state.cifResponse?.lleadaddresslane2 ?? '',
+                      state.cifResponse?.restAddress ?? '',
+                      // state.cifResponse?.resAddresslane1 ?? '',
+                      // state.cifResponse?.resAddresslane2 ?? '',
                     ].where((val) => val.isNotEmpty).join(' '),
                   },
                   {
                     "icon": Icons.format_list_numbered_rtl_rounded,
                     "label": "Pincode",
-                    "value": state.cifResponse?.lleadpinno,
+                    "value": state.cifResponse?.borrowerPostalCode,
                   },
                 ],
                 showDialog(
@@ -167,9 +167,12 @@ class CIFSearch extends StatelessWidget {
                         ),
                         onPressed: () {
                           if (cifForm.valid) {
+                            final uniqId = generateUniqueID();
                             final CIFRequest req =
                                 CIFRequest(
-                                  cifId: cifForm.control('cifid').value,
+                                  custId: cifForm.control('cifid').value,
+                                  refNo: uniqId,
+                                  msgId: uniqId,
                                 ).copyWith();
                             context.read<DedupeBloc>().add(
                               SearchCifEvent(request: req),

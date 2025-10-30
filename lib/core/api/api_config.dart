@@ -11,7 +11,9 @@ class ApiConfig {
   static const String MASTERS_API_ENDPOINT = 'MasterDetails/getMasterDetails';
   static const String AADHAAR_API_ENDPOINT = 'MobileService/getAadhaarDetails';
 
-  static const String CIF_API_ENDPOINT = 'MobileService/CIFSearch';
+  // static const String CIF_API_ENDPOINT = 'MobileService/CIFSearch';
+  static const String CIF_API_ENDPOINT = 'UAIBController/callUAIB';
+  static const String CIBIL_API_ENDPOINT = 'UAIBController/callUAIB';
 
   static const String DEDUPE_API_ENDPOINT = "MobileService/getDedupeSearch";
   static const String GETCITY_API_ENDPOINT = "MasterDetails/getCityCode";
@@ -19,9 +21,11 @@ class ApiConfig {
       "MasterDetails/getDistrictCode";
 
   static const String API_RESPONSE_SUCCESS_KEY = 'Success';
+  static const String API_RESPONSE_ErrorFlag_KEY = 'ErrorFlag';
   static const String API_RESPONSE_ERRORMESSAGE_KEY = 'ErrorMessage';
 
   static const String API_RESPONSE_RESPONSE_KEY = 'responseData';
+  static const String API_RESPONSE_KEY = 'RESPONSE';
 
   static const String LEAD_INBOX_API_ENDPOINT =
       'MobileService/getLeadGroupDetails';
@@ -55,7 +59,8 @@ class ApiConfig {
   static const String UPLOAD_DOCUMENT = 'MobileService/getDocumentUpload';
   static const String FETCH_UPLOAD_DOCUMENT = 'MobileService/getUploadDocument';
   static const String DELETE_UPLOAD_DOCUMENT = 'MobileService/deleteUploadFile';
-  static const String GET_LAND_CROP_STATUS = 'MobileService/getLandAndCropStatus';
+  static const String GET_LAND_CROP_STATUS =
+      'MobileService/getLandAndCropStatus';
   static const String mpinRegisterEndpoint = 'MobileService/registerMPIN';
   static const String mpinValidateEndPoint = 'MobileService/validateMPINLogin';
   static const String module = 'AGRI';

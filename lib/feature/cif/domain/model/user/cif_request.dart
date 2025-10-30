@@ -7,60 +7,68 @@
    */
 import 'dart:convert';
 
+import 'package:newsee/AppData/app_constants.dart';
 import 'package:newsee/core/api/api_config.dart';
 
 class CIFRequest {
-  String? custId;
-  String? uniqueId;
-  String cifId;
-  String? type;
-  String? token;
+  final String? bankName;
+  final String? moduleName;
+  final String? apiName;
+  final String? refNo;
+  final String? msgId;
+  final String custId;
+
   CIFRequest({
-    this.custId,
-    this.uniqueId,
-    required this.cifId,
-    this.type,
-    this.token,
+    this.bankName,
+    this.moduleName,
+    this.apiName,
+    this.refNo,
+    this.msgId,
+    required this.custId,
   });
 
   CIFRequest copyWith({
+    String? bankName,
+    String? moduleName,
+    String? apiName,
+    String? refNo,
+    String? msgId,
     String? custId,
-    String? uniqueId,
-    String? cifId,
-    String? type,
-    String? token,
   }) {
     return CIFRequest(
-      custId: "902534",
-      uniqueId: "3",
-      cifId: cifId ?? this.cifId,
-      type: "borrower",
-      token: ApiConfig.AUTH_TOKEN,
+      bankName: bankName ?? AppConstants.bankName,
+      moduleName: moduleName ?? AppConstants.mobilityModule,
+      apiName: apiName ?? AppConstants.cifApiName,
+      refNo: refNo ?? this.refNo,
+      msgId: msgId ?? this.msgId,
+      custId: custId ?? this.custId,
     );
   }
 
   Map<String, dynamic> toMap() {
-    return <String, dynamic>{
+    return {
+      'BankName': bankName,
+      'ModuleName': moduleName,
+      'ApiName': apiName,
+      'RefNo': refNo,
+      'msgid': msgId,
       'custId': custId,
-      'uniqueId': uniqueId,
-      'cifId': cifId,
-      'type': type,
-      'token': token,
     };
   }
 
   factory CIFRequest.fromMap(Map<String, dynamic> map) {
     return CIFRequest(
-      custId: map['custId'] != null ? map['custId'] as String : null,
-      uniqueId: map['uniqueId'] != null ? map['uniqueId'] as String : null,
-      cifId: map['cifId'] as String,
-      type: map['type'] != null ? map['type'] as String : null,
-      token: map['token'] != null ? map['token'] as String : null,
+      bankName: map['BankName'] as String?,
+      moduleName: map['ModuleName'] as String?,
+      apiName: map['ApiName'] as String?,
+      refNo: map['RefNo'] as String?,
+      msgId: map['msgid'] as String?,
+      custId: map['custId'] as String,
     );
   }
 
   String toJson() => json.encode(toMap());
 
   factory CIFRequest.fromJson(String source) =>
-      CIFRequest.fromMap(json.decode(source) as Map<String, dynamic>);
+      CIFRequest.fromMap(json.decode(source));
 }
