@@ -10,12 +10,6 @@ import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqlite_api.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
-/*
-  @author     : Lathamani 30/11/2025
-  @desc       : This page displays the HTML report in a WebView.
-                It converts the base64 HTML data to a file and saves the file path in the table for future display
-*/
-
 class CibilHtmlViewer extends StatefulWidget {
   final String? htmlFileBase64;
   final String? localFilePath;

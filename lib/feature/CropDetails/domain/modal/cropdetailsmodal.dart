@@ -2,6 +2,8 @@
 
 import 'dart:convert';
 
+import 'package:newsee/Utils/utils.dart';
+
 class CropDetailsModal {
   int? lcdRowId;
   int? lcdProposalNo;
@@ -88,7 +90,7 @@ class CropDetailsModal {
       'typeOfLand': lcdTypeOfLand,
       'culAreaLand': lcdCulAreaLand,
       'culAreaSize': lcdCulAreaSize?.toString(),
-      'scaOfFin': lcdScaOfFin?.toString(),
+      'scaOfFin': formatAmount(lcdScaOfFin.toString(), 'currency'),
       'addSofByRo': lcdAddSofByRo?.toString(),
       'addSofAmount': lcdAddSofAmount?.toString(),
       'costOfCul': lcdCostOfCul?.toString(),
@@ -109,7 +111,7 @@ class CropDetailsModal {
       lcdTypeOfLand: form['typeOfLand']?.toString(),
       lcdCulAreaLand: form['culAreaLand']?.toString(),
       lcdCulAreaSize: _toInt(form['culAreaSize']),
-      lcdScaOfFin: _toInt(form['scaOfFin']),
+      lcdScaOfFin: _toInt(form['scaOfFin'].replaceAll(',', '')),
       lcdAddSofByRo: _toInt(form['addSofByRo']),
       lcdAddSofAmount: _toInt(form['addSofAmount']),
       lcdCostOfCul: _toInt(form['costOfCul']),

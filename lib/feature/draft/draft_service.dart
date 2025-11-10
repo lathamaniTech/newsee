@@ -3,11 +3,6 @@ import 'package:intl/intl.dart';
 import 'package:newsee/feature/draft/draft_event_notifier.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:newsee/feature/draft/domain/draft_lead_model.dart';
-/* 
-    @author     : lathamani.m  8/09/2025
-    @desc       : this is draft inbox service file for creating sharedPreference,
-                  save and get functionality of incompleted leads data
-  */
 
 class DraftService {
   static const String _draftKeyPrefix = 'draft_';

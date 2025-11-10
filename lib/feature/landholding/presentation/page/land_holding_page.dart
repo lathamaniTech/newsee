@@ -1,21 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:go_router/go_router.dart';
 import 'package:newsee/AppData/app_api_constants.dart';
 import 'package:newsee/AppData/app_constants.dart';
 import 'package:newsee/AppData/app_forms.dart';
+import 'package:newsee/Utils/media_service.dart';
 import 'package:newsee/Utils/utils.dart';
+import 'package:newsee/feature/landholding/domain/modal/LandData.dart';
 import 'package:newsee/feature/landholding/presentation/bloc/land_holding_bloc.dart';
 import 'package:newsee/feature/loader/presentation/bloc/global_loading_bloc.dart';
 import 'package:newsee/feature/loader/presentation/bloc/global_loading_event.dart';
 import 'package:newsee/feature/masters/domain/modal/geography_master.dart';
 import 'package:newsee/feature/masters/domain/modal/lov.dart';
+import 'package:newsee/widgets/alpha_text_field.dart';
 import 'package:newsee/widgets/google_maps_card.dart';
 import 'package:newsee/widgets/k_willpopscope.dart';
 import 'package:newsee/widgets/options_sheet.dart';
 import 'package:newsee/widgets/searchable_drop_down.dart';
 import 'package:newsee/widgets/success_bottom_sheet.dart';
+import 'package:newsee/widgets/sysmo_alert.dart';
 import 'package:reactive_forms/reactive_forms.dart';
 import 'package:newsee/widgets/custom_text_field.dart';
 import 'package:newsee/widgets/drop_down.dart';
@@ -170,6 +175,8 @@ class LandHoldingPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print(' Received  proposalNumber: $proposalNumber');
+
     final globalLoadingBloc = context.read<GlobalLoadingBloc>();
 
     return Kwillpopscope(
@@ -255,6 +262,7 @@ class LandHoldingPage extends StatelessWidget {
               if (state.status == SaveStatus.success) {
                 globalLoadingBloc.add(HideLoading());
                 form.reset();
+
                 form.control('applicantName').updateValue(applicantName);
                 form.control('sumOfTotalAcreage').markAsDisabled();
                 showSuccessBottomSheet(
@@ -274,7 +282,7 @@ class LandHoldingPage extends StatelessWidget {
                     if (Navigator.of(context).canPop()) {
                       Navigator.of(context).pop();
                     }
-                  },
+                  }, // OnPressedRightButton,
                 );
               }
               if (state.selectedLandData != null &&
@@ -325,16 +333,16 @@ class LandHoldingPage extends StatelessWidget {
                                 padding: const EdgeInsets.all(16),
                                 child: Column(
                                   children: [
-                                    Dropdown(
-                                      controlName: 'applicantName',
-                                      label: 'Applicant Name / Guarantor',
-                                      items: [applicantName],
-                                    ),
-                                    // CustomTextField(
+                                    // Dropdown(
                                     //   controlName: 'applicantName',
                                     //   label: 'Applicant Name / Guarantor',
-                                    //   mantatory: true,
+                                    //   items: [applicantName],
                                     // ),
+                                    CustomTextField(
+                                      controlName: 'applicantName',
+                                      label: 'Applicant Name / Guarantor',
+                                      mantatory: true,
+                                    ),
                                     SearchableDropdown(
                                       controlName: 'state',
                                       label: 'State',
@@ -343,6 +351,11 @@ class LandHoldingPage extends StatelessWidget {
                                         form.controls['state']?.updateValue(
                                           val.code,
                                         );
+                                        // globalLoadingBloc.add(
+                                        //   ShowLoading(
+                                        //     message: "Fetching city...",
+                                        //   ),
+                                        // );
 
                                         context.read<LandHoldingBloc>().add(
                                           OnStateCityChangeEvent(
@@ -468,6 +481,126 @@ class LandHoldingPage extends StatelessWidget {
                                             maxlength: 3,
                                           ),
                                         ),
+
+                                        // const SizedBox(width: 8),
+                                        // OutlinedButton.icon(
+                                        //   onPressed: () async {
+                                        //     if (form
+                                        //             .control('farmDistance')
+                                        //             .value !=
+                                        //         null) {
+                                        //       final position =
+                                        //           form
+                                        //                   .control(
+                                        //                     'farmDistance',
+                                        //                   )
+                                        //                   .value
+                                        //               as String;
+                                        //       if (position.contains(',')) {
+                                        //         final parts = position.split(
+                                        //           ",",
+                                        //         );
+                                        //         final latitude =
+                                        //             double.tryParse(
+                                        //               parts[0].trim(),
+                                        //             );
+                                        //         final longitude =
+                                        //             double.tryParse(
+                                        //               parts[1].trim(),
+                                        //             );
+                                        //         if (latitude != null &&
+                                        //             longitude != null) {
+                                        //           showGoogleMapsDailog(
+                                        //             context,
+                                        //             latitude,
+                                        //             longitude,
+                                        //           );
+                                        //         }
+                                        //       }
+                                        //     } else {
+                                        //       globalLoadingBloc.add(
+                                        //         ShowLoading(
+                                        //           message: 'Fetching location',
+                                        //         ),
+                                        //       );
+                                        //       try {
+                                        //         final curposition =
+                                        //             await MediaService()
+                                        //                 .getLocation(context);
+                                        //         globalLoadingBloc.add(
+                                        //           HideLoading(),
+                                        //         );
+                                        //         if (curposition.position !=
+                                        //             null) {
+                                        //           // form
+                                        //           //     .control('locationOfFarm')
+                                        //           //     .updateValue(
+                                        //           //       '${curposition.position!.latitude},${curposition.position!.longitude}',
+                                        //           //     );
+                                        //           showGoogleMapsDailog(
+                                        //             context,
+                                        //             curposition
+                                        //                 .position!
+                                        //                 .latitude,
+                                        //             curposition
+                                        //                 .position!
+                                        //                 .longitude,
+                                        //           );
+                                        //           double calculateDistance =
+                                        //               Geolocator.distanceBetween(
+                                        //                 12.9483,
+                                        //                 80.2546,
+                                        //                 curposition
+                                        //                     .position!
+                                        //                     .latitude,
+                                        //                 curposition
+                                        //                     .position!
+                                        //                     .longitude,
+                                        //               );
+                                        //           print(calculateDistance);
+                                        //           String value =
+                                        //               (calculateDistance / 1000)
+                                        //                   .round()
+                                        //                   .toString();
+                                        //           print(
+                                        //             'calculateDistance----->$value',
+                                        //           );
+                                        //           form
+                                        //               .control('farmDistance')
+                                        //               .updateValue(value);
+                                        //         } else {
+                                        //           showDialog(
+                                        //             context: context,
+                                        //             builder:
+                                        //                 (
+                                        //                   _,
+                                        //                 ) => SysmoAlert.warning(
+                                        //                   message:
+                                        //                       curposition.error
+                                        //                           .toString(),
+                                        //                   onButtonPressed: () {
+                                        //                     context.pop();
+                                        //                   },
+                                        //                 ),
+                                        //           );
+                                        //         }
+                                        //       } catch (error) {
+                                        //         SysmoAlert.warning(
+                                        //           message: error.toString(),
+                                        //         );
+                                        //       }
+                                        //     }
+                                        //   },
+                                        //   icon: Icon(Icons.map),
+                                        //   label: Text("location"),
+                                        //   style: OutlinedButton.styleFrom(
+                                        //     padding: EdgeInsets.symmetric(
+                                        //       horizontal: 16,
+                                        //       vertical: 12,
+                                        //     ),
+                                        //     textStyle: TextStyle(fontSize: 16),
+                                        //   ),
+                                        // ),
                                       ],
                                     ),
 

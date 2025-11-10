@@ -7,13 +7,8 @@ import 'package:newsee/feature/auth/domain/model/user_details.dart';
 import 'package:newsee/feature/cic_check/domain/repository/cibilreports_crud_repo.dart';
 import 'package:newsee/feature/cic_check/presentation/bloc/cic_check_bloc.dart';
 import 'package:newsee/widgets/cibil_html_viewer.dart';
+import 'package:newsee/widgets/loader.dart';
 import 'package:newsee/widgets/sysmo_alert.dart';
-
-/*
-  @author     : Lathamani 04/11/2025
-  @desc       : On the first click of view report (when CIBIL is being checked for the first time), the base64 data is passed to the CIBIL report HTML view page.
-                When returning to the page later (after the CIBIL check is already completed), clicking the "View Report" button retrieves the report file path from the table and displays the report    
-*/
 
 Future<void> viewCibilHtml(
   BuildContext context,
@@ -87,7 +82,6 @@ Future<void> viewCibilHtml(
   }
 }
 
-// Fetch report data from table once checked cibil
 Future<List<dynamic>?> fetchReportsFromDB(String proposalNum) async {
   UserDetails? userDetails = await loadUser();
   if (userDetails == null) return null;

@@ -18,6 +18,7 @@ import 'package:newsee/widgets/options_sheet.dart';
 import 'package:newsee/widgets/searchable_drop_down.dart';
 import 'package:newsee/widgets/success_bottom_sheet.dart';
 import 'package:reactive_forms/reactive_forms.dart';
+import 'package:newsee/widgets/radio.dart';
 import 'package:newsee/widgets/integer_text_field.dart';
 
 class CropDetailsPage extends StatefulWidget {
@@ -37,11 +38,12 @@ class CropDetailsPage extends StatefulWidget {
 class _CropDetailsPageState extends State<CropDetailsPage> {
   final form = AppForms.buildCropDetailsForm();
   final ValueNotifier<int> currentIndex = ValueNotifier<int>(0);
+  bool _isResetting = false;
   @override
   void initState() {
     super.initState();
 
-    // trigger auto-calculation when any dependent control changes
+    // Trigger auto-calculation when any dependent control changes
     final controlsToWatch = [
       'culAreaLand',
       'scaOfFin',
@@ -53,27 +55,19 @@ class _CropDetailsPageState extends State<CropDetailsPage> {
     ];
 
     for (final controlName in controlsToWatch) {
-      form
-          .control(controlName)
-          .valueChanges
-          .listen((_) => getCalculateTotalCultivated());
+      form.control(controlName).valueChanges.listen((_) => getAddSofAmount());
     }
   }
 
-  /*
-  @author     : Lathamani 6/11/2025
-  @desc       : This getAddSofAmount method calculate total cultivated area, 
-  due date of repayment and additional sof
-*/
-
-  void getCalculateTotalCultivated() {
+  void getAddSofAmount() {
     try {
       final culAreaRaw = form.control('culAreaLand').value?.toString() ?? '0';
       final sofRaw = form.control('scaOfFin').value?.toString() ?? '0';
       final addSofRaw = form.control('addSofByRo').value?.toString() ?? '0';
       final cropIns = form.control('cropIns').value?.toString() ?? '';
       final cropType = form.control('cropType').value?.toString() ?? '';
-      //If key inputs are empty or zero, clear calculated fields and return
+
+      // If key inputs are empty or zero — clear calculated fields and return
       if (culAreaRaw.trim().isEmpty ||
           sofRaw.trim().isEmpty ||
           culAreaRaw == '0' ||
@@ -86,21 +80,12 @@ class _CropDetailsPageState extends State<CropDetailsPage> {
       }
 
       final culArea = double.tryParse(culAreaRaw) ?? 0.0;
-      final sof = double.tryParse(sofRaw) ?? 0.0;
+      final sof = double.tryParse(sofRaw.replaceAll(',', '')) ?? 0.0;
       final addSOfPercent = double.tryParse(addSofRaw) ?? 0.0;
 
-      // total cultivation calculations value = cultivated area * sof
+      // Base calculations
       final totalCultCost = culArea * sof;
-      // additional amount of sof value = total cultivated area * (additional sof / 100)
       final addSofValue = totalCultCost * (addSOfPercent / 100);
-
-      // Update calculated fields
-      form
-          .control('costOfCul')
-          .patchValue(totalCultCost.toStringAsFixed(2), emitEvent: true);
-      form
-          .control('addSofAmount')
-          .patchValue(addSofValue.toStringAsFixed(2), emitEvent: true);
 
       // Insurance calculation
       //season: Kharif - 1, rabi - 2
@@ -124,6 +109,14 @@ class _CropDetailsPageState extends State<CropDetailsPage> {
             .patchValue(cov.toStringAsFixed(2), emitEvent: true);
       }
 
+      // Update calculated fields
+      form
+          .control('costOfCul')
+          .patchValue(totalCultCost.toStringAsFixed(2), emitEvent: true);
+      form
+          .control('addSofAmount')
+          .patchValue(addSofValue.toStringAsFixed(2), emitEvent: true);
+
       // Repayment due date calculation
       // 1- long term, 2 -short term
       final now = DateTime.now();
@@ -132,10 +125,18 @@ class _CropDetailsPageState extends State<CropDetailsPage> {
       final formattedDate =
           '${dueDate.day.toString().padLeft(2, '0')}-${dueDate.month.toString().padLeft(2, '0')}-${dueDate.year}';
       form.control('dueDateOfRepay').patchValue(formattedDate, emitEvent: true);
-      print('calculations completed: ${form.value}');
-    } catch (e) {
-      print('rrror in getAddSofAmount: $e');
+
+      print('Calculations completed: ${form.value}');
+    } catch (e, stack) {
+      print('Error in getAddSofAmount: $e');
+      print(stack);
     }
+  }
+
+  bool isFormCompletelyEmpty(FormGroup form) {
+    return form.rawValue.values.every((value) {
+      return value == null || value.toString().trim().isEmpty;
+    });
   }
 
   backHandler(context) {
@@ -166,7 +167,6 @@ class _CropDetailsPageState extends State<CropDetailsPage> {
   void handleSave(BuildContext context, CropyieldpageState state) {
     if (form.valid) {
       print("handleSave =>  ${form.rawValue}");
-
       final cropFormData = CropDetailsModal.fromForm(form.rawValue);
       context.read<CropyieldpageBloc>().add(
         CropFormSaveEvent(cropData: cropFormData),
@@ -216,12 +216,15 @@ class _CropDetailsPageState extends State<CropDetailsPage> {
   void showBottomSheet(BuildContext context, CropyieldpageState state) {
     final entries = state.cropData ?? [];
     final lovlist = state.lovlist;
+    // final showSubmitButton = state.showSubmit;
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
       builder: (_) {
+        final showSubmitButton = state.showSubmit;
+        print("showSubmitButton $showSubmitButton");
         return BlocProvider<CropyieldpageBloc>.value(
           value: context.read<CropyieldpageBloc>(),
           child: SafeArea(
@@ -258,11 +261,13 @@ class _CropDetailsPageState extends State<CropDetailsPage> {
                                       v.Header == 'CropName' &&
                                       v.optvalue == item.lcdCropName,
                                 );
+                                print("cropname $cropname");
                                 return Slidable(
                                   key: ValueKey(item.lcdRowId),
                                   endActionPane: ActionPane(
                                     motion: ScrollMotion(),
-                                    extentRatio: 0.25,
+                                    extentRatio:
+                                        0.25, // Controls width of action pane
                                     children: [
                                       SlidableAction(
                                         onPressed: (slidableContext) {
@@ -292,7 +297,9 @@ class _CropDetailsPageState extends State<CropDetailsPage> {
                                                   );
                                             }
                                           } catch (error) {
-                                            print("deleteLandData: $error");
+                                            print(
+                                              "deleteLandData-error $error",
+                                            );
                                           }
                                         },
                                         backgroundColor: Colors.red,
@@ -473,6 +480,7 @@ class _CropDetailsPageState extends State<CropDetailsPage> {
               if (state.status == SaveStatus.loading) {
                 globalLoadingBloc.add(ShowLoading(message: 'Please wait...'));
               }
+
               if (state.status == SaveStatus.delete) {
                 globalLoadingBloc.add(HideLoading());
                 form.reset();
@@ -481,8 +489,17 @@ class _CropDetailsPageState extends State<CropDetailsPage> {
                   message: 'Crop Details Deleted Successfully',
                 );
               }
+
               if (state.status == SaveStatus.init) {
                 globalLoadingBloc.add(HideLoading());
+                // if ((state.cropData != null && state.cropData!.isNotEmpty) &&
+                //     (state.landDetails != null &&
+                //         state.landDetails!.isNotEmpty)) {
+                //   irrigatedController.text =
+                //       state.landDetails!['lpAgriPcIrrigated'].toString();
+                //   rainfedController.text =
+                //       state.landDetails!['lpAgriPcRainfed'].toString();
+                // }
               } else if (state.status == SaveStatus.mastersucess) {
                 form.reset();
                 disableFields();
@@ -514,21 +531,35 @@ class _CropDetailsPageState extends State<CropDetailsPage> {
                     if (Navigator.of(context).canPop()) {
                       Navigator.of(context).pop();
                     }
-                  },
+                  }, // OnPressedRightButton,
                 );
+
+                // showSnack(
+                //   context,
+                //   message: 'Crop Details Submitted Successfully',
+                // );
               } else if (state.status == SaveStatus.failure &&
                   state.errorMessage != null) {
                 globalLoadingBloc.add(HideLoading());
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(content: Text(state.errorMessage.toString())),
                 );
+                showSnack(
+                  context,
+                  message: 'Crop Details Submitted Successfully',
+                );
               }
             },
             builder: (context, state) {
+              print("state.showSubmit-builer ${state.showSubmit}");
               if (state.status == SaveStatus.update &&
                   state.selectedCropData != null) {
+                print(
+                  "currently current selected cropdetails index is ${currentIndex.value}",
+                );
                 print("state.selectedCropData is => ${state.selectedCropData}");
                 form.patchValue(state.selectedCropData!.toForm());
+
                 form.updateValueAndValidity();
               }
 
@@ -817,6 +848,7 @@ class _CropDetailsPageState extends State<CropDetailsPage> {
                                         },
                                         readOnly: true,
                                         decoration: InputDecoration(
+                                          // labelText: 'Due Date Of Repayment',
                                           label: RichText(
                                             text: TextSpan(
                                               text: 'Due Date Of Repayment',
@@ -882,6 +914,12 @@ class _CropDetailsPageState extends State<CropDetailsPage> {
                                                   ),
                                                 ),
                                                 style: ElevatedButton.styleFrom(
+                                                  // backgroundColor: const Color.fromARGB(
+                                                  //   212,
+                                                  //   5,
+                                                  //   8,
+                                                  //   205,
+                                                  // ),
                                                   backgroundColor: Colors.teal,
                                                   padding:
                                                       const EdgeInsets.symmetric(

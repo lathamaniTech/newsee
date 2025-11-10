@@ -13,7 +13,7 @@ class Globalconfig {
 
   static bool masterUpdate = false;
   static int loanAmountMaximum = 0;
-  static bool isOffline = true;
+  static bool isOffline = false;
   final OperationNetwork _operationNetwork;
 
   Globalconfig._(this._operationNetwork);

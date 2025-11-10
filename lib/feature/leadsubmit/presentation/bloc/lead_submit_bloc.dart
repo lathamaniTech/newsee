@@ -82,7 +82,6 @@ final class LeadSubmitBloc extends Bloc<LeadSubmitEvent, LeadSubmitState> {
       PersonalData.fromMap(personalDataMap);
     }
     // final coappdataMap = event.coAppAndGurantorData?.toMap();
-
     // coapplicant or gurantor applicants List are seperating
     final coApplicants =
         event.coAppAndGurantorData
@@ -106,6 +105,11 @@ final class LeadSubmitBloc extends Bloc<LeadSubmitEvent, LeadSubmitState> {
           from: AppConstants.Format_dd_MM_yyyy,
           to: AppConstants.Format_yyyy_MM_dd,
         );
+        String? loanLiabilityAmount = applicant['loanLiabilityAmount']
+            ?.replaceAll(',', '');
+        applicant['loanLiabilityAmount'] = loanLiabilityAmount;
+        String? depositAmount = applicant['depositAmount']?.replaceAll(',', '');
+        applicant['depositAmount'] = depositAmount;
         applicant['dob'] = formatted;
         applicant.addAll({"residentialStatus": "4"});
       }
@@ -120,6 +124,11 @@ final class LeadSubmitBloc extends Bloc<LeadSubmitEvent, LeadSubmitState> {
           to: AppConstants.Format_yyyy_MM_dd,
         );
         guarantor['dob'] = formatted;
+        String? loanLiabilityAmount = guarantor['loanLiabilityAmount']
+            ?.replaceAll(',', '');
+        guarantor['loanLiabilityAmount'] = loanLiabilityAmount;
+        String? depositAmount = guarantor['depositAmount']?.replaceAll(',', '');
+        guarantor['depositAmount'] = depositAmount;
         guarantor.addAll({"residentialStatus": "4"});
       }
     }
@@ -186,7 +195,6 @@ final class LeadSubmitBloc extends Bloc<LeadSubmitEvent, LeadSubmitState> {
     }
   }
 
-  // after successfully submit lead, deleted that lead from sharedPreference
   deleteDraftFromStorage() async {
     final draftService = DraftService();
     final leadref = draftService.getCurrentLeadRef();

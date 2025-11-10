@@ -114,7 +114,11 @@ class _CoApplicantFormBottomSheetState
 
                   if (value != null) {
                     if (key == 'dob') {
-                      final formattedDate = getDateFormat(value);
+                      final formattedDate = getDateFormat(
+                        value,
+                        // from: AppConstants.Format_dd_MM_yyyy,
+                        // to: AppConstants.Format_yyyy_MM_dd,
+                      );
                       coAppAndGurantorForm.control(key)
                         ..updateValue(formattedDate)
                         ..markAsDisabled();
@@ -125,18 +129,18 @@ class _CoApplicantFormBottomSheetState
                           .control(key)
                           .updateValue(value == '001' ? 'I' : 'N');
                     } else {
-                      setFieldDisableOrEnable(coAppAndGurantorForm, key, value);
-                      // if (value != null && value.toString().trim().isNotEmpty) {
-                      //   coAppAndGurantorForm.control(key).updateValue(value);
-                      //   coAppAndGurantorForm.control(key).markAsDisabled();
-                      // } else {
-                      //   coAppAndGurantorForm.control(key).markAsEnabled();
-                      // }
+                      if (value != null && value.toString().trim().isNotEmpty) {
+                        coAppAndGurantorForm.control(key).updateValue(value);
+                        coAppAndGurantorForm.control(key).markAsDisabled();
+                      } else {
+                        coAppAndGurantorForm.control(key).markAsEnabled();
+                      }
                       // coAppAndGurantorForm.control(key).updateValue(value);
                     }
                   }
                 }
               } else if (state.status == SaveStatus.dedupefailure) {
+                // showSnack(context, message: 'Cif pulling failed...');
                 showErrorDialog(
                   context,
                   'Dedupe/CIF/Aadhaar Validation failed...',
