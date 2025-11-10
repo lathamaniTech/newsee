@@ -19,8 +19,6 @@ import 'package:newsee/feature/masters/domain/modal/lov.dart';
 import 'package:newsee/feature/masters/domain/repository/geographymaster_crud_repo.dart';
 import 'package:newsee/feature/masters/domain/repository/lov_crud_repo.dart';
 import 'package:sqflite/sqlite_api.dart';
-import 'package:newsee/AppData/app_constants.dart';
-
 part 'land_holding_event.dart';
 part 'land_holding_state.dart';
 

@@ -82,6 +82,7 @@ final class LeadSubmitBloc extends Bloc<LeadSubmitEvent, LeadSubmitState> {
       PersonalData.fromMap(personalDataMap);
     }
     // final coappdataMap = event.coAppAndGurantorData?.toMap();
+
     // coapplicant or gurantor applicants List are seperating
     final coApplicants =
         event.coAppAndGurantorData
@@ -185,6 +186,7 @@ final class LeadSubmitBloc extends Bloc<LeadSubmitEvent, LeadSubmitState> {
     }
   }
 
+  // after successfully submit lead, deleted that lead from sharedPreference
   deleteDraftFromStorage() async {
     final draftService = DraftService();
     final leadref = draftService.getCurrentLeadRef();

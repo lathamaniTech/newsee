@@ -3,11 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:newsee/AppData/app_api_constants.dart';
 import 'package:newsee/AppData/app_constants.dart';
-import 'package:newsee/AppData/app_route_constants.dart';
 import 'package:newsee/Model/address_data.dart';
 import 'package:newsee/Model/personal_data.dart';
-import 'package:newsee/Utils/proposal_utils.dart';
-import 'package:newsee/Utils/shared_preference_handler.dart';
 import 'package:newsee/Utils/shared_preference_utils.dart';
 import 'package:newsee/Utils/utils.dart';
 import 'package:newsee/feature/addressdetails/presentation/bloc/address_details_bloc.dart';
@@ -139,6 +136,8 @@ class LeadSubmitPage extends StatelessWidget {
                 }
               },
 
+              // Removed the right button that navigated to the land page and
+              //simply added a "Cancel" button instead and pop bottom sheet
               onPressedRightButton: () {
                 // final applicantData =
                 //     state.leadSubmitRequest?.individualNonIndividualDetails;

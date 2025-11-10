@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:newsee/AppData/app_api_constants.dart';
 import 'package:newsee/AppData/app_forms.dart';
 import 'package:newsee/Utils/utils.dart';
 import 'package:newsee/feature/cif/domain/model/user/cif_request.dart';
@@ -12,7 +11,6 @@ import 'package:reactive_forms/reactive_forms.dart';
 final FormGroup dedupeForm = AppForms.DEDUPE_DETAILS_FORM;
 
 void cifSearch(BuildContext context, FormGroup form, String? applicantType) {
-  // final String type = applicantType == 'C' ? 'coapplicant' : 'guarantor';
   if (form.control('cifNumber').valid) {
     final uniqId = generateUniqueID();
     final CIFRequest req =
@@ -21,11 +19,6 @@ void cifSearch(BuildContext context, FormGroup form, String? applicantType) {
           refNo: uniqId,
           msgId: uniqId,
         ).copyWith();
-    // final req = CIFRequest(
-    //   custId: form.control('cifNumber').value,
-    // type: 'borrower',
-    // token: ApiConstants.api_qa_token,
-    // );
     context.read<CoappDetailsBloc>().add(
       CoAppGurantorSearchCifEvent(request: req),
     );

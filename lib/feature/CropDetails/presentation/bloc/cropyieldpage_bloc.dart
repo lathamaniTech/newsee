@@ -1,7 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:newsee/AppData/app_constants.dart';
-import 'package:newsee/Utils/utils.dart';
 import 'package:newsee/core/api/AsyncResponseHandler.dart';
 import 'package:newsee/core/api/api_config.dart';
 import 'package:newsee/core/api/failure.dart';
@@ -13,7 +12,6 @@ import 'package:newsee/feature/CropDetails/domain/modal/cropdetailsmodal.dart';
 import 'package:newsee/feature/CropDetails/domain/modal/cropmodel.dart';
 import 'package:newsee/feature/CropDetails/domain/modal/croprequestmodel.dart';
 import 'package:newsee/feature/CropDetails/domain/repository/cropdetails_repository.dart';
-import 'package:newsee/feature/landholding/domain/modal/LandData.dart';
 import 'package:newsee/feature/masters/domain/modal/lov.dart';
 import 'package:newsee/feature/masters/domain/repository/lov_crud_repo.dart';
 import 'package:sqflite/sqflite.dart';
@@ -46,23 +44,16 @@ class CropyieldpageBloc extends Bloc<CropyieldpageEvent, CropyieldpageState> {
 
       for (final detail in state.cropData ?? []) {
         print('submit $detail');
-
         final int areaOfCul =
             int.tryParse(detail.lcdCostOfCul?.toString() ?? '0') ?? 0;
-
         final int addsofamt = detail.lcdAddSofAmount ?? 0;
         final int insPre = detail.lcdInsPre ?? 0;
-
-        print('submit $areaOfCul, $insPre, $addsofamt');
 
         totalCul += areaOfCul;
         totalSof += addsofamt;
         totalIns += insPre;
-
-        print('Submitting detail: $detail');
       }
 
-      print('submit');
       final CropRequestModel cropReq = CropRequestModel(
         proposalNumber: int.tryParse(event.proposalNumber),
         userid: event.userid,
@@ -100,14 +91,6 @@ class CropyieldpageBloc extends Bloc<CropyieldpageEvent, CropyieldpageState> {
       AsyncResponseHandler<Failure, CropGetResponse> cropGetResponse =
           await cropRepository.getCrop(event.proposalNumber);
       if (responseHandler.isRight() && cropGetResponse.isRight()) {
-        // List<Map<String, dynamic>> listofAssessment = responseHandler.right.responseData?['AssessmentSOF'];
-        // print("listofAssessment value is => $listofAssessment");
-        // List<LandData> landData = listofAssessment.map((e) => LandData.fromMap(e)).toList();
-
-        print(
-          "cropGetResponse.right.agriCropDetails ${cropGetResponse.right.agriCropDetails}",
-        );
-
         emit(
           state.copyWith(
             status: SaveStatus.success,
@@ -146,44 +129,18 @@ class CropyieldpageBloc extends Bloc<CropyieldpageEvent, CropyieldpageState> {
       emit(state.copyWith(status: SaveStatus.loading));
       Database _db = await DBConfig().database;
       List<Lov> listOfLov = await LovCrudRepo(_db).getAll();
-      print('listOfLov => $listOfLov');
-
-      //Get Crop Details
       CropDetailsRepository cropRepository = CropDetailsRepositoryImpl();
       AsyncResponseHandler<Failure, CropGetResponse> cropResponse =
           await cropRepository.getCrop(event.proposalNumber);
 
-      //Get Land Details
-      // final LandHoldingRepository landHoldingRepository =
-      //     LandHoldingRespositoryImpl();
-      // final landresponse = await landHoldingRepository.getLandholding(event.proposalNumber);
-      // print("get responseHandler value is => $cropResponse");
-
-      //Emit init state
-      // if (cropResponse.isRight() && landresponse.isRight()) {
       if (cropResponse.isRight()) {
-        print(
-          "cropResponse.right.agriCropDetails-gettime ${cropResponse.right.agriCropDetails}",
-        );
-        // List<LandData> landData = landresponse.right.agriLandHoldingsList.map((e) => LandData.fromMap(e)).toList();
         emit(
           state.copyWith(
             lovlist: listOfLov,
             status: SaveStatus.init,
             cropData: cropResponse.right.agriCropDetails,
-            // landDetails: cropResponse.right.agriLandDetails,
-            // landData: landData
           ),
         );
-        // } else if (landresponse.isRight()) {
-        //   List<LandData> landData = landresponse.right.agriLandHoldingsList.map((e) => LandData.fromMap(e)).toList();
-        //   emit(
-        //     state.copyWith(
-        //       lovlist: listOfLov,
-        //       status: SaveStatus.init,
-        //       landData: landData
-        //     )
-        //   );
       } else {
         emit(state.copyWith(lovlist: listOfLov, status: SaveStatus.init));
       }
@@ -266,25 +223,10 @@ class CropyieldpageBloc extends Bloc<CropyieldpageEvent, CropyieldpageState> {
       print("get responseHandler value is => $delResponseHandler");
 
       if (delResponseHandler.isRight()) {
-        // AsyncResponseHandler<Failure, CropGetResponse> cropGetResponse = await cropRepository.getCrop(
-        //   event.proposalNumber
-        // );
-
-        // if (cropGetResponse.isRight()) {
-        //   emit(
-        //     state.copyWith(
-        //       status: SaveStatus.delete,
-        //       cropData: cropGetResponse.right.agriCropDetails,
-        //       errorMessage: delResponseHandler.right
-        //     )
-        //   );
-        // } else {
-        print("final landDetailsList ${state.cropData}, ${event.index}");
         List<CropDetailsModal> cropDetailsList = state.cropData!;
         cropDetailsList.removeAt(event.index);
         final addedCrop = checkNewArray(cropDetailsList);
         final showSubmit = addedCrop ? true : false;
-        print("final landDetailsList $cropDetailsList");
         emit(
           state.copyWith(
             status: SaveStatus.delete,
@@ -351,7 +293,6 @@ class CropyieldpageBloc extends Bloc<CropyieldpageEvent, CropyieldpageState> {
       }
       return false;
     } catch (error) {
-      print("final checkNewArray $error");
       return false;
     }
   }

@@ -52,8 +52,8 @@ class Personal extends StatelessWidget {
   bool refAadhaar = true;
 
   /* 
-    @author     : ganeshkumar.b  13/06/2025
-    @desc       : map Aadhaar response in personal form
+    @author     : latha  3/11/2025
+    @desc       : map Aadhaar response in personal form and disabled fields if value is not null
     @param      : {AadharvalidateResponse val} - aadhaar response
   */
   mapAadhaarData(val) {
@@ -62,40 +62,21 @@ class Personal extends StatelessWidget {
         form.control('aadharRefNo').updateValue(val?.referenceId);
         refAadhaar = true;
         nameSeperate(val.name);
-        // if (val.name != null) {
-        //   String fullname = val?.name;
-        //   List getNameArray = fullname.split(' ');
-        //   if (getNameArray.length > 2) {
-        //     String fullname = getNameArray.sublist(2).join();
-        //     setControl('firstName', getNameArray[0]);
-        //     setControl('middleName', getNameArray[1]);
-        //     setControl('lastName', fullname);
-        //   } else if (getNameArray.length == 2) {
-        //     setControl('firstName', getNameArray[0]);
-        //     setControl('lastName', getNameArray[1]);
-        //   } else if (getNameArray.length == 1) {
-        //     setControl('firstName', getNameArray[0]);
-        //   }
-        // }
-        setControl('primaryMobileNumber', val?.mobile);
+        setFieldDisableOrEnable(form, 'primaryMobileNumber', val?.mobile);
         final formattedDate =
             val.dateOfBirth != null
                 ? getCorrectDateFormat(val.dateOfBirth!)
                 : null;
-        // getDateFormatedByProvided(
-        //   val?.dateOfBirth!,
-        //   from: AppConstants.Format_dd_MM_yyyy,
-        //   to: AppConstants.Format_yyyy_MM_dd,
-        // );
         print('formattedDate in personal page => $formattedDate');
-        setControl('dob', formattedDate);
-        setControl('email', val?.email);
+        setFieldDisableOrEnable(form, 'dob', formattedDate);
+        setFieldDisableOrEnable(form, 'email', val?.email);
       }
     } catch (error) {
       print("autoPopulateData-catch-error $error");
     }
   }
 
+  // If the first name is null, extract the name from the 'name' property of the Aadhar or CIF response.
   void nameSeperate(val) {
     print('nameapp: $val');
     if (val != null) {
@@ -103,31 +84,21 @@ class Personal extends StatelessWidget {
       List getNameArray = fullname.split(' ');
       if (getNameArray.length > 2) {
         String fullname = getNameArray.sublist(2).join();
-        setControl('firstName', getNameArray[0]);
-        setControl('middleName', getNameArray[1]);
-        setControl('lastName', fullname);
+        setFieldDisableOrEnable(form, 'firstName', getNameArray[0]);
+        setFieldDisableOrEnable(form, 'middleName', getNameArray[1]);
+        setFieldDisableOrEnable(form, 'lastName', fullname);
       } else if (getNameArray.length == 2) {
-        setControl('firstName', getNameArray[0]);
-        setControl('lastName', getNameArray[1]);
+        setFieldDisableOrEnable(form, 'firstName', getNameArray[0]);
+        setFieldDisableOrEnable(form, 'lastName', getNameArray[1]);
       } else if (getNameArray.length == 1) {
-        setControl('firstName', getNameArray[0]);
+        setFieldDisableOrEnable(form, 'firstName', getNameArray[0]);
       }
     }
   }
 
-  void setControl(String controlName, dynamic value) {
-    final control = form.control(controlName);
-    if (value != null && value.toString().trim().isNotEmpty) {
-      control.updateValue(value);
-      control.markAsDisabled();
-    } else {
-      control.markAsEnabled();
-    }
-  }
-
   /* 
-    @author     : ganeshkumar.b  13/06/2025
-    @desc       : map cif response in personal form
+    @author     : lathamani.m  30/11/2025
+    @desc       : map cif response in personal form and diabled field if value not null
     @param      : {CifResponse val} - cifresponse
   */
   mapCifDate(val, lovList) {
@@ -162,24 +133,25 @@ class Personal extends StatelessWidget {
 
       // set values to form controls
       if (val.firstName != null && val.firstName!.isNotEmpty) {
-        setControl('firstName', val.firstName);
-        setControl('middleName', val.secondName);
-        setControl('lastName', val.lastName);
+        setFieldDisableOrEnable(form, 'firstName', val.firstName);
+        setFieldDisableOrEnable(form, 'middleName', val.secondName);
+        setFieldDisableOrEnable(form, 'lastName', val.lastName);
       } else {
         nameSeperate(val.applicantName);
       }
 
-      setControl(
+      setFieldDisableOrEnable(
+        form,
         'dob',
         val.dateOfBirth != null ? getDateFormat(val.dateOfBirth!) : null,
       );
-      setControl('primaryMobileNumber', mobile);
-      setControl('email', val.email);
-      setControl('panNumber', val.panNo);
-      setControl('aadharRefNo', val.aadharNum);
-      setControl('religion', religionLov?.optvalue);
-      setControl('caste', casteLov?.optvalue);
-      setControl('gender', genderLov?.optvalue);
+      setFieldDisableOrEnable(form, 'primaryMobileNumber', mobile);
+      setFieldDisableOrEnable(form, 'email', val.email);
+      setFieldDisableOrEnable(form, 'panNumber', val.panNo);
+      setFieldDisableOrEnable(form, 'aadharRefNo', val.aadharNum);
+      setFieldDisableOrEnable(form, 'religion', religionLov?.optvalue);
+      setFieldDisableOrEnable(form, 'caste', casteLov?.optvalue);
+      setFieldDisableOrEnable(form, 'gender', genderLov?.optvalue);
 
       // aadhaar flag
       refAadhaar = val.aadharNum?.isNotEmpty == true;

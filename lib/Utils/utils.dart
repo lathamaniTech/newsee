@@ -11,15 +11,18 @@ import 'package:newsee/feature/coapplicant/presentation/bloc/coapp_details_bloc.
 import 'package:newsee/feature/leadInbox/domain/modal/group_lead_inbox.dart';
 import 'package:newsee/feature/masters/domain/modal/geography_master.dart';
 import 'package:newsee/feature/proposal_inbox/domain/modal/group_proposal_inbox.dart';
+import 'package:reactive_forms/reactive_forms.dart';
 
 String formatAmount(String amount, [String? type]) {
   try {
     final num value = num.parse(amount);
+
     if (type == null || type.isEmpty) {
+      // if 'type' is not null, only commas are added to the numeric input values
       final formatter = NumberFormat.decimalPattern('en_IN');
       return formatter.format(value);
     } else {
-      // return '₹${formatter.format(value)}';
+      //this block, add commas and .00 to numeric value
       final formatter = NumberFormat.currency(
         locale: 'en_IN',
         symbol: '',
@@ -71,15 +74,10 @@ String getDateFormat(dynamic value) {
   ];
 
   for (final format in formats) {
-    try {
-      final date = format.parseStrict(input);
-      return DateFormat('dd-MM-yyyy').format(date);
-    } catch (_) {
-      // continue trying next format
-    }
+    final date = format.parseStrict(input);
+    return DateFormat('dd-MM-yyyy').format(date);
   }
 
-  // Try a fallback using DateTime.parse (handles many standard formats)
   try {
     final date = DateTime.parse(input);
     return DateFormat('dd-MM-yyyy').format(date);
@@ -367,13 +365,24 @@ List<GroupProposalInbox>? onSearchApplicationInbox({
 }
 
 String generateUniqueID() {
-  // Get current timestamp in milliseconds
   final timestamp = DateTime.now().millisecondsSinceEpoch;
-
-  // Generate random number between 0 and 99999
   final random = Random().nextInt(100000);
-
-  // Combine timestamp and random number, take last 10 digits
+  // its combine timestamp and random number, take last 10 digits
   final combined = (timestamp + random).toString();
   return combined.substring(combined.length - 10);
+}
+
+// set field disable or enabled based on value variable
+void setFieldDisableOrEnable(
+  FormGroup form,
+  String controlName,
+  dynamic value,
+) {
+  final control = form.control(controlName);
+  if (value != null && value.toString().trim().isNotEmpty) {
+    control.updateValue(value);
+    control.markAsDisabled();
+  } else {
+    control.markAsEnabled();
+  }
 }

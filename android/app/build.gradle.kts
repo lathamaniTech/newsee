@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.ubi.agriqa"
+    namespace = "com.ubi.agri"
     compileSdk = 35
     // ndkVersion = flutter.ndkVersion
     ndkVersion = "27.0.12077973"
