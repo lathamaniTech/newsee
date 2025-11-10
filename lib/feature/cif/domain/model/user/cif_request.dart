@@ -8,7 +8,6 @@
 import 'dart:convert';
 
 import 'package:newsee/AppData/app_constants.dart';
-import 'package:newsee/core/api/api_config.dart';
 
 class CIFRequest {
   final String? bankName;

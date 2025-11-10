@@ -83,11 +83,11 @@ class CropModal {
       'typeOfLand': typeOfLand ?? '',
       'scaOfFin': scaOfFin ?? 0,
       'addSofByRo': addSofByRo ?? 0,
-      'costOfCul': costOfCul ?? 0,
+      'costOfCul': costOfCul,
       'covOfCrop': covOfCrop ?? '',
       'cropIns': cropIns ?? '',
-      'addSofAmount': addSofAmount ?? 0,
-      'insPre': insPre ?? 0,
+      'addSofAmount': addSofAmount,
+      'insPre': insPre,
       'dueDateOfRepay': dueDateOfRepay ?? '',
     };
   }

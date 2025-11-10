@@ -154,12 +154,17 @@ class DedupeBloc extends Bloc<DedupeEvent, DedupeState> {
   }
 
   Future openbottomsheet(OpenSheetEvent event, Emitter emit) async {
-    print("open botton sheet call here");
+    print("open botton sheet call here ${event.request}");
+    // emit(state.copyWith(status: DedupeFetchStatus.init));
+    // // small delay to ensure listener triggers
+    // await Future.delayed(Duration(milliseconds: 50));
+    final timestamp = DateTime.now().millisecondsSinceEpoch;
     emit(
       state.copyWith(
         status: DedupeFetchStatus.change,
         constitution: event.request['constitution'],
         isNewCustomer: event.request['isNewCustomer'],
+        changeTrigger: timestamp,
       ),
     );
   }

@@ -11,44 +11,82 @@ import 'package:newsee/feature/coapplicant/presentation/bloc/coapp_details_bloc.
 import 'package:newsee/feature/leadInbox/domain/modal/group_lead_inbox.dart';
 import 'package:newsee/feature/masters/domain/modal/geography_master.dart';
 import 'package:newsee/feature/proposal_inbox/domain/modal/group_proposal_inbox.dart';
-import 'package:reactive_forms/reactive_forms.dart';
 
-String formatAmount(String amount) {
+String formatAmount(String amount, [String? type]) {
   try {
     final num value = num.parse(amount);
-    final formatter = NumberFormat.decimalPattern('en_IN');
-    // return '₹${formatter.format(value)}';
-    // final formatter = NumberFormat.currency(locale: 'en_IN', symbol: '₹');
-    return formatter.format(value);
+    if (type == null || type.isEmpty) {
+      final formatter = NumberFormat.decimalPattern('en_IN');
+      return formatter.format(value);
+    } else {
+      // return '₹${formatter.format(value)}';
+      final formatter = NumberFormat.currency(
+        locale: 'en_IN',
+        symbol: '',
+        decimalDigits: 2,
+      );
+      return formatter.format(value).trim();
+    }
   } catch (e) {
+    print('amountformate: $e');
     return amount;
   }
 }
 
 // Convert CIF Response Date to String Date(dd-MM-yyyy);
-String getDateFormat(dynamic value) {
-  // final DateFormat parser = DateFormat("MMM dd, yyyy, hh:mm:ss a");
-  // DateTime date = parser.parse(value);
-  // DateFormat formatter = DateFormat('dd-MM-yyyy');
-  // String convertedDateString = formatter.format(date);
-  // return convertedDateString;
-  if (value == null || value.toString().trim().isEmpty) return "";
+// String getDateFormat(dynamic value) {
+//   if (value == null || value.toString().trim().isEmpty) return "";
 
-  final formats = [
+//   final formats = [
+//     DateFormat("dd-MM-yyyy"),
+//     DateFormat("yyyy-MM-dd"),
+//     DateFormat("MMM dd, yyyy, hh:mm:ss a"),
+//   ];
+
+//   for (var format in formats) {
+//     try {
+//       final date = format.parse(value.toString());
+//       return DateFormat('dd-MM-yyyy').format(date);
+//     } catch (e) {
+//       print('dat: $e');
+//     }
+//   }
+//   return "";
+// }
+
+String getDateFormat(dynamic value) {
+  if (value == null) return "";
+  final input = value.toString().trim();
+  if (input.isEmpty) return "";
+
+  final List<DateFormat> formats = [
     DateFormat("dd-MM-yyyy"),
     DateFormat("yyyy-MM-dd"),
+    DateFormat("dd/MM/yyyy"),
+    DateFormat("yyyy/MM/dd"),
+    DateFormat("MMM dd, yyyy"),
     DateFormat("MMM dd, yyyy, hh:mm:ss a"),
+    DateFormat("yyyy-MM-ddTHH:mm:ss"), // ISO-like
+    DateFormat("yyyy-MM-dd HH:mm:ss"),
   ];
 
-  for (var format in formats) {
+  for (final format in formats) {
     try {
-      final date = format.parse(value.toString());
+      final date = format.parseStrict(input);
       return DateFormat('dd-MM-yyyy').format(date);
-    } catch (e) {
-      print('dat: $e');
+    } catch (_) {
+      // continue trying next format
     }
   }
-  return "";
+
+  // Try a fallback using DateTime.parse (handles many standard formats)
+  try {
+    final date = DateTime.parse(input);
+    return DateFormat('dd-MM-yyyy').format(date);
+  } catch (e) {
+    print('dateFormate: $e');
+    return "";
+  }
 }
 
 // Convert Aadhaar Response Date to String Date(dd-MM-yyyy);
@@ -116,6 +154,7 @@ String getDateFormatedByProvided(
 }
 
 void showSnack(BuildContext context, {required String message}) {
+  // final rootContext = Navigator.of(context, rootNavigator: true).context;
   ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
 }
 
@@ -197,35 +236,81 @@ void closeBottomSheetIfExists(BuildContext context) {
   }
 }
 
-CoapplicantData mapCoapplicantDataFromCif(CifResponse response) {
-  String mobileno = '';
-  if (response.mobilNum!.length == 12 && response.mobilNum!.startsWith("91")) {
-    mobileno = response.mobilNum!.substring(2);
+Map<String, String?> nameSeperate(String? fullName) {
+  if (fullName == null || fullName.trim().isEmpty) {
+    return {'firstName': '', 'middleName': '', 'lastName': ''};
   }
+  final getNameArray = fullName.trim().split(RegExp(r'\s+'));
+  // String fullname = fullName;
+  // List getNameArray = fullname.split(' ');
+  print('fullName: $getNameArray');
 
-  CoapplicantData data = CoapplicantData(
-    firstName: response.firstName,
-    lastName: response.lastName,
-    email: response.email,
-    primaryMobileNumber: mobileno != '' ? mobileno : response.mobilNum,
-    panNumber: response.panNo,
-    address1: response.restAddress,
-    // address2: response.lleadaddresslane1,
-    // address3: response.lleadaddresslane2,
-    pincode: response.borrowerPostalCode,
-    cifNumber: response.relCifid,
-    aadharRefNo: response.aadharNum,
-    dob: getDateFormat(response.dateOfBirth),
-    // loanLiabilityCount: response.liabilityCount,
-    // loanLiabilityAmount: response.liabilityAmount,
-    // depositCount: response.depositCount,
-    // depositAmount: response.depositAmount,
-    constitution: response.constitutionCode,
-    title: response.custTitle,
-  );
+  if (getNameArray.length == 1) {
+    return {'firstName': fullName, 'middleName': '', 'lastName': ''};
+  } else if (getNameArray.length == 2) {
+    return {
+      'firstName': getNameArray[0],
+      'middleName': '',
+      'lastName': getNameArray[1],
+    };
+  } else {
+    return {
+      'firstName': getNameArray[0],
+      'middleName': getNameArray[1],
+      'lastName': getNameArray.sublist(2).join(),
+    };
+  }
+}
 
-  print('mapCoapplicantDataFromCif => $data');
-  return data;
+CoapplicantData mapCoapplicantDataFromCif(CifResponse response) {
+  try {
+    String mobileno = '';
+    if (response.mobilNum!.length == 12 &&
+        response.mobilNum!.startsWith("91")) {
+      mobileno = response.mobilNum!.substring(2);
+    }
+    String? firstName = '';
+    String? middleName = '';
+    String? lastName = '';
+    if (response.firstName != null && response.firstName!.isNotEmpty) {
+      firstName = response.firstName;
+      middleName = response.secondName;
+      lastName = response.lastName;
+    } else {
+      final result = nameSeperate(response.applicantName);
+      firstName = result['firstName'];
+      middleName = result['middleName'];
+      lastName = result['lastName'];
+    }
+
+    CoapplicantData data = CoapplicantData(
+      firstName: firstName,
+      middleName: middleName,
+      lastName: lastName,
+      email: response.email,
+      primaryMobileNumber: mobileno != '' ? mobileno : response.mobilNum,
+      panNumber: response.panNo,
+      address1: response.restAddress,
+      // address2: response.lleadaddresslane1,
+      // address3: response.lleadaddresslane2,
+      pincode: response.borrowerPostalCode,
+      cifNumber: response.relCifid,
+      aadharRefNo: response.aadharNum,
+      dob: getDateFormat(response.dateOfBirth),
+      // loanLiabilityCount: response.liabilityCount,
+      // loanLiabilityAmount: response.liabilityAmount,
+      // depositCount: response.depositCount,
+      // depositAmount: response.depositAmount,
+      constitution: response.constitutionCode,
+      title: response.custTitle,
+    );
+
+    print('mapCoapplicantDataFromCif => $data');
+    return data;
+  } catch (e) {
+    print('co-app map: $e');
+    return CoapplicantData();
+  }
 }
 
 /// @desc   : Remove rupee seperator from form value

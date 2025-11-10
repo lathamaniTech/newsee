@@ -7,11 +7,12 @@ import 'package:newsee/feature/loanproductdetails/presentation/bloc/loanproduct_
 import 'package:newsee/feature/masters/domain/modal/product.dart';
 import 'package:newsee/feature/masters/domain/modal/product_master.dart';
 import 'package:newsee/feature/masters/domain/modal/productschema.dart';
-import 'package:newsee/widgets/k_willpopscope.dart';
-import 'package:newsee/widgets/sysmo_alert.dart';
 import 'package:newsee/widgets/bottom_sheet.dart';
+import 'package:newsee/widgets/k_willpopscope.dart';
 import 'package:newsee/widgets/productcard.dart';
 import 'package:newsee/widgets/searchable_drop_down.dart';
+import 'package:newsee/widgets/sysmo_alert.dart';
+
 import 'package:reactive_forms/reactive_forms.dart';
 
 /* 
@@ -75,63 +76,78 @@ class Loan extends StatelessWidget {
           automaticallyImplyLeading: false,
         ),
         body: BlocConsumer<LoanproductBloc, LoanproductState>(
-          listener: (context, state) {
+          listener: (context, state) async {
             BuildContext ctxt = context;
             print('LoanProductBlocListener:: log =>  ${state.showBottomSheet}');
 
             if (state.showBottomSheet == true) {
-              openBottomSheet(
+              await openBottomSheet(
                 context,
                 0.7,
                 0.5,
                 0.9,
                 // (context, scrollController) => Expanded(
-                (context, scrollController) => ListView.builder(
-                  controller: scrollController,
-                  itemCount: state.productmasterList.length,
-                  itemBuilder: (context, index) {
-                    final product = state.productmasterList[index];
-                    return Padding(
-                      padding: const EdgeInsets.only(
-                        top: 10.0,
-                        left: 10.0,
-                        bottom: 4.0,
+                (context, scrollController) => Padding(
+                  padding: const EdgeInsets.only(
+                    top: 10.0,
+                    left: 10.0,
+                    bottom: 4.0,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Please tap any product to select and proceed',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.deepOrange,
+                        ),
                       ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'Please tap any product to select and proceed',
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                              color: Colors.deepOrange,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          InkWell(
-                            onTap: () {
-                              ProductMaster selectedProduct = product;
-                              ctxt.read<LoanproductBloc>().add(
-                                ResetShowBottomSheet(
-                                  selectedProduct: selectedProduct,
+                      const SizedBox(height: 8),
+                      Expanded(
+                        child: ListView.builder(
+                          controller: scrollController,
+                          itemCount: state.productmasterList.length,
+                          itemBuilder: (context, index) {
+                            final product = state.productmasterList[index];
+                            return Padding(
+                              padding: const EdgeInsets.only(bottom: 6.0),
+                              child: InkWell(
+                                onTap: () {
+                                  ProductMaster selectedProduct = product;
+                                  ctxt.read<LoanproductBloc>().add(
+                                    ResetShowBottomSheet(
+                                      selectedProduct: selectedProduct,
+                                    ),
+                                  );
+                                },
+                                child: ProductCard(
+                                  productId: product.prdCode,
+                                  productDescription: product.prdDesc,
+                                  amountFrom: formatAmount(
+                                    product.prdamtFromRange,
+                                    'currency',
+                                  ),
+                                  amountTo: formatAmount(
+                                    product.prdamtToRange,
+                                    'currency',
+                                  ),
                                 ),
-                              );
-                            },
-                            child: ProductCard(
-                              productId: product.prdCode,
-                              productDescription: product.prdDesc,
-                              amountFrom: formatAmount(product.prdamtFromRange),
-                              amountTo: formatAmount(product.prdamtToRange),
-                            ),
-                          ),
-                        ],
+                              ),
+                            );
+                          },
+                        ),
                       ),
-                    );
-                  },
+                    ],
+                  ),
                 ),
+
                 // ),
-              );
+              ).whenComplete(() {
+                // when user taps outside or swipes down
+                context.read<LoanproductBloc>().add(ResetShowBottomSheet());
+              });
             }
             print('poping current route, ${state.status}');
             if (state.selectedProduct != null &&
@@ -177,6 +193,10 @@ class Loan extends StatelessWidget {
           // child: BlocBuilder<LoanproductBloc, LoanproductState>(
           builder: (context, state) {
             if (state.getLead!) {
+              Globalconfig.loanAmountMaximum = int.parse(
+                state.selectedProduct?.prdamtToRange ?? '0',
+              );
+              print('loanAmt: ${Globalconfig.loanAmountMaximum}');
               form.controls['typeofloan']?.updateValue(
                 state.selectedProductScheme?.optionValue.toString(),
               );
@@ -225,7 +245,7 @@ class Loan extends StatelessWidget {
                     children: [
                       SearchableDropdown<ProductSchema>(
                         controlName: 'typeofloan',
-                        label: 'Type Of Loan',
+                        label: 'Type of Loan',
                         items: state.productSchemeList,
                         onChangeListener: (ProductSchema val) {
                           form.controls['typeofloan']?.updateValue(
@@ -352,9 +372,11 @@ class Loan extends StatelessWidget {
                                         state.selectedProduct!.prdDesc,
                                     amountFrom: formatAmount(
                                       state.selectedProduct!.prdamtFromRange,
+                                      'currency',
                                     ),
                                     amountTo: formatAmount(
                                       state.selectedProduct!.prdamtToRange,
+                                      'currency',
                                     ),
                                   ),
                                 ]

@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:newsee/core/api/auth_failure.dart';
 import 'package:newsee/feature/cif/data/repository/cif_respository_impl.dart';
 import 'package:newsee/feature/cif/domain/model/user/cif_request.dart';
 import 'package:newsee/feature/cif/domain/repository/cif_repository.dart';

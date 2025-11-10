@@ -72,3 +72,9 @@ this way user can see the auditlog data and can identify the rootcause at ease
 further download logdata provision and upload to lendperfect server backend to be added
 
 ---
+
+for qa:
+package id: com.ubi.agriqa
+
+for uat:
+package id: com.ubi.agriuat

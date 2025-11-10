@@ -114,6 +114,7 @@ class CibilHtmlViewerState extends State<CibilHtmlViewer> {
       appBar: AppBar(
         title: const Text('CIBIL Report'),
         backgroundColor: Colors.teal,
+        foregroundColor: Colors.white,
       ),
       body: Stack(
         children: [

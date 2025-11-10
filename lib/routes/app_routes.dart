@@ -52,6 +52,7 @@ final routes = GoRouter(
           (context, state) => PopScope(
             canPop: false,
             onPopInvokedWithResult: (didpop, data) async {
+              if (didpop) return;
               final shouldPop = await showDialog<bool>(
                 context: context,
                 builder:
@@ -92,6 +93,7 @@ final routes = GoRouter(
         return PopScope(
           canPop: false,
           onPopInvokedWithResult: (didPop, result) async {
+            if (didPop) return;
             final shouldPop = await showDialog<bool>(
               context: context,
               builder:
@@ -176,6 +178,7 @@ final routes = GoRouter(
         return PopScope(
           canPop: false,
           onPopInvokedWithResult: (didpop, data) async {
+            if (didpop) return;
             final shouldPop = await showDialog<bool>(
               context: context,
               builder:
@@ -207,47 +210,92 @@ final routes = GoRouter(
         );
       },
     ),
+
+    // GoRoute(
+    //   path: AppRouteConstants.DOCUMENT_PAGE['path']!,
+    //   name: AppRouteConstants.DOCUMENT_PAGE['name'],
+
+    //   builder: (context, state) {
+    //     final extra = state.extra as String?;
+    //     final proposalNumber = extra ?? '';
+    //     return PopScope(
+    //       canPop: false,
+    //       onPopInvokedWithResult: (didpop, data) async {
+    //         final shouldPop = await showDialog<bool>(
+    //           context: context,
+    //           builder:
+    //               (context) => AlertDialog(
+    //                 title: Text('Confirm'),
+    //                 content: Text('Do you want to Exit ?'),
+    //                 actions: [
+    //                   TextButton(
+    //                     onPressed: () => Navigator.of(context).pop(false),
+    //                     child: Text('Cancel'),
+    //                   ),
+    //                   TextButton(
+    //                     onPressed: () => Navigator.of(context).pop(true),
+    //                     child: Text('Yes'),
+    //                   ),
+    //                 ],
+    //               ),
+    //         );
+    //         if (shouldPop ?? false) {
+    //           Navigator.of(context).pop(false);
+    //         }
+    //       },
+    //       child: BlocProvider(
+    //         create: (_) => DocumentBloc(mediaService: MediaService()),
+    //         // ..add(FetchDocumentsEvent(proposalNumber: proposalNumber)),
+    //         // lazy: false,
+    //         child: DocumentPage(proposalnumber: proposalNumber),
+    //       ),
+    //     );
+    //   },
+    // ),
     GoRoute(
       path: AppRouteConstants.DOCUMENT_PAGE['path']!,
       name: AppRouteConstants.DOCUMENT_PAGE['name'],
-
       builder: (context, state) {
         final extra = state.extra as String?;
         final proposalNumber = extra ?? '';
+
         return PopScope(
           canPop: false,
-          onPopInvokedWithResult: (didpop, data) async {
+          onPopInvokedWithResult: (didPop, result) async {
+            // Prevent multiple dialogs
+            if (didPop) return;
+
             final shouldPop = await showDialog<bool>(
               context: context,
               builder:
                   (context) => AlertDialog(
-                    title: Text('Confirm'),
-                    content: Text('Do you want to Exit ?'),
+                    title: const Text('Confirm'),
+                    content: const Text('Do you want to exit?'),
                     actions: [
                       TextButton(
                         onPressed: () => Navigator.of(context).pop(false),
-                        child: Text('Cancel'),
+                        child: const Text('Cancel'),
                       ),
                       TextButton(
                         onPressed: () => Navigator.of(context).pop(true),
-                        child: Text('Yes'),
+                        child: const Text('Yes'),
                       ),
                     ],
                   ),
             );
+
             if (shouldPop ?? false) {
-              Navigator.of(context).pop(false);
+              Navigator.of(context).pop(); // exit the page
             }
           },
           child: BlocProvider(
             create: (_) => DocumentBloc(mediaService: MediaService()),
-            // ..add(FetchDocumentsEvent(proposalNumber: proposalNumber)),
-            // lazy: false,
             child: DocumentPage(proposalnumber: proposalNumber),
           ),
         );
       },
     ),
+
     GoRoute(
       path: AppRouteConstants.CROP_DETAILS_PAGE['path']!,
       name: AppRouteConstants.CROP_DETAILS_PAGE['name'],
@@ -256,6 +304,7 @@ final routes = GoRouter(
         return PopScope(
           canPop: false,
           onPopInvokedWithResult: (didpop, data) async {
+            if (didpop) return;
             final shouldPop = await showDialog<bool>(
               context: context,
               builder:

@@ -78,7 +78,7 @@ class Address extends StatelessWidget {
     }
   }
 
-  mapAddressDetails(val) {
+  mapAddressDetails(val, [String? type]) {
     try {
       form.control('addressType').updateValue(val.addressType);
       form.control('address1').updateValue(val.address1);
@@ -88,8 +88,11 @@ class Address extends StatelessWidget {
       form.control('cityDistrict').updateValue(val.cityDistrict);
       form.control('area').updateValue(val.area);
       form.control('pincode').updateValue(val.pincode);
-      final leadref = DraftService().getCurrentLeadRef();
-      if (leadref == '' && leadref.isEmpty) {
+      // final leadref = DraftService().getCurrentLeadRef();
+      // if (leadref == '' && leadref.isEmpty) {
+      if (type == 'draft') {
+        form.markAsEnabled();
+      } else {
         form.markAsDisabled();
       }
     } catch (error) {
@@ -162,7 +165,7 @@ class Address extends StatelessWidget {
               }
             } else if (state.status == SaveStatus.success &&
                 state.getLead == false) {
-              mapAddressDetails(state.addressData);
+              mapAddressDetails(state.addressData, 'draft');
             } else if (state.status == SaveStatus.success &&
                 state.getLead == true) {
               mapAddressDetails(state.addressData);
@@ -240,6 +243,13 @@ class Address extends StatelessWidget {
                                     .stateCityMaster
                                     ?.firstWhere(
                                       (val) => val.code == stateCode,
+                                      orElse:
+                                          () => GeographyMaster(
+                                            stateParentId: '0',
+                                            cityParentId: '0',
+                                            code: '0',
+                                            value: '',
+                                          ),
                                     );
                                 print(geographyMaster);
                                 if (geographyMaster != null) {
@@ -285,7 +295,16 @@ class Address extends StatelessWidget {
 
                                 GeographyMaster? geographyMaster = state
                                     .cityMaster
-                                    ?.firstWhere((val) => val.code == cityCode);
+                                    ?.firstWhere(
+                                      (val) => val.code == cityCode,
+                                      orElse:
+                                          () => GeographyMaster(
+                                            stateParentId: '0',
+                                            cityParentId: '0',
+                                            code: '0',
+                                            value: '',
+                                          ),
+                                    );
                                 print(geographyMaster);
                                 if (geographyMaster != null) {
                                   form.controls['cityDistrict']?.updateValue(

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:go_router/go_router.dart';
+import 'package:newsee/AppData/app_api_constants.dart';
 import 'package:newsee/AppData/app_constants.dart';
 import 'package:newsee/AppData/app_forms.dart';
 import 'package:newsee/Utils/shared_preference_utils.dart';
@@ -15,6 +16,7 @@ import 'package:newsee/feature/masters/domain/modal/lov.dart';
 import 'package:newsee/widgets/k_willpopscope.dart';
 import 'package:newsee/widgets/options_sheet.dart';
 import 'package:newsee/widgets/searchable_drop_down.dart';
+import 'package:newsee/widgets/success_bottom_sheet.dart';
 import 'package:reactive_forms/reactive_forms.dart';
 import 'package:newsee/widgets/radio.dart';
 import 'package:newsee/widgets/integer_text_field.dart';
@@ -36,14 +38,25 @@ class CropDetailsPage extends StatefulWidget {
 class _CropDetailsPageState extends State<CropDetailsPage> {
   final form = AppForms.buildCropDetailsForm();
   final ValueNotifier<int> currentIndex = ValueNotifier<int>(0);
-
+  bool _isResetting = false;
   @override
   void initState() {
     super.initState();
 
-    form.control('culAreaLand').valueChanges.listen((_) => getAddSofAmount());
-    form.control('scaOfFin').valueChanges.listen((_) => getAddSofAmount());
-    form.control('addSofByRo').valueChanges.listen((_) => getAddSofAmount());
+    // Trigger auto-calculation when any dependent control changes
+    final controlsToWatch = [
+      'culAreaLand',
+      'scaOfFin',
+      'addSofByRo',
+      'season',
+      'covOfCrop',
+      'cropIns',
+      'cropType',
+    ];
+
+    for (final controlName in controlsToWatch) {
+      form.control(controlName).valueChanges.listen((_) => getAddSofAmount());
+    }
   }
 
   void getAddSofAmount() {
@@ -51,21 +64,77 @@ class _CropDetailsPageState extends State<CropDetailsPage> {
       final culAreaRaw = form.control('culAreaLand').value?.toString() ?? '0';
       final sofRaw = form.control('scaOfFin').value?.toString() ?? '0';
       final addSofRaw = form.control('addSofByRo').value?.toString() ?? '0';
+      final cropIns = form.control('cropIns').value?.toString() ?? '';
+      final cropType = form.control('cropType').value?.toString() ?? '';
 
-      final culArea = int.tryParse(culAreaRaw) ?? 0;
-      final sof = int.tryParse(sofRaw) ?? 0;
-      final addSOfPercent = int.tryParse(addSofRaw) ?? 0;
+      // If key inputs are empty or zero — clear calculated fields and return
+      if (culAreaRaw.trim().isEmpty ||
+          sofRaw.trim().isEmpty ||
+          culAreaRaw == '0' ||
+          sofRaw == '0') {
+        form.control('costOfCul').patchValue('', emitEvent: true);
+        form.control('addSofAmount').patchValue('', emitEvent: true);
+        form.control('insPre').patchValue('', emitEvent: true);
+        form.control('dueDateOfRepay').patchValue('', emitEvent: true);
+        return;
+      }
 
-      final baseTotal = culArea * sof;
-      final addSofValue = baseTotal * addSOfPercent;
+      final culArea = double.tryParse(culAreaRaw) ?? 0.0;
+      final sof = double.tryParse(sofRaw) ?? 0.0;
+      final addSOfPercent = double.tryParse(addSofRaw) ?? 0.0;
 
+      // Base calculations
+      final totalCultCost = culArea * sof;
+      final addSofValue = totalCultCost * (addSOfPercent / 100);
+
+      // Insurance calculation
+      //season: Kharif - 1, rabi - 2
+      // coverage crop: food/oil - 1 horticult crop - 2
+      if (cropIns == '2') {
+        form.control('insPre').patchValue('0', emitEvent: true);
+      } else {
+        final season = form.control('season').value?.toString() ?? '';
+        final covOfCrop = form.control('covOfCrop').value?.toString() ?? '';
+
+        double covPercent = 1.5;
+        if (season == '1' && covOfCrop == '1') {
+          covPercent = 2.0;
+        } else if (covOfCrop == '2') {
+          covPercent = 5.0;
+        }
+
+        final cov = totalCultCost * (covPercent / 100);
+        form
+            .control('insPre')
+            .patchValue(cov.toStringAsFixed(2), emitEvent: true);
+      }
+
+      // Update calculated fields
+      form
+          .control('costOfCul')
+          .patchValue(totalCultCost.toStringAsFixed(2), emitEvent: true);
       form
           .control('addSofAmount')
           .patchValue(addSofValue.toStringAsFixed(2), emitEvent: true);
-      print('addSofValue: ${form.value}');
-    } catch (e) {
-      print('getaddsof: $e');
+
+      // Repayment due date calculation
+      // 1- long term, 2 -short term
+      final now = DateTime.now();
+      final monthsToAdd = cropType == '1' ? 18 : 12;
+      final dueDate = DateTime(now.year, now.month + monthsToAdd, now.day);
+      final formattedDate =
+          '${dueDate.day.toString().padLeft(2, '0')}-${dueDate.month.toString().padLeft(2, '0')}-${dueDate.year}';
+      form.control('dueDateOfRepay').patchValue(formattedDate, emitEvent: true);
+
+      print('Calculations completed: ${form.value}');
+    } catch (e, stack) {
+      print('Error in getAddSofAmount: $e');
+      print(stack);
     }
+  }
+
+  void resetForm() {
+    form.reset();
   }
 
   bool isFormCompletelyEmpty(FormGroup form) {
@@ -101,7 +170,7 @@ class _CropDetailsPageState extends State<CropDetailsPage> {
 
   void handleSave(BuildContext context, CropyieldpageState state) {
     if (form.valid) {
-      print("handleSave =>  ${form.value}");
+      print("handleSave =>  ${form.rawValue}");
 
       final cropFormData = CropDetailsModal.fromForm(form.rawValue);
       context.read<CropyieldpageBloc>().add(
@@ -129,6 +198,7 @@ class _CropDetailsPageState extends State<CropDetailsPage> {
 
   void handleUpdate(BuildContext context, CropyieldpageState state) {
     if (form.valid) {
+      print('handleupdate: ${form.rawValue}');
       final cropFormData = CropDetailsModal.fromForm(form.rawValue);
       context.read<CropyieldpageBloc>().add(
         CropDetailsUpdateEvent(
@@ -139,6 +209,13 @@ class _CropDetailsPageState extends State<CropDetailsPage> {
     } else {
       form.markAllAsTouched();
     }
+  }
+
+  disableFields() {
+    form.control('insPre').markAsDisabled();
+    form.control('costOfCul').markAsDisabled();
+    form.control('addSofAmount').markAsDisabled();
+    form.control('dueDateOfRepay').markAsDisabled();
   }
 
   void showBottomSheet(BuildContext context, CropyieldpageState state) {
@@ -184,7 +261,6 @@ class _CropDetailsPageState extends State<CropDetailsPage> {
                                       v.Header == 'CropTypeOfLand' &&
                                       v.optvalue == item.lcdTypeOfLand,
                                 );
-                                print("landname $landname");
                                 final cropname = lovlist.firstWhere(
                                   (v) =>
                                       v.Header == 'CropName' &&
@@ -201,8 +277,9 @@ class _CropDetailsPageState extends State<CropDetailsPage> {
                                       SlidableAction(
                                         onPressed: (slidableContext) {
                                           try {
-                                            if (item.lcdRowId != '' ||
-                                                item.lcdRowId != null) {
+                                            if (item.lcdRowId != null &&
+                                                item.lcdRowId != '') {
+                                              print(item.lcdRowId);
                                               slidableContext
                                                   .read<CropyieldpageBloc>()
                                                   .add(
@@ -411,6 +488,7 @@ class _CropDetailsPageState extends State<CropDetailsPage> {
 
               if (state.status == SaveStatus.delete) {
                 globalLoadingBloc.add(HideLoading());
+                form.reset();
                 showSnack(
                   context,
                   message: 'Crop Details Deleted Successfully',
@@ -428,17 +506,46 @@ class _CropDetailsPageState extends State<CropDetailsPage> {
                 //       state.landDetails!['lpAgriPcRainfed'].toString();
                 // }
               } else if (state.status == SaveStatus.mastersucess) {
-                form.reset();
+                // form.reset();
+                resetForm();
+                disableFields();
               } else if (state.status == SaveStatus.reset) {
-                form.reset();
+                // form.reset();
+                resetForm();
+                disableFields();
               } else if (state.status == SaveStatus.success) {
-                form.reset();
+                // form.reset();
+                resetForm();
+                disableFields();
                 context.pop();
                 globalLoadingBloc.add(HideLoading());
-                showSnack(
-                  context,
-                  message: 'Crop Details Submitted Successfully',
+                showSuccessBottomSheet(
+                  context: context,
+                  headerTxt: ApiConstants.api_response_success,
+                  lead: "",
+                  message: "Crop details successfully submitted",
+                  leftButtonLabel: 'Documents Upload',
+                  rightButtonLabel: 'Cancel',
+                  onPressedLeftButton: () {
+                    if (Navigator.of(context).canPop()) {
+                      Navigator.of(context).pop();
+                      context.pushNamed(
+                        'document',
+                        extra: widget.proposalnumber,
+                      );
+                    }
+                  },
+                  onPressedRightButton: () {
+                    if (Navigator.of(context).canPop()) {
+                      Navigator.of(context).pop();
+                    }
+                  }, // OnPressedRightButton,
                 );
+
+                // showSnack(
+                //   context,
+                //   message: 'Crop Details Submitted Successfully',
+                // );
               } else if (state.status == SaveStatus.failure &&
                   state.errorMessage != null) {
                 globalLoadingBloc.add(HideLoading());
@@ -659,32 +766,43 @@ class _CropDetailsPageState extends State<CropDetailsPage> {
                                       controlName: 'culAreaLand',
                                       label: 'Area Of Cultivated (Acre)',
                                       mantatory: true,
+                                      maxlength: 5,
                                     ),
                                     IntegerTextField(
                                       controlName: 'scaOfFin',
                                       label: 'Scale of Finance (per Acre)',
                                       mantatory: true,
+                                      maxlength: 10,
+                                      isRupeeFormat: true,
+                                    ),
+                                    IntegerTextField(
+                                      controlName: 'costOfCul',
+                                      label:
+                                          'Total Cost Of Cultivation(Acreage*SOF)',
+                                      mantatory: true,
+                                      isRupeeFormat: true,
+                                      maxlength: 10,
                                     ),
                                     IntegerTextField(
                                       controlName: 'addSofByRo',
                                       label: 'Additional SOF %',
                                       mantatory: true,
+                                      maxlength: 10,
                                     ),
                                     IntegerTextField(
                                       controlName: 'addSofAmount',
-                                      label: 'Additonal Amount SOF',
+                                      label: 'Additonal SOF Amount',
                                       mantatory: true,
+                                      maxlength: 10,
+                                      isRupeeFormat: true,
                                     ),
                                     IntegerTextField(
                                       controlName: 'culAreaSize',
                                       label: 'Cultivated Area Size',
                                       mantatory: true,
+                                      maxlength: 10,
                                     ),
-                                    IntegerTextField(
-                                      controlName: 'costOfCul',
-                                      label: 'Cost Of Cultivation',
-                                      mantatory: true,
-                                    ),
+
                                     SearchableDropdown<Lov>(
                                       controlName: 'cropIns',
                                       label: 'Crop Insurance',
@@ -724,6 +842,8 @@ class _CropDetailsPageState extends State<CropDetailsPage> {
                                       controlName: 'insPre',
                                       label: 'Insurance Premium',
                                       mantatory: true,
+                                      maxlength: 10,
+                                      isRupeeFormat: true,
                                     ),
                                     Padding(
                                       padding: const EdgeInsets.all(12.0),
@@ -736,7 +856,24 @@ class _CropDetailsPageState extends State<CropDetailsPage> {
                                         },
                                         readOnly: true,
                                         decoration: InputDecoration(
-                                          labelText: 'Due Date Of Repayment',
+                                          // labelText: 'Due Date Of Repayment',
+                                          label: RichText(
+                                            text: TextSpan(
+                                              text: 'Due Date Of Repayment',
+                                              style: const TextStyle(
+                                                color: Colors.black,
+                                                fontSize: 16,
+                                              ),
+                                              children: [
+                                                TextSpan(
+                                                  text: ' *',
+                                                  style: TextStyle(
+                                                    color: Colors.red,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
                                           suffixIcon: Icon(
                                             Icons.calendar_today,
                                           ),
@@ -761,7 +898,7 @@ class _CropDetailsPageState extends State<CropDetailsPage> {
                                         },
                                       ),
                                     ),
-
+                                    SizedBox(height: 80),
                                     Center(
                                       child:
                                           state.status == SaveStatus.update ||

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:newsee/AppData/app_constants.dart';
 import 'package:newsee/AppData/app_forms.dart';
@@ -9,7 +10,6 @@ import 'package:newsee/feature/aadharvalidation/domain/modal/aadharvalidate_requ
 import 'package:newsee/feature/cif/domain/model/user/cif_response.dart';
 import 'package:newsee/feature/dedupe/presentation/bloc/dedupe_bloc.dart';
 import 'package:newsee/feature/draft/draft_service.dart';
-import 'package:newsee/feature/draft/presentation/pages/draft_inbox.dart';
 import 'package:newsee/feature/masters/domain/modal/lov.dart';
 import 'package:newsee/feature/personaldetails/presentation/bloc/personal_details_bloc.dart';
 import 'package:newsee/widgets/SearchableMultiSelectDropdown.dart';
@@ -61,33 +61,67 @@ class Personal extends StatelessWidget {
       if (val != null) {
         form.control('aadharRefNo').updateValue(val?.referenceId);
         refAadhaar = true;
-        if (val.name != null) {
-          String fullname = val?.name;
-          List getNameArray = fullname.split(' ');
-          if (getNameArray.length > 2) {
-            String fullname = getNameArray.sublist(2).join();
-            form.control('firstName').updateValue(getNameArray[0]);
-            form.control('middleName').updateValue(getNameArray[1]);
-            form.control('lastName').updateValue(fullname);
-          } else if (getNameArray.length == 2) {
-            form.control('firstName').updateValue(getNameArray[0]);
-            form.control('lastName').updateValue(getNameArray[1]);
-          } else if (getNameArray.length == 1) {
-            form.control('firstName').updateValue(getNameArray[0]);
-          }
-        }
-        final formattedDate = getDateFormatedByProvided(
-          val?.dateOfBirth!,
-          from: AppConstants.Format_dd_MM_yyyy,
-          to: AppConstants.Format_yyyy_MM_dd,
-        );
+        nameSeperate(val.name);
+        // if (val.name != null) {
+        //   String fullname = val?.name;
+        //   List getNameArray = fullname.split(' ');
+        //   if (getNameArray.length > 2) {
+        //     String fullname = getNameArray.sublist(2).join();
+        //     setControl('firstName', getNameArray[0]);
+        //     setControl('middleName', getNameArray[1]);
+        //     setControl('lastName', fullname);
+        //   } else if (getNameArray.length == 2) {
+        //     setControl('firstName', getNameArray[0]);
+        //     setControl('lastName', getNameArray[1]);
+        //   } else if (getNameArray.length == 1) {
+        //     setControl('firstName', getNameArray[0]);
+        //   }
+        // }
+        setControl('primaryMobileNumber', val?.mobile);
+        final formattedDate =
+            val.dateOfBirth != null
+                ? getCorrectDateFormat(val.dateOfBirth!)
+                : null;
+        // getDateFormatedByProvided(
+        //   val?.dateOfBirth!,
+        //   from: AppConstants.Format_dd_MM_yyyy,
+        //   to: AppConstants.Format_yyyy_MM_dd,
+        // );
         print('formattedDate in personal page => $formattedDate');
-
-        form.control('dob').updateValue(formattedDate);
-        form.control('email').updateValue(val?.email!);
+        setControl('dob', formattedDate);
+        setControl('email', val?.email);
       }
     } catch (error) {
       print("autoPopulateData-catch-error $error");
+    }
+  }
+
+  void nameSeperate(val) {
+    print('nameapp: $val');
+    if (val != null) {
+      String fullname = val;
+      List getNameArray = fullname.split(' ');
+      if (getNameArray.length > 2) {
+        String fullname = getNameArray.sublist(2).join();
+        setControl('firstName', getNameArray[0]);
+        setControl('middleName', getNameArray[1]);
+        setControl('lastName', fullname);
+      } else if (getNameArray.length == 2) {
+        setControl('firstName', getNameArray[0]);
+        setControl('lastName', getNameArray[1]);
+      } else if (getNameArray.length == 1) {
+        setControl('firstName', getNameArray[0]);
+      }
+    }
+  }
+
+  void setControl(String controlName, dynamic value) {
+    final control = form.control(controlName);
+    if (value != null && value.toString().trim().isNotEmpty) {
+      control.updateValue(value);
+      control.markAsDisabled();
+    } else {
+      control.markAsEnabled();
     }
   }
 
@@ -120,16 +154,6 @@ class Personal extends StatelessWidget {
         );
       }
 
-      void setControl(String controlName, dynamic value) {
-        final control = form.control(controlName);
-        if (value != null && value.toString().trim().isNotEmpty) {
-          control.updateValue(value);
-          control.markAsDisabled();
-        } else {
-          control.markAsEnabled();
-        }
-      }
-
       final mobile = formatMobile(val.mobilNum);
       // get find values from list
       final religionLov = findLov('Religion', val.communityName);
@@ -137,9 +161,14 @@ class Personal extends StatelessWidget {
       final genderLov = findLov('Gender', val.gender);
 
       // set values to form controls
-      setControl('firstName', val.firstName);
-      setControl('middleName', val.secondName);
-      setControl('lastName', val.lastName);
+      if (val.firstName != null && val.firstName!.isNotEmpty) {
+        setControl('firstName', val.firstName);
+        setControl('middleName', val.secondName);
+        setControl('lastName', val.lastName);
+      } else {
+        nameSeperate(val.applicantName);
+      }
+
       setControl(
         'dob',
         val.dateOfBirth != null ? getDateFormat(val.dateOfBirth!) : null,
@@ -160,57 +189,7 @@ class Personal extends StatelessWidget {
     }
   }
 
-  // void datamapperCif(CifResponse val, lovList) {
-  //   try {
-  //     String mobileno = '';
-  //     if (val.phoneNum!.length == 12 && val.phoneNum!.startsWith("91")) {
-  //       mobileno = val.phoneNum!.substring(2);
-  //     } else {
-  //       mobileno = val.phoneNum!;
-  //     }
-  //     final Lov lov = lovList?.firstWhere(
-  //       (lov) =>
-  //           lov.Header == 'Religion' &&
-  //           (lov.optvalue.toUpperCase() == val.communityName?.toUpperCase() ||
-  //               lov.optDesc.toUpperCase() == val.communityName?.toUpperCase()),
-  //     );
-
-  //     form.control('firstName')
-  //       ..updateValue(val.firstName!)
-  //       ..markAsDisabled();
-  //     form.control('middleName')
-  //       ..updateValue(val.secondName!)
-  //       ..markAsDisabled();
-  //     form.control('lastName')
-  //       ..updateValue(val.lastName!)
-  //       ..markAsDisabled();
-  //     form.control('dob')
-  //       ..updateValue(getDateFormat(val.dateOfBirth!))
-  //       ..markAsDisabled();
-  //     form.control('primaryMobileNumber')
-  //       ..updateValue(mobileno)
-  //       ..markAsDisabled();
-  //     form.control('email')
-  //       ..updateValue(val.email!)
-  //       ..markAsDisabled();
-  //     form.control('panNumber')
-  //       ..updateValue(val.panNo!)
-  //       ..markAsDisabled();
-  //     form.control('aadharRefNo')
-  //       ..updateValue(val.aadharNum!)
-  //       ..markAsDisabled();
-  //     form.controls['religion']
-  //       ?..updateValue(lov.optvalue)
-  //       ..markAsDisabled();
-  //     if (val.aadharNum != null) {
-  //       refAadhaar = true;
-  //     }
-  //   } catch (error) {
-  //     print("autoPopulateData-catch-error $error");
-  //   }
-  // }
-
-  mapPersonalData(val) {
+  mapPersonalData(val, [String? type]) {
     try {
       form.control('title').updateValue(val['title']);
       form.control('firstName').updateValue(val['firstName']);
@@ -232,7 +211,7 @@ class Personal extends StatelessWidget {
           .updateValue(val['secondaryMobileNumber']);
       form
           .control('loanAmountRequested')
-          .updateValue(val['loanAmountRequested']);
+          .updateValue(formatAmount(val['loanAmountRequested'], 'currency'));
       form.control('natureOfActivity').updateValue(val['natureOfActivity']);
       form.control('occupationType').updateValue(val['occupationType']);
       form.control('agriculturistType').updateValue(val['agriculturistType']);
@@ -243,7 +222,11 @@ class Personal extends StatelessWidget {
       form.control('gender').updateValue(val['gender']);
       form.control('subActivity').updateValue(val['subActivity']);
       final leadref = DraftService().getCurrentLeadRef();
-      if (leadref == '' && leadref.isEmpty) {
+      print('leadrefDraft: $leadref');
+      // if (leadref == '' && leadref.isEmpty) {
+      if (type == 'draft') {
+        form.markAsEnabled();
+      } else {
         form.markAsDisabled();
       }
     } catch (error) {
@@ -364,7 +347,7 @@ class Personal extends StatelessWidget {
               print('saved personal data =>${state.personalData}');
               Map<String, dynamic> personalDetails =
                   state.personalData!.toMap();
-              mapPersonalData(personalDetails);
+              mapPersonalData(personalDetails, 'draft');
             } else if (state.status == SaveStatus.success &&
                 state.getLead == true) {
               Map<String, dynamic> personalDetails =
@@ -422,18 +405,33 @@ class Personal extends StatelessWidget {
                         controlName: 'firstName',
                         label: 'First Name',
                         mantatory: true,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.allow(
+                            AppConstants.NameInputFormatter,
+                          ),
+                        ],
                       ),
                       CustomTextField(
                         fieldKey: _middleNameKey,
                         controlName: 'middleName',
                         label: 'Middle Name',
-                        mantatory: true,
+                        mantatory: false,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.allow(
+                            AppConstants.NameInputFormatter,
+                          ),
+                        ],
                       ),
                       CustomTextField(
                         fieldKey: _lastNameKey,
                         controlName: 'lastName',
                         label: 'Last Name',
                         mantatory: true,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.allow(
+                            AppConstants.NameInputFormatter,
+                          ),
+                        ],
                       ),
                       Padding(
                         padding: const EdgeInsets.all(12.0),
@@ -481,7 +479,7 @@ class Personal extends StatelessWidget {
                         fieldKey: _secondaryMobileNumberKey,
                         controlName: 'secondaryMobileNumber',
                         label: 'Secondary Mobile Number',
-                        mantatory: true,
+                        mantatory: false,
                         maxlength: 10,
                         minlength: 10,
                       ),
@@ -489,7 +487,7 @@ class Personal extends StatelessWidget {
                         fieldKey: _emailKey,
                         controlName: 'email',
                         label: 'Email ID',
-                        mantatory: true,
+                        mantatory: false,
                       ),
                       CustomTextField(
                         fieldKey: _panNumberKey,
@@ -498,6 +496,11 @@ class Personal extends StatelessWidget {
                         mantatory: true,
                         autoCapitalize: true,
                         maxlength: 10,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.allow(
+                            RegExp(r'[A-Z0-9]'),
+                          ),
+                        ],
                       ),
                       refAadhaar
                           ? Row(
@@ -527,7 +530,7 @@ class Personal extends StatelessWidget {
                                 child: IntegerTextField(
                                   fieldKey: _aadhaarKey,
                                   controlName: 'aadhaar',
-                                  label: 'Aadhaar Number',
+                                  label: 'Aadhaar No.',
                                   mantatory: true,
                                   maxlength: 12,
                                   minlength: 12,
@@ -573,7 +576,7 @@ class Personal extends StatelessWidget {
                       IntegerTextField(
                         fieldKey: _loanAmountRequestedKey,
                         controlName: 'loanAmountRequested',
-                        label: 'Loan Amount Required',
+                        label: 'Loan Amount Required (₹)',
                         mantatory: true,
                         isRupeeFormat: true,
                       ),
@@ -861,6 +864,7 @@ class Personal extends StatelessWidget {
                               );
                         },
                       ),
+
                       SearchableMultiSelectDropdown<Lov>(
                         fieldKey: _subActivityKey,
                         controlName: 'subActivity',

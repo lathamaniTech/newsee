@@ -45,21 +45,23 @@ class CropyieldpageBloc extends Bloc<CropyieldpageEvent, CropyieldpageState> {
       int totalIns = 0;
 
       for (final detail in state.cropData ?? []) {
+        print('submit $detail');
+
         final int areaOfCul =
-            int.tryParse(
-              removeSpecialCharacters(detail.lcdCulAreaLand ?? ''),
-            ) ??
-            0;
-        final int scaOfFin = detail.lcdScaOfFin ?? 0;
-        final int addSofByRo = detail.lcdAddSofByRo ?? 0;
+            int.tryParse(detail.lcdCostOfCul?.toString() ?? '0') ?? 0;
+
+        final int addsofamt = detail.lcdAddSofAmount ?? 0;
         final int insPre = detail.lcdInsPre ?? 0;
 
-        totalCul += (areaOfCul * scaOfFin).toInt();
-        totalSof += (areaOfCul * addSofByRo).toInt();
+        print('submit $areaOfCul, $insPre, $addsofamt');
+
+        totalCul += areaOfCul;
+        totalSof += addsofamt;
         totalIns += insPre;
 
         print('Submitting detail: $detail');
       }
+
       print('submit');
       final CropRequestModel cropReq = CropRequestModel(
         proposalNumber: int.tryParse(event.proposalNumber),
@@ -77,11 +79,11 @@ class CropyieldpageBloc extends Bloc<CropyieldpageEvent, CropyieldpageState> {
                     typeOfLand: detail.lcdTypeOfLand,
                     scaOfFin: detail.lcdScaOfFin,
                     addSofByRo: detail.lcdAddSofByRo,
-                    costOfCul: detail.lcdCostOfCul,
+                    costOfCul: detail.lcdCostOfCul?.toInt(),
                     covOfCrop: detail.lcdCovOfCrop,
                     cropIns: detail.lcdCropIns,
-                    addSofAmount: detail.lcdAddSofAmount,
-                    insPre: detail.lcdInsPre,
+                    addSofAmount: detail.lcdAddSofAmount?.toInt(),
+                    insPre: detail.lcdInsPre?.toInt(),
                     dueDateOfRepay: detail.lcdDueDateOfRepay,
                   ),
                 )
@@ -277,6 +279,7 @@ class CropyieldpageBloc extends Bloc<CropyieldpageEvent, CropyieldpageState> {
         //     )
         //   );
         // } else {
+        print("final landDetailsList ${state.cropData}, ${event.index}");
         List<CropDetailsModal> cropDetailsList = state.cropData!;
         cropDetailsList.removeAt(event.index);
         final addedCrop = checkNewArray(cropDetailsList);

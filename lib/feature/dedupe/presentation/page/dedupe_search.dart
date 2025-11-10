@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:newsee/AppData/app_constants.dart';
 import 'package:newsee/feature/aadharvalidation/domain/modal/aadharvalidate_request.dart';
 import 'package:newsee/feature/dedupe/domain/model/deduperequest.dart';
 import 'package:newsee/feature/dedupe/presentation/bloc/dedupe_bloc.dart';
@@ -65,7 +67,6 @@ class DedupeSearch extends StatelessWidget {
       widget: BlocConsumer<DedupeBloc, DedupeState>(
         listener:
             (context, state) => {
-              print('Dedupe final Response => $state '),
               if (state.status == DedupeFetchStatus.success)
                 {
                   /* If aadharvalidateResponse is not null, show the response(name,dob,address etc) 
@@ -97,7 +98,7 @@ class DedupeSearch extends StatelessWidget {
                         {
                           "icon": Icons.contact_phone,
                           "label": "Mobile",
-                          "value": "",
+                          "value": state.aadharvalidateResponse?.mobile,
                         },
                         {
                           "icon": Icons.home,
@@ -111,7 +112,7 @@ class DedupeSearch extends StatelessWidget {
                     {
                       dataList = [
                         {
-                          "icon": Icons.currency_rupee,
+                          "icon": Icons.check_box_rounded,
                           "label": "CBS",
                           "value": "true",
                         },
@@ -130,14 +131,7 @@ class DedupeSearch extends StatelessWidget {
                           side: BorderSide(color: Colors.grey.shade300),
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        // child: ResponseWidget(
-                        //   heightSize:
-                        //       state.aadharvalidateResponse != null
-                        //           ? 0.50
-                        //           : 0.32,
-                        //   dataList: dataList,
-                        //   onpressed: () => {disposeResponse(context, state)},
-                        // ),
+
                         child: ResponseWidget(
                           heightSize:
                               state.aadharvalidateResponse != null ? 0.5 : 0.32,
@@ -152,10 +146,15 @@ class DedupeSearch extends StatelessWidget {
                 }
               else if (state.status == DedupeFetchStatus.failure)
                 {
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(SnackBar(content: Text(state.errorMsg!))),
-
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        state.errorMsg?.isNotEmpty == true
+                            ? state.errorMsg!
+                            : 'No response data from server',
+                      ),
+                    ),
+                  ),
                   if (onSuccess != null) {onSuccess!(state)},
                 },
             },
@@ -192,11 +191,21 @@ class DedupeSearch extends StatelessWidget {
                           controlName: 'firstname',
                           label: 'First Name',
                           mantatory: true,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.allow(
+                              AppConstants.NameInputFormatter,
+                            ),
+                          ],
                         ),
                         CustomTextField(
                           controlName: 'lastname',
                           label: 'Last Name',
                           mantatory: true,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.allow(
+                              AppConstants.NameInputFormatter,
+                            ),
+                          ],
                         ),
                         IntegerTextField(
                           controlName: 'mobilenumber',
@@ -211,6 +220,11 @@ class DedupeSearch extends StatelessWidget {
                           mantatory: true,
                           maxlength: 10,
                           autoCapitalize: true,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.allow(
+                              RegExp(r'[A-Z0-9]'),
+                            ),
+                          ],
                         ),
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.center,

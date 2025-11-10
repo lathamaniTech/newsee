@@ -6,9 +6,10 @@ plugins {
 }
 
 android {
-    namespace = "com.example.newsee"
+    namespace = "com.ubi.agriqa"
     compileSdk = 35
-    ndkVersion = flutter.ndkVersion
+    // ndkVersion = flutter.ndkVersion
+    ndkVersion = "27.0.12077973"
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
@@ -21,7 +22,7 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.example.newsee"
+        applicationId = "com.ubi.agriqa"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         //minSdk = flutter.minSdkVersion
@@ -31,8 +32,28 @@ android {
         versionName = flutter.versionName
     }
 
+    signingConfigs {
+        create("release") {
+            keyAlias = "ubiagri"
+            keyPassword = "sysarc@ubiagri1234"
+            storeFile = file("D:\\Lathamani\\GitHub\\ubi_flutter_github\\ubi_project\\uat_keystore\\ubi_agri_keystore.jks")
+            storePassword = "sysarc@ubiagri1234"
+        }
+    }
+ 
     buildTypes {
-        release {
+        getByName("release") {
+            // TODO: Add your own signing config for the release build.
+            // Signing with the debug keys for now, so `flutter run --release` works.
+            // signingConfig = signingConfigs.getByName("debug")
+            signingConfig = signingConfigs.getByName("release")
+            isMinifyEnabled = false
+            isShrinkResources = false
+        }
+    }
+
+  //  buildTypes {
+       // release {
             // TODO: uncomment thi below three lines before for the release build.
             // This obfuscates Java/Kotlin code.
             // minifyEnabled true
@@ -41,9 +62,9 @@ android {
             
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
-            }
-    }
+          //  signingConfig = signingConfigs.getByName("debug")
+         //   }
+   // }
 }
 
 flutter {

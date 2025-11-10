@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 // ignore: constant_identifier_names
 
 class AppConstants {
@@ -7,7 +6,12 @@ class AppConstants {
     r'[\*\%!$\^.,;:{}\(\)\-_+=\[\]]',
   );
 
+  // static final RegExp Name_Pattern = RegExp(r'^[A-Za-z\s]+$');
+  static final RegExp Name_Pattern = RegExp(r'^[A-Za-z\s/]+$');
   static final RegExp PAN_PATTERN = RegExp(r'^[A-Z]{5}[0-9]{4}[A-Z]$');
+  static final RegExp mobileNumber = RegExp(r'^\d{10}$');
+
+  static final NameInputFormatter = RegExp(r'[A-Za-z\s]');
 
   static final RegExp AADHAAR_PATTERN = RegExp('[0-9]{12}');
 
@@ -22,7 +26,10 @@ class AppConstants {
   static const String GLOBAL_API_ERROR_MESSAGE = 'Something went wrong';
   static const String GLOBAL_NO_DATA_FOUND = 'No Data found';
   static const String GLOBAL_COULD_NOT_LAUNCH = 'Could not launch';
-  static const String FAILED_TO_LOAD_PDF_MESSAGE = 'Failed to load PDF';
+  static const String FAILED_TO_CHECK_CIBIL_MESSAGE =
+      'Failed to check cibil report';
+  static const String FAILED_TO_LOAD_PDF_MESSAGE =
+      'Failed to load cibil report';
   static const String OK = 'OK';
   static const bool SHOW_LOG = true;
 

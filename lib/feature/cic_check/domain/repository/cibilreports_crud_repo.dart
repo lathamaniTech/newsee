@@ -1,8 +1,6 @@
 import 'package:newsee/AppData/DBConstants/table_key_cibil_reports.dart';
-import 'package:newsee/AppData/DBConstants/table_key_geographymaster.dart';
 import 'package:newsee/Utils/query_builder.dart';
 import 'package:newsee/feature/cic_check/domain/modals/cibil_report_table_model.dart';
-import 'package:newsee/feature/masters/domain/modal/geography_master.dart';
 import 'package:newsee/feature/masters/domain/repository/simple_crud_repo.dart';
 import 'package:newsee/feature/masters/domain/repository/simplecursor_crud_repo.dart';
 import 'package:sqflite/sqlite_api.dart';
@@ -14,7 +12,6 @@ class CibilreportsCrudRepo extends SimpleCrudRepo<CibilReportTableModel>
 
   @override
   Future<int> delete(CibilReportTableModel o) {
-    // TODO: implement delete
     throw UnimplementedError();
   }
 
@@ -89,7 +86,6 @@ class CibilreportsCrudRepo extends SimpleCrudRepo<CibilReportTableModel>
 
   @override
   Future<List<CibilReportTableModel>> getById({required int id}) {
-    // TODO: implement getById
     throw UnimplementedError();
   }
 }

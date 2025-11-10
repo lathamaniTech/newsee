@@ -21,6 +21,7 @@ class CifResponse {
   final String? gender;
   final String? communityName;
   final String? casteName;
+  final String? applicantName;
   final String? customrStatus;
   final String? operativeAcct;
   final String? constitutionCode;
@@ -48,6 +49,7 @@ class CifResponse {
     this.gender,
     this.communityName,
     this.casteName,
+    this.applicantName,
     this.customrStatus,
     this.operativeAcct,
     this.constitutionCode,
@@ -82,6 +84,7 @@ class CifResponse {
     String? fatherName,
     String? communityName,
     String? casteName,
+    String? applicantName,
     String? customrStatus,
     String? schmType,
     String? schmDesc,
@@ -114,6 +117,7 @@ class CifResponse {
       gender: gender ?? this.gender,
       communityName: communityName ?? this.communityName,
       casteName: casteName ?? this.casteName,
+      applicantName: applicantName ?? this.applicantName,
       customrStatus: customrStatus ?? this.customrStatus,
       operativeAcct: operativeAcct ?? this.operativeAcct,
       constitutionCode: constitutionCode ?? this.constitutionCode,

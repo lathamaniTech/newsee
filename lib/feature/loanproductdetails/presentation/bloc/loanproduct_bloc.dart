@@ -160,10 +160,11 @@ class LoanproductBloc extends Bloc<LoanproductEvent, LoanproductState> {
         db,
       ).getByColumnNames(columnNames: columnNames, columnValues: columsValues);
       print('productMasterList => $productMasterList');
-      LoanproductState.init();
+      // LoanproductState.init(); //latha commented
       emit(
         state.copyWith(
           productmasterList: productMasterList,
+          selectedProduct: null,
           showBottomSheet: true,
         ),
       );
@@ -272,14 +273,18 @@ class LoanproductBloc extends Bloc<LoanproductEvent, LoanproductState> {
 
       print('loanDraft => $typeOfLoan, $productID');
       print('productID => $productID');
+      print('productSchemaList => $productSchemaList');
       ProductSchema productSchema = productSchemaList.firstWhere(
         (p) => p.optionValue == typeOfLoan,
+        orElse:
+            () => ProductSchema(optionDesc: '', optionId: '', optionValue: ''),
       );
-
+      print('productSchemass => $productSchema}');
       List<Lov> listOfLov = await LovCrudRepo(db).getByColumnNames(
         columnNames: ['Header', 'optvalue'],
         columnValues: ['AgriProductType', productSchema.optionId],
       );
+      print('listOfLov => $listOfLov}');
 
       final optCode = listOfLov.first.optCode;
       print('listOfLov.first.optCode => $optCode');

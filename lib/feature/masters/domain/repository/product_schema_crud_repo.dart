@@ -40,7 +40,7 @@ class ProductSchemaCrudRepo extends SimpleCrudRepo<ProductSchema>
   Future<List<ProductSchema>> getAll() async {
     final List<Map<String, dynamic>> data = await _db.query(
       TableKeysProductSchema.tableName,
-      orderBy: 'id DESC',
+      orderBy: 'optionDesc COLLATE NOCASE ASC',
     );
     print("retdata $data");
     return List.generate(

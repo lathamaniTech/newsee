@@ -7,6 +7,7 @@ import 'package:newsee/AppData/app_api_constants.dart';
 import 'package:newsee/AppData/app_constants.dart';
 import 'package:newsee/Model/address_data.dart';
 import 'package:newsee/Model/personal_data.dart';
+import 'package:newsee/Utils/utils.dart';
 import 'package:newsee/core/api/AsyncResponseHandler.dart';
 import 'package:newsee/core/api/failure.dart';
 import 'package:newsee/feature/auth/domain/model/user_details.dart';
@@ -69,6 +70,17 @@ final class LeadSubmitBloc extends Bloc<LeadSubmitEvent, LeadSubmitState> {
   Future<void> onLeadPush(LeadSubmitPushEvent event, Emitter emit) async {
     emit(state.copyWith(leadSubmitStatus: SubmitStatus.loading));
 
+    final dob = event.personalData?.toMap()['dob'];
+    final formateddate = getDateFormatedByProvided(
+      dob,
+      from: AppConstants.Format_dd_MM_yyyy,
+      to: AppConstants.Format_yyyy_MM_dd,
+    );
+    final personalDataMap = event.personalData?.toMap();
+    if (personalDataMap != null) {
+      personalDataMap['dob'] = formateddate;
+      PersonalData.fromMap(personalDataMap);
+    }
     // final coappdataMap = event.coAppAndGurantorData?.toMap();
     // coapplicant or gurantor applicants List are seperating
     final coApplicants =
@@ -85,12 +97,38 @@ final class LeadSubmitBloc extends Bloc<LeadSubmitEvent, LeadSubmitState> {
             .toList() ??
         [];
 
-    coApplicants.isNotEmpty
-        ? coApplicants[0].addAll({"residentialStatus": "4"})
-        : coApplicants;
-    guarantors.isNotEmpty
-        ? guarantors[0].addAll({"residentialStatus": "4"})
-        : guarantors;
+    if (coApplicants.isNotEmpty) {
+      for (var applicant in coApplicants) {
+        final dob = applicant['dob'];
+        final formatted = getDateFormatedByProvided(
+          dob,
+          from: AppConstants.Format_dd_MM_yyyy,
+          to: AppConstants.Format_yyyy_MM_dd,
+        );
+        applicant['dob'] = formatted;
+        applicant.addAll({"residentialStatus": "4"});
+      }
+    }
+
+    if (guarantors.isNotEmpty) {
+      for (var guarantor in guarantors) {
+        final dob = guarantor['dob'];
+        final formatted = getDateFormatedByProvided(
+          dob,
+          from: AppConstants.Format_dd_MM_yyyy,
+          to: AppConstants.Format_yyyy_MM_dd,
+        );
+        guarantor['dob'] = formatted;
+        guarantor.addAll({"residentialStatus": "4"});
+      }
+    }
+
+    // coApplicants.isNotEmpty
+    //     ? coApplicants[0].addAll({"residentialStatus": "4"})
+    //     : coApplicants;
+    // guarantors.isNotEmpty
+    //     ? guarantors[0].addAll({"residentialStatus": "4"})
+    //     : guarantors;
 
     final SharedPreferencesAsync asyncPrefs = SharedPreferencesAsync();
     String? getString = await asyncPrefs.getString('userdetails');

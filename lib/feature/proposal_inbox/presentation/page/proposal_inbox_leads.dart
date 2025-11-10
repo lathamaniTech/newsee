@@ -309,6 +309,7 @@ class ProposalInbox extends StatelessWidget {
                     builder:
                         (context) => CicCheckPage(
                           selectedProp: proposal,
+                          applicantName: proposal['applicantName'],
                           isApplicantCibilCheck: status.cibilDetails,
                         ),
                   ),
@@ -337,11 +338,24 @@ class ProposalInbox extends StatelessWidget {
               subtitle: "View your Crop Details here",
               status: status.ProposedCropDetails ? 'completed' : 'pending',
               onTap: () {
-                // print(
-                //   'masterVersionMapper: ${Globalconfig.masterVersionMapper}',
-                // );
-                context.pop();
-                context.pushNamed('cropdetails', extra: proposal['propNo']);
+                if (status.landHoldingDetails == true) {
+                  context.pop();
+                  context.pushNamed('cropdetails', extra: proposal['propNo']);
+                } else {
+                  showDialog(
+                    context: context,
+                    builder:
+                        (_) => SysmoAlert(
+                          message: 'Please submit landholding details.',
+                          icon: Icons.error_outline,
+                          iconColor: Colors.red,
+                          backgroundColor: Colors.white,
+                          textColor: Colors.black,
+                          buttonText: AppConstants.OK,
+                          onButtonPressed: () => Navigator.pop(context),
+                        ),
+                  );
+                }
               },
             ),
             OptionsSheet(

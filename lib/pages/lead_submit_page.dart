@@ -138,21 +138,25 @@ class LeadSubmitPage extends StatelessWidget {
                   Navigator.pop(context);
                 }
               },
+
               onPressedRightButton: () {
-                final applicantData =
-                    state.leadSubmitRequest?.individualNonIndividualDetails;
-                final applicantName =
-                    '${applicantData?.firstName} ${applicantData?.lastName}';
-                context.pushNamed(
-                  'landholdings',
-                  extra: {
-                    'proposalNumber': state.proposalNo,
-                    'applicantName': applicantName,
-                  },
-                );
+                // final applicantData =
+                //     state.leadSubmitRequest?.individualNonIndividualDetails;
+                // final applicantName =
+                //     '${applicantData?.firstName} ${applicantData?.lastName}';
+                // context.pushNamed(
+                //   'landholdings',
+                //   extra: {
+                //     'proposalNumber': state.proposalNo,
+                //     'applicantName': applicantName,
+                //   },
+                // );
+                if (Navigator.canPop(context)) {
+                  Navigator.pop(context);
+                }
               },
               leftButtonLabel: 'Go To Inbox',
-              rightButtonLabel: 'Go To LandHolding',
+              rightButtonLabel: 'Cancel',
             );
           } else if (state.proposalSubmitStatus == SaveStatus.failure) {
             print("state.proposalSubmitStatus == SaveStatus.failure");
@@ -276,7 +280,7 @@ class LeadSubmitPage extends StatelessWidget {
     }
   }
 
-  void openProposalSheet(BuildContext context, LeadSubmitState state) {
+  Future<void> openProposalSheet(BuildContext context, LeadSubmitState state) {
     return openBottomSheet(
       context,
       0.5,
@@ -367,12 +371,16 @@ class LeadSubmitPage extends StatelessWidget {
               SysmoTitle(
                 icon: Icons.currency_rupee,
                 label: "Loan Amount",
-                value: formatAmount('${personalData.loanAmountRequested}'),
+                value: formatAmount(
+                  personalData.loanAmountRequested!,
+                  'currency',
+                ),
               ),
               SysmoTitle(
                 icon: Icons.location_on,
                 label: "Location",
-                value: addressData.cityDistrict!,
+                value: addressData.address1!,
+                // value: addressData.cityDistrict!,
               ),
             ],
           ),

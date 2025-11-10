@@ -139,7 +139,7 @@ class LandData extends Equatable {
       'particulars': lklParticulars,
       'sourceofIrrig': lklSourceofIrrigation,
       'farmDistance': lklFarmDistance?.toString(),
-      'farmerCategory': lklfarmercategory,
+      'farmercategory': lklfarmercategory,
       'primaryoccupation': lklprimaryoccupation,
       'sumOfTotalAcreage': lklsumOfTotalAcreage,
       'otherbanks': lklotherbanks == 'Y' ? true : false,

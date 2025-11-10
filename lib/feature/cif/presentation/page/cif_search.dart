@@ -15,9 +15,7 @@ class CIFSearch extends StatelessWidget {
   final TabController tabController;
   CIFSearch({super.key, required this.cifForm, required this.tabController});
 
-  //Dispose Popover
   disposeResponse(context, cifres) {
-    print("Welcome here for you");
     cifForm.reset();
     showDialog(
       context: context,
@@ -84,7 +82,7 @@ class CIFSearch extends StatelessWidget {
                   },
                   {
                     "icon": Icons.elevator_rounded,
-                    "label": "AAdhaar",
+                    "label": "Aadhaar",
                     "value": state.cifResponse?.aadharNum,
                   },
                   {
@@ -92,8 +90,6 @@ class CIFSearch extends StatelessWidget {
                     "label": "Address",
                     "value": [
                       state.cifResponse?.restAddress ?? '',
-                      // state.cifResponse?.resAddresslane1 ?? '',
-                      // state.cifResponse?.resAddresslane2 ?? '',
                     ].where((val) => val.isNotEmpty).join(' '),
                   },
                   {
@@ -120,12 +116,19 @@ class CIFSearch extends StatelessWidget {
                   },
                 ),
               }
-            else if (state.status == CifStatus.failure)
+            else if (state.status == DedupeFetchStatus.failure)
               {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(state.errorMsg as String)),
+                  SnackBar(
+                    content: Text(
+                      state.errorMsg?.isNotEmpty == true
+                          ? state.errorMsg!
+                          : 'No response data from server',
+                    ),
+                  ),
                 ),
               },
+            // {showSnack(context, message: 'No response from server!')},
           },
       builder: (context, state) {
         return ReactiveForm(
@@ -138,7 +141,7 @@ class CIFSearch extends StatelessWidget {
                   Container(
                     padding: EdgeInsets.fromLTRB(20, 0, 0, 0),
                     child: Text(
-                      "Cif Search",
+                      "CIF Search",
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 24,
@@ -178,9 +181,6 @@ class CIFSearch extends StatelessWidget {
                               SearchCifEvent(request: req),
                             );
                           } else {
-                            print(
-                              "Click function passed go here, ${cifForm.valid}",
-                            );
                             cifForm.markAllAsTouched();
                           }
                         },

@@ -194,13 +194,34 @@ class CropDetailsModal {
     return 'CropDetailsModal(lcdRowId: $lcdRowId, lcdProposalNo: $lcdProposalNo, lcdSeason: $lcdSeason, lcdCropType: $lcdCropType, lcdCropName: $lcdCropName, lcdCulAreaLand: $lcdCulAreaLand, lcdCulAreaSize: $lcdCulAreaSize, lcdTypeOfLand: $lcdTypeOfLand, lcdScaOfFin: $lcdScaOfFin, lcdAddSofByRo: $lcdAddSofByRo, lcdCostOfCul: $lcdCostOfCul, lcdCovOfCrop: $lcdCovOfCrop, lcdCropIns: $lcdCropIns, lcdAddSofAmount: $lcdAddSofAmount, lcdInsPre: $lcdInsPre, lcdDueDateOfRepay: $lcdDueDateOfRepay)';
   }
 
+  // static int? _toInt(dynamic value) {
+  //   if (value == null) return null;
+  //   if (value is int) return value;
+  //   if (value is double) return value.toInt();
+  //   if (value is String && value.trim().isNotEmpty) {
+  //     return int.tryParse(value);
+  //   }
+  //   return null;
+  // }
+
   static int? _toInt(dynamic value) {
     if (value == null) return null;
+
     if (value is int) return value;
-    if (value is String && value.trim().isNotEmpty) {
-      return int.tryParse(value);
-    }
     if (value is double) return value.toInt();
-    return null;
+
+    if (value is String) {
+      final trimmed = value.trim();
+      if (trimmed.isEmpty) return null;
+
+      if (trimmed.contains('.')) {
+        final doubleVal = double.tryParse(trimmed);
+        return doubleVal?.toInt();
+      }
+
+      return int.tryParse(trimmed);
+    }
+
+    return int.tryParse(value.toString());
   }
 }

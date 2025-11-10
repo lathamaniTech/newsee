@@ -27,7 +27,6 @@ import 'package:newsee/feature/cif/data/repository/cif_respository_impl.dart';
 import 'package:newsee/feature/cif/domain/model/user/cif_request.dart';
 import 'package:newsee/feature/cif/domain/model/user/cif_response.dart';
 import 'package:newsee/feature/cif/domain/repository/cif_repository.dart';
-import 'package:newsee/feature/coapplicant/applicants_utility_service.dart';
 import 'package:newsee/feature/coapplicant/domain/modal/coapplicant_data.dart';
 import 'package:newsee/feature/draft/draft_service.dart';
 import 'package:newsee/feature/masters/domain/modal/geography_master.dart';
@@ -70,6 +69,7 @@ final class CoappDetailsBloc
               .toList();
 
       emit(state.copyWith(coAppList: updatedList, status: SaveStatus.success));
+      draftSave(updatedList);
     } catch (e) {
       print(e);
     }
@@ -305,20 +305,10 @@ fetching dedupe for co applicant reusing dedupe page cif search logic here
     String middleName = '';
     String lastName = '';
 
-    List<String> nameParts = (response?.name ?? '').trim().split(
-      RegExp(r'\s+'),
-    );
-
-    if (nameParts.length >= 3) {
-      firstName = nameParts[0];
-      middleName = nameParts[1];
-      lastName = nameParts.sublist(2).join(' ');
-    } else if (nameParts.length == 2) {
-      firstName = nameParts[0];
-      lastName = nameParts[1];
-    } else if (nameParts.length == 1) {
-      firstName = nameParts[0];
-    }
+    final result = nameSeperate(response?.name ?? '');
+    firstName = result['firstName']!;
+    middleName = result['middleName']!;
+    lastName = result['lastName']!;
 
     String mobileno = '';
     if (response.mobile.length == 12 && response.mobile.startsWith("91")) {
@@ -331,8 +321,8 @@ fetching dedupe for co applicant reusing dedupe page cif search logic here
       lastName: lastName,
       email: response.email ?? '',
       primaryMobileNumber: mobileno,
-      // aadharRefNo: response.referenceId ?? '',
       aadharRefNo: response.referenceId ?? '',
+      gender: response.gender ?? '',
       address1:
           (response.careOf?.isNotEmpty ??
                   false || response.street?.isNotEmpty ??
@@ -415,13 +405,18 @@ fetching dedupe for co applicant reusing dedupe page cif search logic here
 
       if (coappAdded == 'Y') {
         for (final val in event.leadDetails ?? []) {
-          if (val['applicantType'] == 'C' || val.containsKey('lldCoappCbsid')) {
+          if (val['applicantType'] == 'C' ||
+              (val.containsKey('lldCoappCbsid') == true &&
+                  val['lldCoappCbsid'] != null)) {
             final mapped = mapCoApplicant(val);
             if (mapped != null) {
               coappData.add(mapped);
               coappandGauList.add(mapped);
             }
-          } else {
+          }
+          if (val['applicantType'] == 'G' ||
+              (val.containsKey('lldGuaCbsid') == true &&
+                  val['lldGuaCbsid'] != null)) {
             final mapped = mapGaurantor(val);
             if (mapped != null) {
               gaurantorData.add(mapped);
@@ -509,7 +504,7 @@ fetching dedupe for co applicant reusing dedupe page cif search logic here
                 firstName: val['lldCoappfrstname'],
                 middleName: val['lldCoappmidname'],
                 lastName: val['lldLastnameCoapplican'],
-                dob: val['lldCoappdob'].toString(),
+                dob: getDateFormat(['lldCoappdob'].toString()),
                 relationshipFirm: val['lldCoappRelationFirm'],
                 residentialStatus: val['lldCoappResidentStatus'],
                 email: val['lldCoappemailid'],
@@ -517,6 +512,7 @@ fetching dedupe for co applicant reusing dedupe page cif search logic here
                 secondaryMobileNumber: val['lldCoappSecMobNo'],
                 panNumber: val['lldCoapppanno'],
                 aadharRefNo: val['lldCoappadharno'],
+                gender: val['lldCoappGender'],
                 address1: val['lldCoappaddress'],
                 address2: val['lldCoappaddresslane1'],
                 address3: val['lldCoappaddresslane2'],
@@ -551,7 +547,7 @@ fetching dedupe for co applicant reusing dedupe page cif search logic here
                 firstName: val['lldguafrstname'],
                 middleName: val['lldguamidname'],
                 lastName: val['lldgualastname'],
-                dob: val['lldguadob'].toString(),
+                dob: getDateFormat(['lldguadob'].toString()),
                 relationshipFirm: val['lldGuaRelationFirm'],
                 residentialStatus: val['lldGuaResidentStatus'],
                 email: val['lldguaemailid'],
@@ -559,6 +555,7 @@ fetching dedupe for co applicant reusing dedupe page cif search logic here
                 secondaryMobileNumber: val['lldGuaSecMobNo'],
                 panNumber: val['lldGuapanno'],
                 aadharRefNo: val['lldGuaadharno'],
+                gender: val['lldGuaraGender'],
                 address1: val['lldGuaaddress'],
                 address2: val['lldGuaaddresslane1'],
                 address3: val['lldGuaaddresslane2'],

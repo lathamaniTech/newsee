@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:go_router/go_router.dart';
+import 'package:newsee/AppData/app_api_constants.dart';
 import 'package:newsee/AppData/app_constants.dart';
 import 'package:newsee/AppData/app_forms.dart';
 import 'package:newsee/Utils/media_service.dart';
@@ -18,6 +19,7 @@ import 'package:newsee/widgets/google_maps_card.dart';
 import 'package:newsee/widgets/k_willpopscope.dart';
 import 'package:newsee/widgets/options_sheet.dart';
 import 'package:newsee/widgets/searchable_drop_down.dart';
+import 'package:newsee/widgets/success_bottom_sheet.dart';
 import 'package:newsee/widgets/sysmo_alert.dart';
 import 'package:reactive_forms/reactive_forms.dart';
 import 'package:newsee/widgets/custom_text_field.dart';
@@ -260,11 +262,34 @@ class LandHoldingPage extends StatelessWidget {
               if (state.status == SaveStatus.success) {
                 globalLoadingBloc.add(HideLoading());
                 form.reset();
+
+                form.control('applicantName').updateValue(applicantName);
+                form.control('sumOfTotalAcreage').markAsDisabled();
+                showSuccessBottomSheet(
+                  context: context,
+                  headerTxt: ApiConstants.api_response_success,
+                  lead: "",
+                  message: "Landholding details successfully submitted",
+                  leftButtonLabel: 'Go To Crop Details',
+                  rightButtonLabel: 'Cancel',
+                  onPressedLeftButton: () {
+                    if (Navigator.of(context).canPop()) {
+                      Navigator.of(context).pop();
+                      context.pushNamed('cropdetails', extra: proposalNumber);
+                    }
+                  },
+                  onPressedRightButton: () {
+                    if (Navigator.of(context).canPop()) {
+                      Navigator.of(context).pop();
+                    }
+                  }, // OnPressedRightButton,
+                );
               }
               if (state.selectedLandData != null &&
                   state.status == SaveStatus.update) {
                 var selectedFormArrayData = state.selectedLandData!.mapForm();
                 print("selectedFormArrayData $selectedFormArrayData");
+                selectedFormArrayData['applicantName'] = applicantName;
                 form.patchValue(selectedFormArrayData);
               }
               if (state.status == SaveStatus.mastersucess ||
@@ -279,6 +304,10 @@ class LandHoldingPage extends StatelessWidget {
               if (state.status == SaveStatus.delete &&
                   state.errorMessage != null) {
                 globalLoadingBloc.add(HideLoading());
+                form.reset();
+
+                form.control('applicantName').updateValue(applicantName);
+                form.control('sumOfTotalAcreage').markAsDisabled();
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(content: Text(state.errorMessage.toString())),
                 );
@@ -304,10 +333,15 @@ class LandHoldingPage extends StatelessWidget {
                                 padding: const EdgeInsets.all(16),
                                 child: Column(
                                   children: [
-                                    Dropdown(
+                                    // Dropdown(
+                                    //   controlName: 'applicantName',
+                                    //   label: 'Applicant Name / Guarantor',
+                                    //   items: [applicantName],
+                                    // ),
+                                    CustomTextField(
                                       controlName: 'applicantName',
                                       label: 'Applicant Name / Guarantor',
-                                      items: [applicantName],
+                                      mantatory: true,
                                     ),
                                     SearchableDropdown(
                                       controlName: 'state',
@@ -398,6 +432,13 @@ class LandHoldingPage extends StatelessWidget {
                                           GeographyMaster? geographyMaster =
                                               state.cityMaster?.firstWhere(
                                                 (val) => val.code == cityCode,
+                                                orElse:
+                                                    () => GeographyMaster(
+                                                      stateParentId: '0',
+                                                      cityParentId: '0',
+                                                      code: '0',
+                                                      value: '',
+                                                    ),
                                               );
                                           print(geographyMaster);
                                           if (geographyMaster != null) {
@@ -433,10 +474,11 @@ class LandHoldingPage extends StatelessWidget {
                                           CrossAxisAlignment.center,
                                       children: [
                                         Expanded(
-                                          child: CustomTextField(
+                                          child: IntegerTextField(
                                             controlName: 'farmDistance',
-                                            label: 'Farm Distance',
+                                            label: 'Farm Distance (km)',
                                             mantatory: true,
+                                            maxlength: 3,
                                           ),
                                         ),
 
@@ -566,23 +608,26 @@ class LandHoldingPage extends StatelessWidget {
                                       controlName: 'surveyNo',
                                       label: 'Survey No.',
                                       mantatory: true,
+                                      maxlength: 10,
                                     ),
 
                                     IntegerTextField(
                                       controlName: 'khasraNo',
                                       label: 'Khasra No',
                                       mantatory: true,
+                                      maxlength: 10,
                                     ),
                                     IntegerTextField(
                                       controlName: 'uccCode',
                                       label: 'UCC Code',
                                       mantatory: true,
+                                      maxlength: 10,
                                     ),
                                     IntegerTextField(
                                       controlName: 'totAcre',
                                       label: 'Total Acreage (in Acres)',
                                       mantatory: true,
-                                      maxlength: 2,
+                                      maxlength: 3,
                                       minlength: 1,
                                     ),
 
@@ -707,7 +752,7 @@ class LandHoldingPage extends StatelessWidget {
                                       },
                                     ),
                                     SearchableDropdown<Lov>(
-                                      controlName: 'farmerCategory',
+                                      controlName: 'farmercategory',
                                       label: 'Farmer Category',
                                       items:
                                           state.lovlist!
@@ -716,13 +761,13 @@ class LandHoldingPage extends StatelessWidget {
                                               )
                                               .toList(),
                                       onChangeListener: (Lov val) {
-                                        form.controls['farmerCategory']
+                                        form.controls['farmercategory']
                                             ?.updateValue(val.optvalue);
                                       },
                                       selItem: () {
                                         final value =
                                             form
-                                                .control('farmerCategory')
+                                                .control('farmercategory')
                                                 .value;
                                         if (value == null ||
                                             value.toString().isEmpty) {

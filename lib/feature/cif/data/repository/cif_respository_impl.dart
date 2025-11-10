@@ -21,10 +21,9 @@ class CifRepositoryImpl implements CifRepository {
     CIFRequest req,
   ) async {
     try {
-      print('CIF Search request payload => $req');
       final payload = req.toJson();
       print('CIF Search request payload => $payload');
-      // Call remote or offline data source
+      // call remote or offline data source
       var response =
           Globalconfig.isOffline
               ? await offlineDataProvider(path: AppConstants.cifResponsonse)
@@ -32,7 +31,6 @@ class CifRepositoryImpl implements CifRepository {
                 dio: ApiClient().getDio(),
               ).searchCif(payload);
 
-      // Normalize response
       final data = response.data;
       print('Raw CIF API response => $data');
       if (response.data[ApiConfig.API_RESPONSE_ErrorFlag_KEY]) {
@@ -41,8 +39,6 @@ class CifRepositoryImpl implements CifRepository {
             responseContent is String
                 ? json.decode(responseContent)
                 : responseContent ?? {};
-
-        print('cif responseJson: $responseJson');
 
         final cifResponse = CifResponse.fromJson(
           responseJson['data']['ApplicantDetails'],
@@ -66,7 +62,6 @@ class CifRepositoryImpl implements CifRepository {
           relCifid: relCifid,
         );
 
-        print('Parsed CIFResponseModel => $cifresponse');
         return AsyncResponseHandler.right(cifresponse);
       } else {
         final String errorMessage =

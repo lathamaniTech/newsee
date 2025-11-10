@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:newsee/AppData/app_constants.dart';
 import 'package:newsee/Utils/cibil_report_utils.dart';
 import 'package:newsee/Utils/utils.dart';
@@ -12,9 +13,11 @@ import 'package:newsee/widgets/sysmo_alert.dart';
 class CicCheckPage extends StatelessWidget {
   final Map<String, dynamic>? selectedProp;
   final bool? isApplicantCibilCheck;
+  final String? applicantName;
   const CicCheckPage({
     super.key,
     this.selectedProp,
+    this.applicantName,
     this.isApplicantCibilCheck,
   });
 
@@ -24,8 +27,6 @@ class CicCheckPage extends StatelessWidget {
       isApplicantCibilCheck!,
     );
     final ValueNotifier<bool> applicantCrifCheck = ValueNotifier(false);
-    // final ValueNotifier<bool> coApplicantCibilCheck = ValueNotifier(false);
-    // final ValueNotifier<bool> coApplicantCrifCheck = ValueNotifier(false);
 
     return BlocProvider(
       create: (_) => CicCheckBloc(),
@@ -33,6 +34,7 @@ class CicCheckPage extends StatelessWidget {
         appBar: AppBar(
           title: const Text('CIC Check'),
           backgroundColor: Colors.teal,
+          foregroundColor: Colors.white,
         ),
         body: BlocListener<CicCheckBloc, CicCheckState>(
           listener: (context, state) {
@@ -48,7 +50,7 @@ class CicCheckPage extends StatelessWidget {
                 context: context,
                 builder:
                     (_) => SysmoAlert(
-                      message: AppConstants.FAILED_TO_LOAD_PDF_MESSAGE,
+                      message: AppConstants.FAILED_TO_CHECK_CIBIL_MESSAGE,
                       icon: Icons.error_outline,
                       iconColor: Colors.red,
                       backgroundColor: Colors.white,
@@ -61,333 +63,204 @@ class CicCheckPage extends StatelessWidget {
           },
           child: BlocBuilder<CicCheckBloc, CicCheckState>(
             builder: (context, state) {
-              return SingleChildScrollView(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  children: [
-                    Card(
-                      elevation: 4,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
+              return Stack(
+                children: [
+                  SingleChildScrollView(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      children: [
+                        Card(
+                          elevation: 4,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Icon(
-                                  Icons.person,
-                                  color: Colors.teal,
-                                  size: 32,
+                                Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.person,
+                                      color: Colors.teal,
+                                      size: 32,
+                                    ),
+                                    const SizedBox(width: 16),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            '${AppConstants.appLabelApplicant}',
+                                            style: const TextStyle(
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
+                                          if ((selectedProp!['applicantName'] ??
+                                                  '')
+                                              .isNotEmpty)
+                                            Padding(
+                                              padding: const EdgeInsets.only(
+                                                top: 4,
+                                              ),
+                                              child: Text(
+                                                '${selectedProp!['applicantName']} (${selectedProp!['propNo'] ?? ''})',
+                                                style: const TextStyle(
+                                                  fontSize: 14,
+                                                  color: Color.fromARGB(
+                                                    255,
+                                                    58,
+                                                    57,
+                                                    57,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                                SizedBox(width: 16),
-                                Text(
-                                  '${AppConstants.appLabelApplicant} ${selectedProp!['propNo'] ?? ''}',
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w500,
-                                  ),
+                                const SizedBox(height: 16),
+                                ValueListenableBuilder<bool>(
+                                  valueListenable: applicantCibilCheck,
+                                  builder: (context, cibilChecked, _) {
+                                    return ValueListenableBuilder<bool>(
+                                      valueListenable: applicantCrifCheck,
+                                      builder: (context, crifChecked, _) {
+                                        return Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            ElevatedButton(
+                                              onPressed: () async {
+                                                if (!cibilChecked) {
+                                                  context
+                                                      .read<CicCheckBloc>()
+                                                      .add(
+                                                        CicFetchEvent(
+                                                          proposalData:
+                                                              selectedProp,
+                                                        ),
+                                                      );
+                                                } else {
+                                                  viewCibilHtml(
+                                                    context,
+                                                    selectedProp?['propNo'],
+                                                    'A',
+                                                    'cibil',
+                                                  );
+                                                }
+                                              },
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor:
+                                                    cibilChecked
+                                                        ? const Color.fromARGB(
+                                                          255,
+                                                          44,
+                                                          193,
+                                                          15,
+                                                        )
+                                                        : const Color.fromARGB(
+                                                          255,
+                                                          3,
+                                                          9,
+                                                          110,
+                                                        ),
+                                                foregroundColor: Colors.white,
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                      horizontal: 20,
+                                                      vertical: 10,
+                                                    ),
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(20),
+                                                ),
+                                              ),
+                                              child: Row(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  Icon(
+                                                    cibilChecked
+                                                        ? Icons.picture_as_pdf
+                                                        : Icons.check,
+                                                  ),
+                                                  const SizedBox(width: 8),
+                                                  Text(
+                                                    cibilChecked
+                                                        ? 'View CIBIL'
+                                                        : 'Check CIBIL',
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+                                        );
+                                      },
+                                    );
+                                  },
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 16),
-                            ValueListenableBuilder<bool>(
-                              valueListenable: applicantCibilCheck,
-                              builder: (context, cibilChecked, _) {
-                                return ValueListenableBuilder<bool>(
-                                  valueListenable: applicantCrifCheck,
-                                  builder: (context, crifChecked, _) {
-                                    return Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        ElevatedButton(
-                                          onPressed: () async {
-                                            if (!cibilChecked) {
-                                              context.read<CicCheckBloc>().add(
-                                                CicFetchEvent(
-                                                  proposalData: selectedProp,
-                                                ),
-                                              );
-                                              // applicantCibilCheck.value = true;
-                                            } else {
-                                              viewCibilHtml(
-                                                context,
-                                                selectedProp?['propNo'],
-                                                'A',
-                                                'cibil',
-                                              );
-                                            }
-                                          },
-                                          style: ElevatedButton.styleFrom(
-                                            backgroundColor:
-                                                const Color.fromARGB(
-                                                  255,
-                                                  3,
-                                                  9,
-                                                  110,
-                                                ),
-                                            foregroundColor: Colors.white,
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: 20,
-                                              vertical: 10,
-                                            ),
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(20),
-                                            ),
-                                          ),
-                                          child: Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              Icon(
-                                                cibilChecked
-                                                    ? Icons.picture_as_pdf
-                                                    : Icons.check,
-                                              ),
-                                              const SizedBox(width: 8),
-                                              Text(
-                                                cibilChecked
-                                                    ? 'View CIBIL'
-                                                    : 'Check CIBIL',
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-
-                                        // const SizedBox(width: 12),
-                                        // ElevatedButton(
-                                        //   onPressed: () async {
-                                        //     if (!crifChecked) {
-                                        //       context.read<CicCheckBloc>().add(
-                                        //         CicFetchEvent(
-                                        //           proposalData: selectedProp,
-                                        //         ),
-                                        //       );
-                                        //       applicantCrifCheck.value = true;
-                                        //     } else {
-                                        //       viewCibilHtml(
-                                        //         context,
-                                        //         selectedProp?['propNo'],
-                                        //         'A',
-                                        //         'crif',
-                                        //       );
-                                        //     }
-                                        //   },
-
-                                        //   style: ElevatedButton.styleFrom(
-                                        //     backgroundColor:
-                                        //         const Color.fromARGB(
-                                        //           255,
-                                        //           3,
-                                        //           9,
-                                        //           110,
-                                        //         ),
-                                        //     foregroundColor: Colors.white,
-                                        //     padding: const EdgeInsets.symmetric(
-                                        //       horizontal: 20,
-                                        //       vertical: 10,
-                                        //     ),
-                                        //     shape: RoundedRectangleBorder(
-                                        //       borderRadius:
-                                        //           BorderRadius.circular(20),
-                                        //     ),
-                                        //   ),
-                                        //   child: Row(
-                                        //     mainAxisSize: MainAxisSize.min,
-                                        //     children: [
-                                        //       Icon(
-                                        //         crifChecked
-                                        //             ? Icons.picture_as_pdf
-                                        //             : Icons.check,
-                                        //       ),
-                                        //       const SizedBox(width: 8),
-                                        //       Text(
-                                        //         crifChecked
-                                        //             ? 'View CRIF'
-                                        //             : 'Check CRIF',
-                                        //       ),
-                                        //     ],
-                                        //   ),
-                                        // ),
-                                      ],
-                                    );
-                                  },
-                                );
-                              },
-                            ),
-                          ],
+                          ),
                         ),
-                      ),
+                        const SizedBox(height: 80),
+                      ],
                     ),
-
-                    const SizedBox(height: 16),
-
-                    // Card(
-                    //   elevation: 4,
-                    //   shape: RoundedRectangleBorder(
-                    //     borderRadius: BorderRadius.circular(12),
-                    //   ),
-                    //   child: Padding(
-                    //     padding: const EdgeInsets.all(16),
-                    //     child: Column(
-                    //       crossAxisAlignment: CrossAxisAlignment.start,
-                    //       children: [
-                    //         Row(
-                    //           children: const [
-                    //             Icon(Icons.group, color: Colors.teal, size: 32),
-                    //             SizedBox(width: 16),
-                    //             Text(
-                    //               AppConstants.appLabelCoApplicant,
-                    //               style: TextStyle(
-                    //                 fontSize: 18,
-                    //                 fontWeight: FontWeight.w500,
-                    //               ),
-                    //             ),
-                    //           ],
-                    //         ),
-                    //         const SizedBox(height: 16),
-                    //         ValueListenableBuilder<bool>(
-                    //           valueListenable: coApplicantCibilCheck,
-                    //           builder: (context, cibilChecked, _) {
-                    //             return ValueListenableBuilder<bool>(
-                    //               valueListenable: coApplicantCrifCheck,
-                    //               builder: (context, crifChecked, _) {
-                    //                 return Row(
-                    //                   mainAxisAlignment:
-                    //                       MainAxisAlignment.center,
-                    //                   children: [
-                    //                     ElevatedButton(
-                    //                       onPressed: () async {
-                    //                         if (!cibilChecked) {
-                    //                           context.read<CicCheckBloc>().add(
-                    //                             CicFetchEvent(
-                    //                               proposalData: selectedProp,
-                    //                             ),
-                    //                           );
-                    //                           coApplicantCibilCheck.value =
-                    //                               true;
-                    //                         } else {
-                    //                           viewCibilHtml(
-                    //                             context,
-                    //                             selectedProp?['propNo'],
-                    //                             'C',
-                    //                             'cibil',
-                    //                           );
-                    //                         }
-                    //                       },
-
-                    //                       style: ElevatedButton.styleFrom(
-                    //                         backgroundColor:
-                    //                             const Color.fromARGB(
-                    //                               255,
-                    //                               3,
-                    //                               9,
-                    //                               110,
-                    //                             ),
-                    //                         foregroundColor: Colors.white,
-                    //                         padding: const EdgeInsets.symmetric(
-                    //                           horizontal: 20,
-                    //                           vertical: 10,
-                    //                         ),
-                    //                         shape: RoundedRectangleBorder(
-                    //                           borderRadius:
-                    //                               BorderRadius.circular(20),
-                    //                         ),
-                    //                       ),
-                    //                       child: Row(
-                    //                         mainAxisSize: MainAxisSize.min,
-                    //                         children: [
-                    //                           Icon(
-                    //                             cibilChecked
-                    //                                 ? Icons.picture_as_pdf
-                    //                                 : Icons.check,
-                    //                           ),
-                    //                           const SizedBox(width: 8),
-                    //                           Text(
-                    //                             cibilChecked
-                    //                                 ? 'View CIBIL'
-                    //                                 : 'Check CIBIL',
-                    //                           ),
-                    //                         ],
-                    //                       ),
-                    //                     ),
-                    //                     const SizedBox(width: 12),
-                    //                     ElevatedButton(
-                    //                       onPressed: () async {
-                    //                         if (!crifChecked) {
-                    //                           context.read<CicCheckBloc>().add(
-                    //                             CicFetchEvent(
-                    //                               proposalData: selectedProp,
-                    //                             ),
-                    //                           );
-                    //                           coApplicantCrifCheck.value = true;
-                    //                         } else {
-                    //                           viewCibilHtml(
-                    //                             context,
-                    //                             selectedProp?['propNo'],
-                    //                             'C',
-                    //                             'crif',
-                    //                           );
-                    //                         }
-                    //                       },
-
-                    //                       style: ElevatedButton.styleFrom(
-                    //                         backgroundColor:
-                    //                             const Color.fromARGB(
-                    //                               255,
-                    //                               3,
-                    //                               9,
-                    //                               110,
-                    //                             ),
-                    //                         foregroundColor: Colors.white,
-                    //                         padding: const EdgeInsets.symmetric(
-                    //                           horizontal: 20,
-                    //                           vertical: 10,
-                    //                         ),
-                    //                         shape: RoundedRectangleBorder(
-                    //                           borderRadius:
-                    //                               BorderRadius.circular(20),
-                    //                         ),
-                    //                       ),
-                    //                       child: Row(
-                    //                         mainAxisSize: MainAxisSize.min,
-                    //                         children: [
-                    //                           Icon(
-                    //                             crifChecked
-                    //                                 ? Icons.picture_as_pdf
-                    //                                 : Icons.check,
-                    //                           ),
-                    //                           const SizedBox(width: 8),
-                    //                           Text(
-                    //                             crifChecked
-                    //                                 ? 'View CRIF'
-                    //                                 : 'Check CRIF',
-                    //                           ),
-                    //                         ],
-                    //                       ),
-                    //                     ),
-                    //                   ],
-                    //                 );
-                    //               },
-                    //             );
-                    //           },
-                    //         ),
-                    //       ],
-                    //     ),
-                    //   ),
-                    // ),
-                  ],
-                ),
+                  ),
+                  const SizedBox(height: 100),
+                  ValueListenableBuilder<bool>(
+                    valueListenable: applicantCibilCheck,
+                    builder: (context, cibilChecked, _) {
+                      if (!cibilChecked) return const SizedBox.shrink();
+                      return Positioned(
+                        bottom: 20,
+                        left: 0,
+                        right: 0,
+                        child: Center(
+                          child: ElevatedButton.icon(
+                            onPressed: () {
+                              Navigator.pop(context);
+                              context.pushNamed(
+                                'landholdings',
+                                extra: {
+                                  'applicantName':
+                                      selectedProp?['applicantName'],
+                                  'proposalNumber': selectedProp?['propNo'],
+                                },
+                              );
+                            },
+                            icon: const Icon(Icons.arrow_forward),
+                            label: const Text(
+                              'Next',
+                              style: TextStyle(fontSize: 16),
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.teal,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 40,
+                                vertical: 14,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(30),
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ],
               );
             },
           ),
         ),
       ),
-      //   },
-      // ),
     );
   }
 }

@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:newsee/AppData/app_constants.dart';
 import 'package:newsee/Model/personal_data.dart';
+import 'package:newsee/Utils/utils.dart';
 import 'package:newsee/core/db/db_config.dart';
 import 'package:newsee/feature/aadharvalidation/data/repository/aadhar_validate_impl.dart';
 import 'package:newsee/feature/aadharvalidation/domain/modal/aadharvalidate_request.dart';
@@ -136,7 +137,7 @@ final class PersonalDetailsBloc
       Database _db = await DBConfig().database;
       List<Lov> listOfLov = await LovCrudRepo(_db).getAll();
       print('personalDatad => ${event.leadDetails}');
-      print(PersonalData.fromMap(event.leadDetails!));
+      // print(PersonalData.fromMap(event.leadDetails!));
       PersonalData? personalData =
           event.leadDetails!.containsKey('lleadtitle')
               ? PersonalData(
@@ -144,7 +145,7 @@ final class PersonalDetailsBloc
                 firstName: event.leadDetails!['lleadfrstname'],
                 middleName: event.leadDetails!['lleadmidname'],
                 lastName: event.leadDetails!['lleadlastname'],
-                dob: event.leadDetails!['lleaddob'],
+                dob: getDateFormat(event.leadDetails!['lleaddob']),
                 residentialStatus: event.leadDetails!['lldResidentialStatus'],
                 primaryMobileNumber: event.leadDetails!['lleadmobno'],
                 secondaryMobileNumber: event.leadDetails!['lleadSecMobNo'],
