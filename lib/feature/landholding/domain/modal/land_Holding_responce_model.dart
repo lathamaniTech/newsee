@@ -24,7 +24,20 @@ class LandHoldingResponceModel {
     return LandHoldingResponceModel(
       agriLandHoldingsList: List<LandData>.from(
         (map['agriLandHoldingsList'] ?? []).map(
-          (e) => LandData.fromMap(Map<String, dynamic>.from(e)),
+          (e) {
+            final m = Map<String, dynamic>.from(e);
+
+            // Convert mixed numeric/string values safely
+            m['lklTotAcre'] = m['lklTotAcre']?.toString();
+            m['lklsumOfTotalAcreage'] = m['lklsumOfTotalAcreage']?.toString();
+
+            return LandData.fromMap(m);
+          },
+          // (e) => {
+          //   e['lklTotAcre'] = e['lklTotAcre'].toString(),
+          //   e['lklsumOfTotalAcreage'] = e['lklsumOfTotalAcreage'].toString(),
+          //   LandData.fromMap(Map<String, dynamic>.from(e)),
+          // },
         ),
       ),
     );

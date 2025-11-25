@@ -10,6 +10,12 @@ import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqlite_api.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
+/*
+  @author     : Lathamani 30/11/2025
+  @desc       : This page displays the HTML report in a WebView.
+                It converts the base64 HTML data to a file and saves the file path in the table for future display
+*/
+
 class CibilHtmlViewer extends StatefulWidget {
   final String? htmlFileBase64;
   final String? localFilePath;
@@ -51,25 +57,7 @@ class CibilHtmlViewerState extends State<CibilHtmlViewer> {
         htmlContent = await File(widget.localFilePath!).readAsString();
       } else if (widget.htmlFileBase64 != null &&
           widget.htmlFileBase64!.isNotEmpty) {
-        UserDetails? userDetails = await loadUser();
-        // decode and save base64 html content
         htmlContent = utf8.decode(base64.decode(widget.htmlFileBase64!));
-
-        final dir = await getApplicationDocumentsDirectory();
-        final filePath =
-            '${dir.path}/${widget.applicantType}${widget.reportType}_${widget.propNo}.html';
-        final file = File(filePath);
-        await file.writeAsString(htmlContent);
-
-        print('cibil html saved at: $filePath');
-
-        await savefilePathInTable({
-          'userid': userDetails!.LPuserID,
-          'proposalNo': widget.propNo,
-          'applicantType': widget.applicantType,
-          'reportType': widget.reportType,
-          'filepath': filePath,
-        });
       } else {
         throw Exception('No html data or file path provided.');
       }
@@ -87,25 +75,6 @@ class CibilHtmlViewerState extends State<CibilHtmlViewer> {
         setState(() => isLoading = false);
       }
     }
-  }
-
-  Future<void> savefilePathInTable(Map<String, dynamic> data) async {
-    Database db = await DBConfig().database;
-    CibilreportsCrudRepo cibilCrudRepo = CibilreportsCrudRepo(db);
-
-    final model = CibilReportTableModel(
-      userid: data['userid'],
-      proposalNo: data['proposalNo'],
-      applicantType: data['applicantType'],
-      reportType: data['reportType'],
-      filepath: data['filepath'],
-    );
-
-    await cibilCrudRepo.save(model);
-
-    print('Report saved in DB successfully...');
-    List<CibilReportTableModel> p = await cibilCrudRepo.getAll();
-    print('cibilCrudRepo.getAll() => ${p.length}');
   }
 
   @override

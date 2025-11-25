@@ -328,6 +328,7 @@ class ProposalInbox extends StatelessWidget {
                   extra: {
                     'applicantName': proposal['applicantName'],
                     'proposalNumber': proposal['propNo'],
+                    'isCompleted': status.landHoldingDetails,
                   },
                 );
               },
@@ -340,7 +341,13 @@ class ProposalInbox extends StatelessWidget {
               onTap: () {
                 if (status.landHoldingDetails == true) {
                   context.pop();
-                  context.pushNamed('cropdetails', extra: proposal['propNo']);
+                  context.pushNamed(
+                    'cropdetails',
+                    extra: {
+                      'proposal': proposal['propNo'],
+                      'isCompleted': status.ProposedCropDetails,
+                    },
+                  );
                 } else {
                   showDialog(
                     context: context,

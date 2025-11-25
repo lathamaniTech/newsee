@@ -98,39 +98,53 @@ final class LeadSubmitBloc extends Bloc<LeadSubmitEvent, LeadSubmitState> {
         [];
 
     if (coApplicants.isNotEmpty) {
-      for (var applicant in coApplicants) {
-        final dob = applicant['dob'];
-        final formatted = getDateFormatedByProvided(
-          dob,
-          from: AppConstants.Format_dd_MM_yyyy,
-          to: AppConstants.Format_yyyy_MM_dd,
-        );
-        String? loanLiabilityAmount = applicant['loanLiabilityAmount']
-            ?.replaceAll(',', '');
-        applicant['loanLiabilityAmount'] = loanLiabilityAmount;
-        String? depositAmount = applicant['depositAmount']?.replaceAll(',', '');
-        applicant['depositAmount'] = depositAmount;
-        applicant['dob'] = formatted;
-        applicant.addAll({"residentialStatus": "4"});
-      }
+      processApplicants(coApplicants);
+      // for (var applicant in coApplicants) {
+      //   final dob = applicant['dob'];
+      //   final formatted = getDateFormatedByProvided(
+      //     dob,
+      //     from: AppConstants.Format_dd_MM_yyyy,
+      //     to: AppConstants.Format_yyyy_MM_dd,
+      //   );
+      //   String loanLiabilityAmount = applicant['loanLiabilityAmount']
+      //       ?.replaceAll(',', '');
+      //   if (loanLiabilityAmount.contains('.')) {
+      //     loanLiabilityAmount = loanLiabilityAmount.split('.').first;
+      //   }
+      //   applicant['loanLiabilityAmount'] = loanLiabilityAmount;
+      //   String depositAmount = applicant['depositAmount']?.replaceAll(',', '');
+      //   if (depositAmount.contains('.')) {
+      //     depositAmount = depositAmount.split('.').first;
+      //   }
+      //   applicant['depositAmount'] = depositAmount;
+      //   applicant['dob'] = formatted;
+      //   applicant.addAll({"residentialStatus": "4"});
+      // }
     }
 
     if (guarantors.isNotEmpty) {
-      for (var guarantor in guarantors) {
-        final dob = guarantor['dob'];
-        final formatted = getDateFormatedByProvided(
-          dob,
-          from: AppConstants.Format_dd_MM_yyyy,
-          to: AppConstants.Format_yyyy_MM_dd,
-        );
-        guarantor['dob'] = formatted;
-        String? loanLiabilityAmount = guarantor['loanLiabilityAmount']
-            ?.replaceAll(',', '');
-        guarantor['loanLiabilityAmount'] = loanLiabilityAmount;
-        String? depositAmount = guarantor['depositAmount']?.replaceAll(',', '');
-        guarantor['depositAmount'] = depositAmount;
-        guarantor.addAll({"residentialStatus": "4"});
-      }
+      processApplicants(guarantors);
+      // for (var guarantor in guarantors) {
+      //   final dob = guarantor['dob'];
+      //   final formatted = getDateFormatedByProvided(
+      //     dob,
+      //     from: AppConstants.Format_dd_MM_yyyy,
+      //     to: AppConstants.Format_yyyy_MM_dd,
+      //   );
+      //   guarantor['dob'] = formatted;
+      //   String loanLiabilityAmount = guarantor['loanLiabilityAmount']
+      //       ?.replaceAll(',', '');
+      //   if (loanLiabilityAmount.contains('.')) {
+      //     loanLiabilityAmount = loanLiabilityAmount.split('.').first;
+      //   }
+      //   guarantor['loanLiabilityAmount'] = loanLiabilityAmount;
+      //   String depositAmount = guarantor['depositAmount']?.replaceAll(',', '');
+      //   if (depositAmount.contains('.')) {
+      //     depositAmount = depositAmount.split('.').first;
+      //   }
+      //   guarantor['depositAmount'] = depositAmount;
+      //   guarantor.addAll({"residentialStatus": "4"});
+      // }
     }
 
     // coApplicants.isNotEmpty
@@ -193,6 +207,33 @@ final class LeadSubmitBloc extends Bloc<LeadSubmitEvent, LeadSubmitState> {
 
       emit(state.copyWith(leadSubmitStatus: SubmitStatus.failure));
     }
+  }
+
+  void processApplicants(List<Map<String, dynamic>> applicants) {
+    for (var applicant in applicants) {
+      final dob = applicant['dob'];
+      final formattedDob = getDateFormatedByProvided(
+        dob,
+        from: AppConstants.Format_dd_MM_yyyy,
+        to: AppConstants.Format_yyyy_MM_dd,
+      );
+
+      applicant['dob'] = formattedDob;
+      applicant['loanLiabilityAmount'] = sanitizeAmount(
+        applicant['loanLiabilityAmount'],
+      );
+      applicant['depositAmount'] = sanitizeAmount(applicant['depositAmount']);
+      applicant['residentialStatus'] = '4';
+    }
+  }
+
+  String sanitizeAmount(String? amount) {
+    if (amount == null) return '';
+    var cleaned = amount.replaceAll(',', '');
+    if (cleaned.contains('.')) {
+      cleaned = cleaned.split('.').first;
+    }
+    return cleaned;
   }
 
   deleteDraftFromStorage() async {

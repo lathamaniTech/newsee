@@ -71,6 +71,8 @@ class AppConstants {
   static const String mobilityModule = 'Mobility Module';
   static const String cropResponsonse = 'assets/data/crop.json';
   static const String cropGetResponsonse = 'assets/data/get_crop.json';
+  static const String rhIHLandCropResponse =
+      'assets/data/RBIH_LAND_CROP_RESP.json';
 }
 
 class BioMetricResult {

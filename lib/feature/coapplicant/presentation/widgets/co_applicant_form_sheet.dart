@@ -721,7 +721,16 @@ class _CoApplicantFormBottomSheetState
 
                               GeographyMaster? geographyMaster = state
                                   .stateCityMaster
-                                  ?.firstWhere((val) => val.code == stateCode);
+                                  ?.firstWhere(
+                                    (val) => val.code == stateCode,
+                                    orElse:
+                                        () => GeographyMaster(
+                                          stateParentId: '0',
+                                          cityParentId: '0',
+                                          code: '0',
+                                          value: '',
+                                        ),
+                                  );
                               if (geographyMaster != null) {
                                 coAppAndGurantorForm.controls['state']
                                     ?.updateValue(geographyMaster.code);
@@ -824,7 +833,7 @@ class _CoApplicantFormBottomSheetState
                           label: 'Loan Liability Amount (₹)',
                           mantatory: true,
                           isRupeeFormat: true,
-                          maxlength: 10,
+                          maxlength: 15,
                           minlength: 1,
                         ),
                         IntegerTextField(
@@ -840,7 +849,7 @@ class _CoApplicantFormBottomSheetState
                           label: 'Deposit Amount (₹)',
                           mantatory: true,
                           isRupeeFormat: true,
-                          maxlength: 10,
+                          maxlength: 15,
                           minlength: 1,
                         ),
                         SizedBox(height: 20),

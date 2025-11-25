@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:newsee/feature/cic_check/domain/modals/cibil_report_table_model.dart';
 import 'package:newsee/feature/cic_check/domain/modals/cibil_response_model.dart';
 
 enum CicCheckStatus { initial, loading, success, failure }
@@ -8,22 +9,27 @@ class CicCheckState extends Equatable {
   final CibilResponse? cibilResponse;
   final bool isApplicantCibilCheck;
   final bool? isCoAppCibilCheck;
+  final List<CibilReportTableModel>? cibilDataFromTable;
+  final String? cibilScore;
 
   const CicCheckState({
     this.status,
     this.cibilResponse,
     this.isApplicantCibilCheck = false,
     this.isCoAppCibilCheck = false,
+    this.cibilDataFromTable,
+    this.cibilScore,
   });
 
-  factory CicCheckState.init() =>
-      const CicCheckState(status: CicCheckStatus.initial);
+  factory CicCheckState.init() => CicCheckState(status: CicCheckStatus.initial);
 
   CicCheckState copyWith({
     CicCheckStatus? status,
     CibilResponse? cibilResponse,
     bool? isApplicantCibilCheck,
     bool? isCoAppCibilCheck,
+    String? cibilScore,
+    List<CibilReportTableModel>? cibilDataFromTable,
   }) {
     return CicCheckState(
       status: status ?? this.status,
@@ -31,6 +37,8 @@ class CicCheckState extends Equatable {
       isApplicantCibilCheck:
           isApplicantCibilCheck ?? this.isApplicantCibilCheck,
       isCoAppCibilCheck: isCoAppCibilCheck ?? this.isCoAppCibilCheck,
+      cibilDataFromTable: cibilDataFromTable ?? this.cibilDataFromTable,
+      cibilScore: cibilScore ?? this.cibilScore,
     );
   }
 
@@ -40,5 +48,7 @@ class CicCheckState extends Equatable {
     cibilResponse,
     isApplicantCibilCheck,
     isCoAppCibilCheck,
+    cibilDataFromTable,
+    cibilScore,
   ];
 }

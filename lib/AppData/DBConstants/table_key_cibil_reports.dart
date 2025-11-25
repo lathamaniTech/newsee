@@ -17,6 +17,7 @@ class TableKeysCibilReports {
   static const String _applicantType = 'applicantType';
   static const String _reportType = 'reportType';
   static const String _filepath = 'filepath';
+  static const String _cibilScore = 'cibilScore';
 
   static const String createTableQuery = '''
                 CREATE TABLE IF NOT EXISTS ${TableKeysCibilReports.tableName}(
@@ -25,7 +26,8 @@ class TableKeysCibilReports {
             ${TableKeysCibilReports._proposalNo} TEXT,
             ${TableKeysCibilReports._applicantType} TEXT,
             ${TableKeysCibilReports._reportType} TEXT,
-            ${TableKeysCibilReports._filepath} TEXT
+            ${TableKeysCibilReports._filepath} TEXT,
+            ${TableKeysCibilReports._cibilScore} TEXT
                       )
      ''';
 

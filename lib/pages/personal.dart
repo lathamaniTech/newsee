@@ -52,8 +52,8 @@ class Personal extends StatelessWidget {
   bool refAadhaar = true;
 
   /* 
-    @author     : ganeshkumar.b  13/06/2025
-    @desc       : map Aadhaar response in personal form
+    @author     : latha  3/11/2025
+    @desc       : map Aadhaar response in personal form and disabled fields if value is not null
     @param      : {AadharvalidateResponse val} - aadhaar response
   */
   mapAadhaarData(val) {
@@ -62,31 +62,13 @@ class Personal extends StatelessWidget {
         form.control('aadharRefNo').updateValue(val?.referenceId);
         refAadhaar = true;
         nameSeperate(val.name);
-        // if (val.name != null) {
-        //   String fullname = val?.name;
-        //   List getNameArray = fullname.split(' ');
-        //   if (getNameArray.length > 2) {
-        //     String fullname = getNameArray.sublist(2).join();
-        //     setControl('firstName', getNameArray[0]);
-        //     setControl('middleName', getNameArray[1]);
-        //     setControl('lastName', fullname);
-        //   } else if (getNameArray.length == 2) {
-        //     setControl('firstName', getNameArray[0]);
-        //     setControl('lastName', getNameArray[1]);
-        //   } else if (getNameArray.length == 1) {
-        //     setControl('firstName', getNameArray[0]);
-        //   }
-        // }
+
         setControl('primaryMobileNumber', val?.mobile);
         final formattedDate =
             val.dateOfBirth != null
                 ? getCorrectDateFormat(val.dateOfBirth!)
                 : null;
-        // getDateFormatedByProvided(
-        //   val?.dateOfBirth!,
-        //   from: AppConstants.Format_dd_MM_yyyy,
-        //   to: AppConstants.Format_yyyy_MM_dd,
-        // );
+
         print('formattedDate in personal page => $formattedDate');
         setControl('dob', formattedDate);
         setControl('email', val?.email);
@@ -96,6 +78,8 @@ class Personal extends StatelessWidget {
     }
   }
 
+  // If the first name is null, extract the name from the 'name' property of the Aadhar
+  //or CIF response.
   void nameSeperate(val) {
     print('nameapp: $val');
     if (val != null) {
@@ -126,8 +110,8 @@ class Personal extends StatelessWidget {
   }
 
   /* 
-    @author     : ganeshkumar.b  13/06/2025
-    @desc       : map cif response in personal form
+    @author     : lathamani.m  30/11/2025
+    @desc       : map cif response in personal form and diabled field if value not null
     @param      : {CifResponse val} - cifresponse
   */
   mapCifDate(val, lovList) {
@@ -149,7 +133,8 @@ class Personal extends StatelessWidget {
           (lov) =>
               lov.Header == header &&
               (lov.optvalue.toUpperCase() == target.toUpperCase() ||
-                  lov.optDesc.toUpperCase() == target.toUpperCase()),
+                  lov.optDesc.toUpperCase() == target.toUpperCase() ||
+                  lov.optCode.toUpperCase() == target.toUpperCase()),
           orElse: () => Lov(Header: '', optvalue: '', optDesc: '', optCode: ''),
         );
       }
@@ -180,6 +165,7 @@ class Personal extends StatelessWidget {
       setControl('religion', religionLov?.optvalue);
       setControl('caste', casteLov?.optvalue);
       setControl('gender', genderLov?.optvalue);
+      setControl('residentialStatus', '1');
 
       // aadhaar flag
       refAadhaar = val.aadharNum?.isNotEmpty == true;
@@ -601,7 +587,7 @@ class Personal extends StatelessWidget {
                           return state.lovList!
                               .where((v) => v.Header == 'ResidentialStatus')
                               .firstWhere(
-                                (lov) => lov.optvalue == value,
+                                (lov) => lov.optvalue == '1',
                                 orElse:
                                     () => Lov(
                                       Header: 'ResidentialStatus',

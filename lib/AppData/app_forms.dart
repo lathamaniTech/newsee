@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:newsee/AppData/app_constants.dart';
 import 'package:newsee/AppData/globalconfig.dart';
@@ -134,13 +135,18 @@ class AppForms {
           }
 
           // Remove all non-digit characters (commas, spaces, ₹ etc.)
-          final cleanValue = rawValue.replaceAll(RegExp(r'[^\d]'), '');
+          String cleanValue = rawValue.replaceAll(RegExp(r'[^\d.]'), '');
+          print('loanAmountRequested => ${cleanValue}');
+          // If the value contains a decimal point, keep only the integer part
+          if (cleanValue.contains('.')) {
+            cleanValue = cleanValue.split('.').first;
+          }
 
           if (cleanValue.isEmpty) return null;
 
           // Parse safely
           final loanAmountEntered = int.tryParse(cleanValue) ?? 0;
-
+          print('loanAmountRequested::delegateAsync => ${loanAmountEntered}');
           // Compare with configured maximum
           if (loanAmountEntered > Globalconfig.loanAmountMaximum) {
             print(
@@ -262,53 +268,6 @@ class AppForms {
     'depositAmount': FormControl<String>(validators: [Validators.required]),
   });
 
-  // Land Holding Form
-  // static FormGroup buildLandHoldingDetailsForm() {
-  //   return FormGroup({
-  //     'lslLandRowid': FormControl<String>(validators: []),
-  //     'applicantName': FormControl<String>(validators: [Validators.required]),
-  //     'locationOfFarm': FormControl<String>(
-  //       validators: [Validators.required],
-  //       disabled: true,
-  //     ),
-  //     'state': FormControl<String>(validators: [Validators.required]),
-  //     'taluk': FormControl<String>(validators: [Validators.required]),
-  //     'firka': FormControl<String>(
-  //       validators: [Validators.required, Validators.pattern(r'^\d+$')],
-  //     ),
-  //     'totalAcreage': FormControl<String>(
-  //       validators: [Validators.required, Validators.pattern(r'^\d+$')],
-  //     ),
-  //     'irrigatedLand': FormControl<String>(
-  //       validators: [Validators.required, Validators.pattern(r'^\d+$')],
-  //     ),
-  //     'compactBlocks': FormControl<bool>(validators: [Validators.required]),
-  //     'landOwnedByApplicant': FormControl<bool>(
-  //       validators: [Validators.required],
-  //     ),
-  //     'distanceFromBranch': FormControl<String>(
-  //       validators: [Validators.required, Validators.pattern(r'^\d+$')],
-  //       disabled: true,
-  //     ),
-  //     'district': FormControl<String>(validators: [Validators.required]),
-  //     'village': FormControl<String>(validators: [Validators.required]),
-  //     'surveyNo': FormControl<String>(
-  //       validators: [Validators.required, Validators.pattern(r'^\d+$')],
-  //     ),
-  //     'natureOfRight': FormControl<String>(validators: [Validators.required]),
-  //     'irrigationFacilities': FormControl<String>(
-  //       validators: [Validators.required],
-  //     ),
-  //     'affectedByCeiling': FormControl<bool>(validators: [Validators.required]),
-  //     'landAgriActive': FormControl<bool>(validators: [Validators.required]),
-  //     'villageOfficerCertified': FormControl<bool>(
-  //       validators: [Validators.required],
-  //     ),
-  //     // 'latitude': FormControl<String>(validators: []),
-  //     // 'longitude': FormControl<String>(validators: []),
-  //   });
-  // }
-
   static FormGroup buildLandHoldingForm() {
     return FormGroup({
       'rowId': FormControl<String>(validators: []),
@@ -317,6 +276,7 @@ class AppForms {
       'district': FormControl<String>(validators: [Validators.required]),
       'village': FormControl<String>(validators: [Validators.required]),
       'taluk': FormControl<String>(validators: [Validators.required]),
+      'locationOfFarm': FormControl<String>(validators: []),
       'farmDistance': FormControl<String>(
         validators: [
           Validators.required,
@@ -341,14 +301,14 @@ class AppForms {
       'uccCode': FormControl<String>(
         validators: [
           Validators.required,
-          Validators.maxLength(10),
+          Validators.maxLength(2),
           Validators.minLength(1),
         ],
       ),
       'totAcre': FormControl<String>(
         validators: [
           Validators.required,
-          Validators.maxLength(3),
+          Validators.maxLength(6),
           Validators.minLength(1),
         ],
       ),
@@ -384,46 +344,36 @@ class AppForms {
         validators: [Validators.required, Validators.maxLength(10)],
       ),
       'scaOfFin': FormControl<String>(
-        validators: [Validators.required, Validators.maxLength(10)],
+        validators: [Validators.required, Validators.maxLength(15)],
       ),
       'addSofByRo': FormControl<String>(
         validators: [Validators.required, Validators.maxLength(10)],
       ),
       'addSofAmount': FormControl<String>(
-        validators: [Validators.maxLength(10)],
+        validators: [Validators.maxLength(15)],
         disabled: true,
       ),
       'costOfCul': FormControl<String>(
-        validators: [Validators.required, Validators.maxLength(12)],
+        validators: [Validators.required, Validators.maxLength(15)],
         disabled: true,
       ),
       'cropIns': FormControl<String>(validators: [Validators.required]),
       'insPre': FormControl<String>(
-        validators: [Validators.required, Validators.maxLength(10)],
+        validators: [Validators.required, Validators.maxLength(15)],
         disabled: true,
       ),
       'dueDateOfRepay': FormControl<String>(
         validators: [Validators.required],
         disabled: true,
       ),
-      // 'totalcostCultivation': FormControl<String>(validators: []),
-      // 'totalInsurprem': FormControl<String>(validators: []),
-      // 'totalSofamt': FormControl<String>(validators: []),
     });
   }
 
-  //  static FormGroup buildCropDetailsForm() {
-  //   return FormGroup({
-  //     'lasSeqno': FormControl<String>(validators: []),
-  //     'lasSeason': FormControl<String>(validators: [Validators.required]),
-  //     'lasCrop': FormControl<String>(validators: [Validators.required]),
-  //     'lasAreaofculti': FormControl<String>(validators: [Validators.required]),
-  //     'lasTypOfLand': FormControl<String>(validators: [Validators.required]),
-  //     'lasScaloffin': FormControl<String>(validators: [Validators.required]),
-  //     'lasReqScaloffin': FormControl<String>(validators: [Validators.required]),
-  //     'notifiedCropFlag': FormControl<bool>(validators: [Validators.required]),
-  //     'lasPrePerAcre': FormControl<String>(validators: [Validators.required]),
-  //     'lasPreToCollect': FormControl<String>(validators: [Validators.required]),
-  //   });
-  // }
+  static FormGroup AUDIT_LOG_FORM() => FormGroup({
+    'todayAndThisweek': FormControl<String>(value: ''),
+    'startDate': FormControl<String>(value: null),
+    'endDate': FormControl<String>(value: null),
+    'startTime': FormControl<TimeOfDay>(value: null),
+    'endTime': FormControl<TimeOfDay>(value: null),
+  });
 }

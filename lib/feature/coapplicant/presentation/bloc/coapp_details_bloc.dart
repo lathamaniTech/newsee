@@ -83,6 +83,7 @@ final class CoappDetailsBloc
           status: SaveStatus.success,
         ),
       );
+      draftSave(state.coAppList);
     } else {
       emit(state.copyWith(isApplicantsAdded: event.addapplicants));
     }
@@ -205,6 +206,18 @@ fetching dedupe for co applicant reusing dedupe page cif search logic here
     final response = await dedupeRepository.searchCif(event.request);
     if (response.isRight()) {
       CifResponse cifResponse = response.right;
+
+      final title = findLovByHeaderAndValue('Title', cifResponse.custTitle);
+      if (title.optvalue.isNotEmpty) {
+        cifResponse = cifResponse.copyWith(custTitle: title.optvalue);
+      }
+
+      final gender = findLovByHeaderAndValue('Gender', cifResponse.gender);
+
+      if (gender.optvalue.isNotEmpty) {
+        cifResponse = cifResponse.copyWith(gender: gender.optvalue);
+      }
+
       // map cifresponse to CoapplicantData so we can set data to form()
       CoapplicantData coapplicantDataFromCif = mapCoapplicantDataFromCif(
         cifResponse,
@@ -220,6 +233,23 @@ fetching dedupe for co applicant reusing dedupe page cif search logic here
       print('cif failure response.left ');
       emit(state.copyWith(status: SaveStatus.dedupefailure, isCifValid: false));
     }
+  }
+
+  Lov findLovByHeaderAndValue(String header, String? value) {
+    if (value == null) {
+      return Lov(Header: header, optvalue: '', optDesc: '', optCode: '');
+    }
+
+    return state.lovList!
+        .where((v) => v.Header == header)
+        .firstWhere(
+          (lov) =>
+              lov.optvalue.toString().toUpperCase() == value.toUpperCase() ||
+              lov.optDesc.toString().toUpperCase() == value.toUpperCase() ||
+              lov.optCode.toString().toUpperCase() == value.toUpperCase(),
+          orElse:
+              () => Lov(Header: header, optvalue: '', optDesc: '', optCode: ''),
+        );
   }
 
   Future<void> validateAadaar(AadhaarValidateEvent event, Emitter emit) async {

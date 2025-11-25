@@ -14,6 +14,7 @@ CibilReportTableModel _$CibilReportTableModelFromJson(
   applicantType: json['applicantType'] as String,
   reportType: json['reportType'] as String,
   filepath: json['filepath'] as String,
+  cibilScore: json['cibilScore'] as String,
 );
 
 Map<String, dynamic> _$CibilReportTableModelToJson(
@@ -24,4 +25,5 @@ Map<String, dynamic> _$CibilReportTableModelToJson(
   'applicantType': instance.applicantType,
   'reportType': instance.reportType,
   'filepath': instance.filepath,
+  'cibilScore': instance.cibilScore,
 };

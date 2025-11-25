@@ -209,31 +209,30 @@ class Loan extends StatelessWidget {
               form.markAsDisabled();
             } else {
               print('init: $state');
-              if (state.productSchemeList.isNotEmpty &&
-                  form.control('typeofloan').value == null) {
-                print(state.productSchemeList);
-                final selectedLoan = state.productSchemeList.firstWhere(
-                  (scheme) => scheme.optionValue == '80354',
-                  orElse:
-                      () => ProductSchema(
-                        optionId: '',
-                        optionDesc: '',
-                        optionValue: '',
-                      ),
-                );
+              // if (state.productSchemeList.isNotEmpty &&
+              //     form.control('typeofloan').value == null) {
+              //   print(state.productSchemeList);
+              // set on default type of loan as TEST KCC
+              // final selectedLoan = state.productSchemeList.firstWhere(
+              //   (scheme) => scheme.optionValue == '80354',
+              //   orElse:
+              //       () => ProductSchema(
+              //         optionId: '',
+              //         optionDesc: '',
+              //         optionValue: '',
+              //       ),
+              // );
+              // print(selectedLoan);
+              // if (selectedLoan.optionValue.isNotEmpty) {
+              //   form
+              //       .control('typeofloan')
+              //       .updateValue(selectedLoan.optionValue);
 
-                print(selectedLoan);
-
-                if (selectedLoan.optionValue.isNotEmpty) {
-                  form
-                      .control('typeofloan')
-                      .updateValue(selectedLoan.optionValue);
-
-                  context.read<LoanproductBloc>().add(
-                    LoanProductDropdownChange(field: selectedLoan),
-                  );
-                }
-              }
+              //   context.read<LoanproductBloc>().add(
+              //     LoanProductDropdownChange(field: selectedLoan),
+              //   );
+              // }
+              // }
 
               form.markAsEnabled();
             }

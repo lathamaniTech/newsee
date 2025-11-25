@@ -13,7 +13,7 @@ class LandData extends Equatable {
   final String? lklSurveyNo;
   final String? lklKhasraNo;
   final String? lklUccCode;
-  final int? lklTotAcre;
+  final String? lklTotAcre;
   final String? lklLandType;
   final String? lklParticulars;
   final String? lklSourceofIrrigation;
@@ -85,7 +85,7 @@ class LandData extends Equatable {
     String? lklSurveyNo,
     String? lklKhasraNo,
     String? lklUccCode,
-    int? lklTotAcre,
+    String? lklTotAcre,
     String? lklLandType,
     String? lklParticulars,
     String? lklSourceofIrrigation,
@@ -125,7 +125,7 @@ class LandData extends Equatable {
 
   Map<String, dynamic> mapForm() {
     return {
-      'rowId': lklRowid?.toString(),
+      'rowId': lklRowid != null ? lklRowid?.toString() : '',
       'applicantName': lklApplicantName,
       'state': lslLandState,
       'district': lslLandDistrict,
@@ -138,7 +138,8 @@ class LandData extends Equatable {
       'landType': lklLandType,
       'particulars': lklParticulars,
       'sourceofIrrig': lklSourceofIrrigation,
-      'farmDistance': lklFarmDistance?.toString(),
+      'farmDistance':
+          lklFarmDistance != null ? lklFarmDistance?.toString() : '',
       'farmercategory': lklfarmercategory,
       'primaryoccupation': lklprimaryoccupation,
       'sumOfTotalAcreage': lklsumOfTotalAcreage,
@@ -184,7 +185,8 @@ class LandData extends Equatable {
       lklSurveyNo: map['lklSurveyNo'] as String?,
       lklKhasraNo: map['lklKhasraNo'] as String?,
       lklUccCode: map['lklUccCode'] as String?,
-      lklTotAcre: map['lklTotAcre'] != null ? map['lklTotAcre'] as int : null,
+      lklTotAcre:
+          map['lklTotAcre'] != null ? map['lklTotAcre'] as String : null,
       lklLandType: map['lklLandType'] as String?,
       lklParticulars: map['lklParticulars'] as String?,
       lklSourceofIrrigation: map['lklSourceofIrrigation'] as String?,

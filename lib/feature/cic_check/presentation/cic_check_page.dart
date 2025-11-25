@@ -7,6 +7,7 @@ import 'package:newsee/Utils/utils.dart';
 import 'package:newsee/feature/cic_check/presentation/bloc/cic_check_bloc.dart';
 import 'package:newsee/feature/cic_check/presentation/bloc/cic_check_event.dart';
 import 'package:newsee/feature/cic_check/presentation/bloc/cic_check_state.dart';
+import 'package:newsee/feature/cic_check/presentation/widgets/score_meter_card.dart';
 import 'package:newsee/widgets/loader.dart';
 import 'package:newsee/widgets/sysmo_alert.dart';
 
@@ -23,13 +24,23 @@ class CicCheckPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ValueNotifier<bool> applicantCibilCheck = ValueNotifier(
-      isApplicantCibilCheck!,
+    // final ValueNotifier<bool> applicantCibilCheck = ValueNotifier(
+    //   isApplicantCibilCheck!,
+    // );
+    final applicantCibilCheck = ValueNotifier<bool>(
+      isApplicantCibilCheck ?? false,
     );
-    final ValueNotifier<bool> applicantCrifCheck = ValueNotifier(false);
 
+    final ValueNotifier<bool> applicantCrifCheck = ValueNotifier(false);
     return BlocProvider(
-      create: (_) => CicCheckBloc(),
+      create:
+          (_) =>
+              CicCheckBloc()..add(
+                CibilDataFetchFromDBEvent(
+                  proposal: selectedProp?['propNo'] ?? "",
+                  cibilStatu: isApplicantCibilCheck,
+                ),
+              ),
       child: Scaffold(
         appBar: AppBar(
           title: const Text('CIC Check'),
@@ -124,7 +135,19 @@ class CicCheckPage extends StatelessWidget {
                                     ),
                                   ],
                                 ),
-                                const SizedBox(height: 16),
+
+                                if (state.cibilScore != null) ...[
+                                  const SizedBox(height: 14),
+
+                                  ScoreMeterCard(
+                                    score:
+                                        int.tryParse(
+                                          state.cibilScore!,
+                                        )!.toDouble(),
+                                    label: "CIBIL Score",
+                                  ),
+                                ],
+                                const SizedBox(height: 14),
                                 ValueListenableBuilder<bool>(
                                   valueListenable: applicantCibilCheck,
                                   builder: (context, cibilChecked, _) {
@@ -144,6 +167,8 @@ class CicCheckPage extends StatelessWidget {
                                                         CicFetchEvent(
                                                           proposalData:
                                                               selectedProp,
+                                                          reportType: 'cibil',
+                                                          applicantType: 'A',
                                                         ),
                                                       );
                                                 } else {
@@ -152,6 +177,7 @@ class CicCheckPage extends StatelessWidget {
                                                     selectedProp?['propNo'],
                                                     'A',
                                                     'cibil',
+                                                    state.cibilDataFromTable,
                                                   );
                                                 }
                                               },
@@ -212,7 +238,8 @@ class CicCheckPage extends StatelessWidget {
                       ],
                     ),
                   ),
-                  const SizedBox(height: 100),
+                  const SizedBox(height: 180),
+                  // navigating to land holding page once get success response show button
                   ValueListenableBuilder<bool>(
                     valueListenable: applicantCibilCheck,
                     builder: (context, cibilChecked, _) {
@@ -231,6 +258,7 @@ class CicCheckPage extends StatelessWidget {
                                   'applicantName':
                                       selectedProp?['applicantName'],
                                   'proposalNumber': selectedProp?['propNo'],
+                                  'isCompleted': false,
                                 },
                               );
                             },

@@ -340,6 +340,13 @@ class Address extends StatelessWidget {
                                     .districtMaster
                                     ?.firstWhere(
                                       (val) => val.code == districtCode,
+                                      orElse:
+                                          () => GeographyMaster(
+                                            stateParentId: '0',
+                                            cityParentId: '0',
+                                            code: '0',
+                                            value: '',
+                                          ),
                                     );
                                 print(geographyMaster);
                                 if (geographyMaster != null) {

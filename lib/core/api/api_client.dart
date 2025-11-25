@@ -1,15 +1,18 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/services.dart';
-import 'package:newsee/AppData/app_constants.dart';
+import 'package:intl/intl.dart';
 import 'package:newsee/core/api/api_config.dart';
+import 'package:newsee/core/db/db_config.dart';
+import 'package:newsee/feature/audit_logs/domain/modal/auditlog.dart';
+import 'package:newsee/feature/audit_logs/domain/repository/audit_log_crud_repo.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dio/io.dart';
-import 'dart:typed_data';
 import 'package:crypto/crypto.dart';
-import 'package:flutter/foundation.dart';
+import 'package:sqflite/sqlite_api.dart';
 
 class ApiClient {
   Dio getDio() {
@@ -49,6 +52,7 @@ class ApiClient {
           compact: false,
         ),
       );
+      // dio.interceptors.add(ConnectivityInterceptor());
       return dio;
     } catch (e) {
       print('getDio: $e');
@@ -56,6 +60,7 @@ class ApiClient {
     }
   }
 
+  // ssl certificate pinning
   Future<void> getSSLCertificatePinning(Dio dio) async {
     try {
       // load the correct certificate of UAT or PROD
@@ -99,6 +104,7 @@ class ConnectivityInterceptor extends Interceptor {
     RequestInterceptorHandler handler,
   ) async {
     // Check internet connectivity
+    insertRequestinDB(options);
     final List<ConnectivityResult> connectivityResult =
         await (Connectivity().checkConnectivity());
     if (connectivityResult.contains(ConnectivityResult.none)) {
@@ -126,4 +132,30 @@ class ConnectivityInterceptor extends Interceptor {
     // Handle errors
     handler.next(err);
   }
+}
+
+Future<void> insertRequestinDB(RequestOptions options) async {
+  Database db = await DBConfig().database;
+
+  AuditLogCrudRepo auditLogCrudRepo = AuditLogCrudRepo(db);
+
+  final userId = options.headers['userid'] ?? 'unknown';
+  final timestamp = DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now());
+  final deviceId = options.headers['deviceId'] ?? 'unknown';
+  final requestDetails = {
+    'url': options.uri.toString(),
+    'headers': options.headers,
+    'data': options.data,
+    'baseUrl': options.baseUrl,
+  };
+
+  final log = AuditLog(
+    userid: userId.toString(),
+    timestamp: timestamp,
+    deviceId: deviceId,
+    request: jsonEncode(requestDetails),
+  );
+  await auditLogCrudRepo.save(log);
+
+  print('Save Audit log in db $log');
 }

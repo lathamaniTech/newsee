@@ -1,6 +1,8 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:newsee/AppData/app_constants.dart';
+import 'package:newsee/AppData/globalconfig.dart';
+import 'package:newsee/Utils/offline_data_provider.dart';
 import 'package:newsee/Utils/utils.dart';
 import 'package:newsee/core/api/AsyncResponseHandler.dart';
 import 'package:newsee/core/api/api_config.dart';
@@ -31,6 +33,7 @@ class CropyieldpageBloc extends Bloc<CropyieldpageEvent, CropyieldpageState> {
     on<CropDetailsSubmitEvent>(onSubmitCropDetails);
     on<CropDetailsDeleteEvent>(onDeleteCropDetails);
     on<CropDetailsRemoveEvent>(onRemoveCrop);
+    on<RBIHCropDetailsFetch>(loadRBIHData);
   }
 
   // submit all added crop details to server
@@ -87,7 +90,11 @@ class CropyieldpageBloc extends Bloc<CropyieldpageEvent, CropyieldpageState> {
                     cropIns: detail.lcdCropIns,
                     addSofAmount: detail.lcdAddSofAmount?.toInt(),
                     insPre: detail.lcdInsPre?.toInt(),
-                    dueDateOfRepay: detail.lcdDueDateOfRepay,
+                    dueDateOfRepay: getDateFormatedByProvided(
+                      detail.lcdDueDateOfRepay,
+                      from: AppConstants.Format_dd_MM_yyyy,
+                      to: AppConstants.Format_yyyy_MM_dd,
+                    ),
                   ),
                 )
                 .toList(),
@@ -110,6 +117,7 @@ class CropyieldpageBloc extends Bloc<CropyieldpageEvent, CropyieldpageState> {
         print(
           "cropGetResponse.right.agriCropDetails ${cropGetResponse.right.agriCropDetails}",
         );
+        Globalconfig.RBIHCropDataList = [];
 
         emit(
           state.copyWith(
@@ -356,6 +364,78 @@ class CropyieldpageBloc extends Bloc<CropyieldpageEvent, CropyieldpageState> {
     } catch (error) {
       print("final checkNewArray $error");
       return false;
+    }
+  }
+
+  Future<void> loadRBIHData(RBIHCropDetailsFetch event, Emitter emit) async {
+    try {
+      // final response = await offlineDataProvider(
+      //   path: AppConstants.rhIHLandCropResponse,
+      // );
+      // if (response != null) {
+      //   final jsonData = response.data;
+      //   final data = jsonData['data']['data'] as Map<String, dynamic>;
+
+      // print("_loadData response $response");
+      // Assuming the JSON structure has these keys
+      // final List<dynamic> cryieldDetails =
+      //     response.data['data']['data']['cropYieldDetails']['cropDetail'];
+
+      // final cropYieldDetailsList =
+      //     (cryieldDetails as List<dynamic>?)
+      //         ?.map((item) => item as Map<String, dynamic>)
+      //         .toList() ??
+      //     [];
+      emit(state.copyWith(status: SaveStatus.loading));
+      final rbiCropDataList = Globalconfig.RBIHCropDataList;
+      print("cropYieldDetailsList: $rbiCropDataList");
+      List<CropDetailsModal> cropDataList =
+          rbiCropDataList.map((cropDetail) {
+            print("totarea raw value: ${cropDetail}");
+            String crop = '';
+            String cropname = cropDetail['croptype'] ?? '';
+            if (cropname.toLowerCase().contains('wheat')) {
+              print('This is wheat crop');
+              crop = '3';
+            } else if (cropname.toLowerCase().contains('bajara')) {
+              crop = '1';
+            } else if (cropname.toLowerCase().contains('coffee')) {
+              crop = '6';
+            } else if (cropname.toLowerCase().contains('daal')) {
+              crop = '5';
+            } else if (cropname.toLowerCase().contains('jawar')) {
+              crop = '2';
+            } else {
+              crop = '7';
+            }
+            return CropDetailsModal(
+              lcdSeason:
+                  cropDetail['seasontype'].toString().isNotEmpty
+                      ? cropDetail['seasontype'].toString()
+                      : '5',
+              lcdCulAreaLand: cropDetail['croparea'].toString(),
+              lcdScaOfFin: 0,
+              lcdCropName: crop,
+              lcdCropType: '2',
+              lcdTypeOfLand: '1',
+              lcdCovOfCrop:
+                  (crop == '1' ||
+                          crop == '2' ||
+                          crop == '3' ||
+                          crop == '5' ||
+                          crop == '6')
+                      ? '1'
+                      : '2',
+            );
+          }).toList();
+
+      emit(state.copyWith(status: SaveStatus.init, cropData: cropDataList));
+      // }
+    } catch (e) {
+      print('Error loading data: $e');
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   SnackBar(content: Text('Error loading data: $e')),
+      // );
     }
   }
 }

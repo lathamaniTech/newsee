@@ -23,6 +23,8 @@ class Globalconfig {
   }) => Globalconfig._(network);
 
   OperationNetwork get operationNetwork => _operationNetwork;
+
+  static List<Map<String, dynamic>> RBIHCropDataList = [];
 }
 
 enum OperationNetwork { online, offline }

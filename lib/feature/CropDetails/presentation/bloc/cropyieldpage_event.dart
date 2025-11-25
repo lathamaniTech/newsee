@@ -46,3 +46,7 @@ class CropDetailsRemoveEvent extends CropyieldpageEvent {
   final int index;
   CropDetailsRemoveEvent({required this.index});
 }
+
+class RBIHCropDetailsFetch extends CropyieldpageEvent {
+  RBIHCropDetailsFetch();
+}

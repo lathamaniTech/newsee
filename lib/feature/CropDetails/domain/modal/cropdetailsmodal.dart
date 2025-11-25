@@ -92,10 +92,10 @@ class CropDetailsModal {
       'culAreaSize': lcdCulAreaSize?.toString(),
       'scaOfFin': formatAmount(lcdScaOfFin.toString(), 'currency'),
       'addSofByRo': lcdAddSofByRo?.toString(),
-      'addSofAmount': lcdAddSofAmount?.toString(),
-      'costOfCul': lcdCostOfCul?.toString(),
+      'addSofAmount': formatAmount(lcdAddSofAmount.toString(), 'currency'),
+      'costOfCul': formatAmount(lcdCostOfCul.toString(), 'currency'),
       'cropIns': lcdCropIns,
-      'insPre': lcdInsPre?.toString(),
+      'insPre': formatAmount(lcdInsPre.toString(), 'currency'),
       'dueDateOfRepay': lcdDueDateOfRepay,
     };
   }
@@ -113,10 +113,10 @@ class CropDetailsModal {
       lcdCulAreaSize: _toInt(form['culAreaSize']),
       lcdScaOfFin: _toInt(form['scaOfFin'].replaceAll(',', '')),
       lcdAddSofByRo: _toInt(form['addSofByRo']),
-      lcdAddSofAmount: _toInt(form['addSofAmount']),
-      lcdCostOfCul: _toInt(form['costOfCul']),
+      lcdAddSofAmount: _toInt(form['addSofAmount'].replaceAll(',', '')),
+      lcdCostOfCul: _toInt(form['costOfCul'].replaceAll(',', '')),
       lcdCropIns: form['cropIns']?.toString(),
-      lcdInsPre: _toInt(form['insPre']),
+      lcdInsPre: _toInt(form['insPre'].replaceAll(',', '')),
       lcdDueDateOfRepay: form['dueDateOfRepay']?.toString(),
     );
   }

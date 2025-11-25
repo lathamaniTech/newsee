@@ -81,8 +81,9 @@ dependencies:
   internet_connection_checker: ^3.0.1
   flutter_pdfview: 1.3.2
   encrypt: ^5.0.3
-  webview_flutter: ^4.7.0
+  webview_flutter: ^4.7.0 # open html report
   crypto: ^3.0.3
+  package_info_plus: ^8.0.0
 
 dev_dependencies:
   flutter_test:
@@ -135,6 +136,7 @@ flutter:
     - assets/data/cibil.json
     - assets/data/crop.json
     - assets/data/get_crop.json
+    - assets/data/RBIH_LAND_CROP_RESP.json
     # - assets/certificates/myserver.cer
     # - assets/logo1.jpg
 

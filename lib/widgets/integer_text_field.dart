@@ -17,6 +17,7 @@ class IntegerTextField extends StatelessWidget {
   final int? minlength;
   final bool isRupeeFormat;
   final Key? fieldKey;
+  final bool decimal;
   IntegerTextField({
     this.fieldKey,
     required this.controlName,
@@ -25,13 +26,20 @@ class IntegerTextField extends StatelessWidget {
     this.maxlength,
     this.minlength,
     this.isRupeeFormat = false,
+    this.decimal = false,
   });
 
   @override
   Widget build(BuildContext context) {
     final List<TextInputFormatter> formatters = [
-      FilteringTextInputFormatter.digitsOnly,
-      if (isRupeeFormat) Rupeeformatter(),
+      if (isRupeeFormat) ...[
+        Rupeeformatter(),
+        // Allow digits and up to 2 decimal places
+        // FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}$')),
+      ] else if (decimal) ...[
+        FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
+      ] else
+        FilteringTextInputFormatter.digitsOnly,
     ];
 
     return Padding(
@@ -40,17 +48,13 @@ class IntegerTextField extends StatelessWidget {
         key: fieldKey,
         autofocus: false,
         formControlName: controlName,
-        keyboardType:
-            isRupeeFormat == true
-                ? TextInputType.numberWithOptions(decimal: true)
-                : TextInputType.number,
+        keyboardType: TextInputType.numberWithOptions(decimal: true),
+        // isRupeeFormat == true
+        //     ? TextInputType.numberWithOptions(decimal: true)
+        //     : TextInputType.number,
         maxLength: maxlength,
         inputFormatters: formatters,
 
-        // [
-        //   if (isRupeeFormat) Rupeeformatter(),
-        //   FilteringTextInputFormatter.digitsOnly,
-        // ],
         decoration: InputDecoration(
           // prefixIcon:
           // isRupeeFormat

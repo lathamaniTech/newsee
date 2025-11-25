@@ -2,14 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import 'package:newsee/AppData/app_api_constants.dart';
 import 'package:newsee/AppData/app_constants.dart';
 import 'package:newsee/AppData/app_forms.dart';
+import 'package:newsee/AppData/globalconfig.dart';
 import 'package:newsee/Utils/shared_preference_utils.dart';
 import 'package:newsee/Utils/utils.dart';
 import 'package:newsee/feature/CropDetails/domain/modal/cropdetailsmodal.dart';
 import 'package:newsee/feature/CropDetails/presentation/bloc/cropyieldpage_bloc.dart';
 import 'package:newsee/feature/auth/domain/model/user_details.dart';
+import 'package:newsee/feature/landholding/presentation/bloc/land_holding_bloc.dart';
 import 'package:newsee/feature/loader/presentation/bloc/global_loading_bloc.dart';
 import 'package:newsee/feature/loader/presentation/bloc/global_loading_event.dart';
 import 'package:newsee/feature/masters/domain/modal/lov.dart';
@@ -18,17 +21,18 @@ import 'package:newsee/widgets/options_sheet.dart';
 import 'package:newsee/widgets/searchable_drop_down.dart';
 import 'package:newsee/widgets/success_bottom_sheet.dart';
 import 'package:reactive_forms/reactive_forms.dart';
-import 'package:newsee/widgets/radio.dart';
 import 'package:newsee/widgets/integer_text_field.dart';
 
 class CropDetailsPage extends StatefulWidget {
   final String title;
   final String proposalnumber;
+  final bool? isCompleted;
 
   const CropDetailsPage({
     super.key,
     required this.title,
     required this.proposalnumber,
+    this.isCompleted,
   });
 
   @override
@@ -38,10 +42,24 @@ class CropDetailsPage extends StatefulWidget {
 class _CropDetailsPageState extends State<CropDetailsPage> {
   final form = AppForms.buildCropDetailsForm();
   final ValueNotifier<int> currentIndex = ValueNotifier<int>(0);
-  bool _isResetting = false;
+  bool _dialogShown = false;
+  final TextEditingController _field1Controller = TextEditingController();
+  final TextEditingController _field2Controller = TextEditingController();
+  String status = 'Not Submit';
+
   @override
   void initState() {
     super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted &&
+          widget.isCompleted == false &&
+          !_dialogShown &&
+          Globalconfig.RBIHCropDataList.isNotEmpty) {
+        _dialogShown = true;
+        showFetchAlert(context);
+      }
+    });
 
     // Trigger auto-calculation when any dependent control changes
     final controlsToWatch = [
@@ -57,6 +75,32 @@ class _CropDetailsPageState extends State<CropDetailsPage> {
     for (final controlName in controlsToWatch) {
       form.control(controlName).valueChanges.listen((_) => getAddSofAmount());
     }
+  }
+
+  void showFetchAlert(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) {
+        return AlertDialog(
+          title: Text("RBIH Crop Details?"),
+          content: Text("Do you want to fetch Crop Details from RBIH?"),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text("No"),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                context.read<CropyieldpageBloc>().add(RBIHCropDetailsFetch());
+              },
+              child: Text("Yes"),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   void getAddSofAmount() {
@@ -104,18 +148,24 @@ class _CropDetailsPageState extends State<CropDetailsPage> {
         }
 
         final cov = totalCultCost * (covPercent / 100);
-        form
-            .control('insPre')
-            .patchValue(cov.toStringAsFixed(2), emitEvent: true);
+        final formattedInsPre = NumberFormat('#,##0.00', 'en_US').format(cov);
+        form.control('insPre').patchValue(formattedInsPre, emitEvent: true);
       }
 
       // Update calculated fields
-      form
-          .control('costOfCul')
-          .patchValue(totalCultCost.toStringAsFixed(2), emitEvent: true);
-      form
-          .control('addSofAmount')
-          .patchValue(addSofValue.toStringAsFixed(2), emitEvent: true);
+      final formattedValue = NumberFormat(
+        '#,##0.00',
+        'en_US',
+      ).format(totalCultCost);
+      form.control('costOfCul').patchValue(formattedValue, emitEvent: true);
+      final addSofFormatted = NumberFormat(
+        '#,##0.00',
+        'en_US',
+      ).format(addSofValue);
+      form.control('addSofAmount').patchValue(addSofFormatted, emitEvent: true);
+      // form
+      //     .control('addSofAmount')
+      //     .patchValue(addSofValue.toStringAsFixed(2), emitEvent: true);
 
       // Repayment due date calculation
       // 1- long term, 2 -short term
@@ -255,11 +305,25 @@ class _CropDetailsPageState extends State<CropDetailsPage> {
                                   (v) =>
                                       v.Header == 'CropTypeOfLand' &&
                                       v.optvalue == item.lcdTypeOfLand,
+                                  orElse:
+                                      () => Lov(
+                                        Header: 'CropTypeOfLand',
+                                        optDesc: '',
+                                        optvalue: '',
+                                        optCode: '',
+                                      ),
                                 );
                                 final cropname = lovlist.firstWhere(
                                   (v) =>
                                       v.Header == 'CropName' &&
                                       v.optvalue == item.lcdCropName,
+                                  orElse:
+                                      () => Lov(
+                                        Header: 'CropName',
+                                        optDesc: '',
+                                        optvalue: '',
+                                        optCode: '',
+                                      ),
                                 );
                                 print("cropname $cropname");
                                 return Slidable(
@@ -312,6 +376,7 @@ class _CropDetailsPageState extends State<CropDetailsPage> {
                                   child: OptionsSheet(
                                     icon: Icons.agriculture,
                                     title: 'LandType - ${landname.optDesc}',
+                                    // title: 'Seasons - ${item.lcdSeason}',
                                     details: [cropname.optDesc],
                                     detailsName: ["Name of the Crop"],
                                     onTap: () {
@@ -468,563 +533,535 @@ class _CropDetailsPageState extends State<CropDetailsPage> {
             ],
           ),
         ),
-        body: BlocProvider(
-          create:
-              (_) =>
-                  CropyieldpageBloc()..add(
-                    CropPageInitialEvent(proposalNumber: widget.proposalnumber),
-                  ),
-          // lazy: true,
-          child: BlocConsumer<CropyieldpageBloc, CropyieldpageState>(
-            listener: (context, state) {
-              if (state.status == SaveStatus.loading) {
-                globalLoadingBloc.add(ShowLoading(message: 'Please wait...'));
-              }
+        body: BlocConsumer<CropyieldpageBloc, CropyieldpageState>(
+          listener: (context, state) {
+            if (state.status == SaveStatus.loading) {
+              globalLoadingBloc.add(ShowLoading(message: 'Please wait...'));
+            }
 
-              if (state.status == SaveStatus.delete) {
-                globalLoadingBloc.add(HideLoading());
-                form.reset();
-                showSnack(
-                  context,
-                  message: 'Crop Details Deleted Successfully',
-                );
-              }
+            if (state.status == SaveStatus.delete) {
+              globalLoadingBloc.add(HideLoading());
+              form.reset();
+              showSnack(context, message: 'Crop Details Deleted Successfully');
+            }
 
-              if (state.status == SaveStatus.init) {
-                globalLoadingBloc.add(HideLoading());
-                // if ((state.cropData != null && state.cropData!.isNotEmpty) &&
-                //     (state.landDetails != null &&
-                //         state.landDetails!.isNotEmpty)) {
-                //   irrigatedController.text =
-                //       state.landDetails!['lpAgriPcIrrigated'].toString();
-                //   rainfedController.text =
-                //       state.landDetails!['lpAgriPcRainfed'].toString();
-                // }
-              } else if (state.status == SaveStatus.mastersucess) {
-                form.reset();
-                disableFields();
-              } else if (state.status == SaveStatus.reset) {
-                form.reset();
-                disableFields();
-              } else if (state.status == SaveStatus.success) {
-                form.reset();
-                disableFields();
-                context.pop();
-                globalLoadingBloc.add(HideLoading());
-                showSuccessBottomSheet(
-                  context: context,
-                  headerTxt: ApiConstants.api_response_success,
-                  lead: "",
-                  message: "Crop details successfully submitted",
-                  leftButtonLabel: 'Documents Upload',
-                  rightButtonLabel: 'Cancel',
-                  onPressedLeftButton: () {
-                    if (Navigator.of(context).canPop()) {
-                      Navigator.of(context).pop();
-                      context.pushNamed(
-                        'document',
-                        extra: widget.proposalnumber,
-                      );
-                    }
-                  },
-                  onPressedRightButton: () {
-                    if (Navigator.of(context).canPop()) {
-                      Navigator.of(context).pop();
-                    }
-                  }, // OnPressedRightButton,
-                );
+            if (state.status == SaveStatus.init) {
+              globalLoadingBloc.add(HideLoading());
+              // if ((state.cropData != null && state.cropData!.isNotEmpty) &&
+              //     (state.landDetails != null &&
+              //         state.landDetails!.isNotEmpty)) {
+              //   irrigatedController.text =
+              //       state.landDetails!['lpAgriPcIrrigated'].toString();
+              //   rainfedController.text =
+              //       state.landDetails!['lpAgriPcRainfed'].toString();
+              // }
+            } else if (state.status == SaveStatus.mastersucess) {
+              form.reset();
+              disableFields();
+            } else if (state.status == SaveStatus.reset) {
+              form.reset();
+              disableFields();
+            } else if (state.status == SaveStatus.success) {
+              form.reset();
+              disableFields();
+              context.pop();
+              globalLoadingBloc.add(HideLoading());
+              showSuccessBottomSheet(
+                context: context,
+                headerTxt: ApiConstants.api_response_success,
+                lead: "",
+                message: "Crop details successfully submitted",
+                leftButtonLabel: 'Documents Upload',
+                rightButtonLabel: 'Cancel',
+                onPressedLeftButton: () {
+                  if (Navigator.of(context).canPop()) {
+                    Navigator.of(context).pop();
+                    context.pushNamed('document', extra: widget.proposalnumber);
+                  }
+                },
+                onPressedRightButton: () {
+                  if (Navigator.of(context).canPop()) {
+                    Navigator.of(context).pop();
+                  }
+                }, // OnPressedRightButton,
+              );
 
-                // showSnack(
-                //   context,
-                //   message: 'Crop Details Submitted Successfully',
-                // );
-              } else if (state.status == SaveStatus.failure &&
-                  state.errorMessage != null) {
-                globalLoadingBloc.add(HideLoading());
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(state.errorMessage.toString())),
-                );
-                showSnack(
-                  context,
-                  message: 'Crop Details Submitted Successfully',
-                );
-              }
-            },
-            builder: (context, state) {
-              print("state.showSubmit-builer ${state.showSubmit}");
-              if (state.status == SaveStatus.update &&
-                  state.selectedCropData != null) {
-                print(
-                  "currently current selected cropdetails index is ${currentIndex.value}",
-                );
-                print("state.selectedCropData is => ${state.selectedCropData}");
-                form.patchValue(state.selectedCropData!.toForm());
+              // showSnack(
+              //   context,
+              //   message: 'Crop Details Submitted Successfully',
+              // );
+            } else if (state.status == SaveStatus.failure &&
+                state.errorMessage != null) {
+              globalLoadingBloc.add(HideLoading());
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(state.errorMessage.toString())),
+              );
+              showSnack(
+                context,
+                message: 'Crop Details Submitted Successfully',
+              );
+            }
+          },
+          builder: (context, state) {
+            print("state.showSubmit-builer ${state.showSubmit}");
+            if (state.status == SaveStatus.update &&
+                state.selectedCropData != null) {
+              print(
+                "currently current selected cropdetails index is ${currentIndex.value}",
+              );
+              print("state.selectedCropData is => ${state.selectedCropData}");
+              form.patchValue(state.selectedCropData!.toForm());
 
-                form.updateValueAndValidity();
-              }
+              form.updateValueAndValidity();
+            }
 
-              return ReactiveForm(
-                formGroup: form,
-                child: SafeArea(
-                  child: Stack(
-                    children: [
-                      SingleChildScrollView(
-                        padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const SizedBox(height: 12),
-                            Card(
-                              elevation: 4,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.all(16),
-                                child: Column(
-                                  children: [
-                                    SearchableDropdown<Lov>(
-                                      controlName: 'season',
-                                      label: 'Season',
-                                      items:
-                                          state.lovlist!
-                                              .where(
-                                                (v) => v.Header == 'Season',
-                                              )
-                                              .toList(),
-                                      onChangeListener: (Lov val) {
-                                        form.controls['season']?.updateValue(
-                                          val.optvalue,
-                                        );
-                                      },
-                                      selItem: () {
-                                        final value =
-                                            form.control('season').value;
-                                        return state.lovlist!
+            return ReactiveForm(
+              formGroup: form,
+              child: SafeArea(
+                child: Stack(
+                  children: [
+                    SingleChildScrollView(
+                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const SizedBox(height: 12),
+                          Card(
+                            elevation: 4,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(16),
+                              child: Column(
+                                children: [
+                                  SearchableDropdown<Lov>(
+                                    controlName: 'season',
+                                    label: 'Season',
+                                    items:
+                                        state.lovlist!
                                             .where((v) => v.Header == 'Season')
-                                            .firstWhere(
-                                              (lov) => lov.optvalue == value,
-                                              orElse:
-                                                  () => Lov(
-                                                    Header: 'Season',
-                                                    optDesc: '',
-                                                    optvalue: '',
-                                                    optCode: '',
-                                                  ),
-                                            );
-                                      },
-                                    ),
-                                    SearchableDropdown<Lov>(
-                                      controlName: 'cropType',
-                                      label: 'Crop Type',
-                                      items:
-                                          state.lovlist!
-                                              .where(
-                                                (v) => v.Header == 'CropType',
-                                              )
-                                              .toList(),
-                                      onChangeListener: (Lov val) {
-                                        form.controls['cropType']?.updateValue(
-                                          val.optvalue,
-                                        );
-                                      },
-                                      selItem: () {
-                                        final value =
-                                            form.control('cropType').value;
-                                        return state.lovlist!
+                                            .toList(),
+                                    onChangeListener: (Lov val) {
+                                      form.controls['season']?.updateValue(
+                                        val.optvalue,
+                                      );
+                                    },
+                                    selItem: () {
+                                      final value =
+                                          form.control('season').value;
+                                      return state.lovlist!
+                                          .where((v) => v.Header == 'Season')
+                                          .firstWhere(
+                                            (lov) =>
+                                                (lov.optvalue.toLowerCase() ==
+                                                        value?.toLowerCase() ||
+                                                    lov.optDesc.toLowerCase() ==
+                                                        value?.toLowerCase()),
+                                            orElse:
+                                                () => Lov(
+                                                  Header: 'Season',
+                                                  optDesc: '',
+                                                  optvalue: '',
+                                                  optCode: '',
+                                                ),
+                                          );
+                                    },
+                                  ),
+                                  SearchableDropdown<Lov>(
+                                    controlName: 'cropType',
+                                    label: 'Crop Type',
+                                    items:
+                                        state.lovlist!
                                             .where(
                                               (v) => v.Header == 'CropType',
                                             )
-                                            .firstWhere(
-                                              (lov) => lov.optvalue == value,
-                                              orElse:
-                                                  () => Lov(
-                                                    Header: 'CropType',
-                                                    optDesc: '',
-                                                    optvalue: '',
-                                                    optCode: '',
-                                                  ),
-                                            );
-                                      },
-                                    ),
+                                            .toList(),
+                                    onChangeListener: (Lov val) {
+                                      form.controls['cropType']?.updateValue(
+                                        val.optvalue,
+                                      );
+                                    },
+                                    selItem: () {
+                                      final value =
+                                          form.control('cropType').value;
+                                      return state.lovlist!
+                                          .where((v) => v.Header == 'CropType')
+                                          .firstWhere(
+                                            (lov) => lov.optvalue == value,
+                                            orElse:
+                                                () => Lov(
+                                                  Header: 'CropType',
+                                                  optDesc: '',
+                                                  optvalue: '',
+                                                  optCode: '',
+                                                ),
+                                          );
+                                    },
+                                  ),
 
-                                    SearchableDropdown<Lov>(
-                                      controlName: 'cropName',
-                                      label: 'Crop Name',
-                                      items:
-                                          state.lovlist!
-                                              .where(
-                                                (v) => v.Header == 'CropName',
-                                              )
-                                              .toList(),
-                                      onChangeListener: (Lov val) {
-                                        form.controls['cropName']?.updateValue(
-                                          val.optvalue,
-                                        );
-                                      },
-                                      selItem: () {
-                                        final value =
-                                            form.control('cropName').value;
-                                        return state.lovlist!
+                                  SearchableDropdown<Lov>(
+                                    controlName: 'cropName',
+                                    label: 'Crop Name',
+                                    items:
+                                        state.lovlist!
                                             .where(
                                               (v) => v.Header == 'CropName',
                                             )
-                                            .firstWhere(
-                                              (lov) => lov.optvalue == value,
-                                              orElse:
-                                                  () => Lov(
-                                                    Header: 'CropName',
-                                                    optDesc: '',
-                                                    optvalue: '',
-                                                    optCode: '',
-                                                  ),
-                                            );
-                                      },
-                                    ),
+                                            .toList(),
+                                    onChangeListener: (Lov val) {
+                                      form.controls['cropName']?.updateValue(
+                                        val.optvalue,
+                                      );
+                                    },
+                                    selItem: () {
+                                      final value =
+                                          form.control('cropName').value;
+                                      return state.lovlist!
+                                          .where((v) => v.Header == 'CropName')
+                                          .firstWhere(
+                                            (lov) => lov.optvalue == value,
+                                            orElse:
+                                                () => Lov(
+                                                  Header: 'CropName',
+                                                  optDesc: '',
+                                                  optvalue: '',
+                                                  optCode: '',
+                                                ),
+                                          );
+                                    },
+                                  ),
 
-                                    SearchableDropdown<Lov>(
-                                      controlName: 'covOfCrop',
-                                      label: 'Coverage of Crop',
-                                      items:
-                                          state.lovlist!
-                                              .where(
-                                                (v) =>
-                                                    v.Header ==
-                                                    'CoverageOfCorp',
-                                              )
-                                              .toList(),
-                                      onChangeListener: (Lov val) {
-                                        form.controls['covOfCrop']?.updateValue(
-                                          val.optvalue,
-                                        );
-                                      },
-                                      selItem: () {
-                                        final value =
-                                            form.control('covOfCrop').value;
-                                        return state.lovlist!
+                                  SearchableDropdown<Lov>(
+                                    controlName: 'covOfCrop',
+                                    label: 'Coverage of Crop',
+                                    items:
+                                        state.lovlist!
                                             .where(
                                               (v) =>
                                                   v.Header == 'CoverageOfCorp',
                                             )
-                                            .firstWhere(
-                                              (lov) => lov.optvalue == value,
-                                              orElse:
-                                                  () => Lov(
-                                                    Header: 'CoverageOfCorp',
-                                                    optDesc: '',
-                                                    optvalue: '',
-                                                    optCode: '',
-                                                  ),
-                                            );
-                                      },
-                                    ),
+                                            .toList(),
+                                    onChangeListener: (Lov val) {
+                                      form.controls['covOfCrop']?.updateValue(
+                                        val.optvalue,
+                                      );
+                                    },
+                                    selItem: () {
+                                      final value =
+                                          form.control('covOfCrop').value;
+                                      return state.lovlist!
+                                          .where(
+                                            (v) => v.Header == 'CoverageOfCorp',
+                                          )
+                                          .firstWhere(
+                                            (lov) => lov.optvalue == value,
+                                            orElse:
+                                                () => Lov(
+                                                  Header: 'CoverageOfCorp',
+                                                  optDesc: '',
+                                                  optvalue: '',
+                                                  optCode: '',
+                                                ),
+                                          );
+                                    },
+                                  ),
 
-                                    SearchableDropdown<Lov>(
-                                      controlName: 'typeOfLand',
-                                      label: 'Type of Land',
-                                      items:
-                                          state.lovlist!
-                                              .where(
-                                                (v) =>
-                                                    v.Header ==
-                                                    'CropTypeOfLand',
-                                              )
-                                              .toList(),
-                                      onChangeListener: (Lov val) {
-                                        form.controls['typeOfLand']
-                                            ?.updateValue(val.optvalue);
-                                      },
-                                      selItem: () {
-                                        final value =
-                                            form.control('typeOfLand').value;
-                                        return state.lovlist!
+                                  SearchableDropdown<Lov>(
+                                    controlName: 'typeOfLand',
+                                    label: 'Type of Land',
+                                    items:
+                                        state.lovlist!
                                             .where(
                                               (v) =>
                                                   v.Header == 'CropTypeOfLand',
                                             )
-                                            .firstWhere(
-                                              (lov) => lov.optvalue == value,
-                                              orElse:
-                                                  () => Lov(
-                                                    Header: 'CropTypeOfLand',
-                                                    optDesc: '',
-                                                    optvalue: '',
-                                                    optCode: '',
-                                                  ),
-                                            );
-                                      },
-                                    ),
-                                    IntegerTextField(
-                                      controlName: 'culAreaLand',
-                                      label: 'Area Of Cultivated (Acre)',
-                                      mantatory: true,
-                                      maxlength: 5,
-                                    ),
-                                    IntegerTextField(
-                                      controlName: 'scaOfFin',
-                                      label: 'Scale of Finance (per Acre)',
-                                      mantatory: true,
-                                      maxlength: 10,
-                                      isRupeeFormat: true,
-                                    ),
-                                    IntegerTextField(
-                                      controlName: 'costOfCul',
-                                      label:
-                                          'Total Cost Of Cultivation(Acreage*SOF)',
-                                      mantatory: true,
-                                      isRupeeFormat: true,
-                                      maxlength: 10,
-                                    ),
-                                    IntegerTextField(
-                                      controlName: 'addSofByRo',
-                                      label: 'Additional SOF %',
-                                      mantatory: true,
-                                      maxlength: 10,
-                                    ),
-                                    IntegerTextField(
-                                      controlName: 'addSofAmount',
-                                      label: 'Additonal SOF Amount',
-                                      mantatory: true,
-                                      maxlength: 10,
-                                      isRupeeFormat: true,
-                                    ),
-                                    IntegerTextField(
-                                      controlName: 'culAreaSize',
-                                      label: 'Cultivated Area Size',
-                                      mantatory: true,
-                                      maxlength: 10,
-                                    ),
+                                            .toList(),
+                                    onChangeListener: (Lov val) {
+                                      form.controls['typeOfLand']?.updateValue(
+                                        val.optvalue,
+                                      );
+                                    },
+                                    selItem: () {
+                                      final value =
+                                          form.control('typeOfLand').value;
+                                      return state.lovlist!
+                                          .where(
+                                            (v) => v.Header == 'CropTypeOfLand',
+                                          )
+                                          .firstWhere(
+                                            (lov) => lov.optvalue == value,
+                                            orElse:
+                                                () => Lov(
+                                                  Header: 'CropTypeOfLand',
+                                                  optDesc: '',
+                                                  optvalue: '',
+                                                  optCode: '',
+                                                ),
+                                          );
+                                    },
+                                  ),
+                                  IntegerTextField(
+                                    controlName: 'culAreaLand',
+                                    label: 'Area Of Cultivated (Acre)',
+                                    mantatory: true,
+                                    maxlength: 5,
+                                  ),
+                                  IntegerTextField(
+                                    controlName: 'scaOfFin',
+                                    label: 'Scale of Finance (per Acre)',
+                                    mantatory: true,
+                                    maxlength: 15,
+                                    isRupeeFormat: true,
+                                  ),
+                                  IntegerTextField(
+                                    controlName: 'costOfCul',
+                                    label:
+                                        'Total Cost Of Cultivation(Acreage*SOF)',
+                                    mantatory: true,
+                                    isRupeeFormat: true,
+                                    maxlength: 15,
+                                  ),
+                                  IntegerTextField(
+                                    controlName: 'addSofByRo',
+                                    label: 'Additional SOF %',
+                                    mantatory: true,
+                                    maxlength: 10,
+                                  ),
+                                  IntegerTextField(
+                                    controlName: 'addSofAmount',
+                                    label: 'Additonal SOF Amount',
+                                    mantatory: true,
+                                    maxlength: 15,
+                                    isRupeeFormat: true,
+                                  ),
+                                  IntegerTextField(
+                                    controlName: 'culAreaSize',
+                                    label: 'Cultivated Area Size',
+                                    mantatory: true,
+                                    maxlength: 10,
+                                  ),
 
-                                    SearchableDropdown<Lov>(
-                                      controlName: 'cropIns',
-                                      label: 'Crop Insurance',
-                                      items:
-                                          state.lovlist!
-                                              .where(
-                                                (v) =>
-                                                    v.Header == 'CorpInsurance',
-                                              )
-                                              .toList(),
-                                      onChangeListener: (Lov val) {
-                                        form.controls['cropIns']?.updateValue(
-                                          val.optvalue,
-                                        );
-                                      },
-                                      selItem: () {
-                                        final value =
-                                            form.control('cropIns').value;
-                                        return state.lovlist!
+                                  SearchableDropdown<Lov>(
+                                    controlName: 'cropIns',
+                                    label: 'Crop Insurance',
+                                    items:
+                                        state.lovlist!
                                             .where(
                                               (v) =>
                                                   v.Header == 'CorpInsurance',
                                             )
-                                            .firstWhere(
-                                              (lov) => lov.optvalue == value,
-                                              orElse:
-                                                  () => Lov(
-                                                    Header: 'CorpInsurance',
-                                                    optDesc: '',
-                                                    optvalue: '',
-                                                    optCode: '',
-                                                  ),
-                                            );
-                                      },
-                                    ),
-                                    IntegerTextField(
-                                      controlName: 'insPre',
-                                      label: 'Insurance Premium',
-                                      mantatory: true,
-                                      maxlength: 10,
-                                      isRupeeFormat: true,
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.all(12.0),
-                                      child: ReactiveTextField<String>(
-                                        formControlName: 'dueDateOfRepay',
-                                        validationMessages: {
-                                          ValidationMessage.required:
-                                              (error) =>
-                                                  'Due Date Of Repayment is required',
-                                        },
-                                        readOnly: true,
-                                        decoration: InputDecoration(
-                                          // labelText: 'Due Date Of Repayment',
-                                          label: RichText(
-                                            text: TextSpan(
-                                              text: 'Due Date Of Repayment',
-                                              style: const TextStyle(
-                                                color: Colors.black,
-                                                fontSize: 16,
-                                              ),
-                                              children: [
-                                                TextSpan(
-                                                  text: ' *',
-                                                  style: TextStyle(
-                                                    color: Colors.red,
-                                                  ),
+                                            .toList(),
+                                    onChangeListener: (Lov val) {
+                                      form.controls['cropIns']?.updateValue(
+                                        val.optvalue,
+                                      );
+                                    },
+                                    selItem: () {
+                                      final value =
+                                          form.control('cropIns').value;
+                                      return state.lovlist!
+                                          .where(
+                                            (v) => v.Header == 'CorpInsurance',
+                                          )
+                                          .firstWhere(
+                                            (lov) => lov.optvalue == value,
+                                            orElse:
+                                                () => Lov(
+                                                  Header: 'CorpInsurance',
+                                                  optDesc: '',
+                                                  optvalue: '',
+                                                  optCode: '',
                                                 ),
-                                              ],
+                                          );
+                                    },
+                                  ),
+                                  IntegerTextField(
+                                    controlName: 'insPre',
+                                    label: 'Insurance Premium',
+                                    mantatory: true,
+                                    maxlength: 15,
+                                    isRupeeFormat: true,
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.all(12.0),
+                                    child: ReactiveTextField<String>(
+                                      formControlName: 'dueDateOfRepay',
+                                      validationMessages: {
+                                        ValidationMessage.required:
+                                            (error) =>
+                                                'Due Date Of Repayment is required',
+                                      },
+                                      readOnly: true,
+                                      decoration: InputDecoration(
+                                        // labelText: 'Due Date Of Repayment',
+                                        label: RichText(
+                                          text: TextSpan(
+                                            text: 'Due Date Of Repayment',
+                                            style: const TextStyle(
+                                              color: Colors.black,
+                                              fontSize: 16,
                                             ),
-                                          ),
-                                          suffixIcon: Icon(
-                                            Icons.calendar_today,
+                                            children: [
+                                              TextSpan(
+                                                text: ' *',
+                                                style: TextStyle(
+                                                  color: Colors.red,
+                                                ),
+                                              ),
+                                            ],
                                           ),
                                         ),
-                                        onTap: (control) async {
-                                          final DateTime? pickedDate =
-                                              await showDatePicker(
-                                                context: context,
-                                                initialDate: DateTime.now(),
-                                                firstDate: DateTime(1900),
-                                                lastDate: DateTime.now(),
-                                              );
-                                          if (pickedDate != null) {
-                                            final formatted =
-                                                "${pickedDate.year}-"
-                                                "${pickedDate.month.toString().padLeft(2, '0')}-"
-                                                "${pickedDate.day.toString().padLeft(2, '0')}";
-                                            form
-                                                .control('dueDateOfRepay')
-                                                .value = formatted;
-                                          }
-                                        },
+                                        suffixIcon: Icon(Icons.calendar_today),
                                       ),
+                                      onTap: (control) async {
+                                        final DateTime? pickedDate =
+                                            await showDatePicker(
+                                              context: context,
+                                              initialDate: DateTime.now(),
+                                              firstDate: DateTime(1900),
+                                              lastDate: DateTime.now(),
+                                            );
+                                        if (pickedDate != null) {
+                                          final formatted =
+                                              "${pickedDate.year}-"
+                                              "${pickedDate.month.toString().padLeft(2, '0')}-"
+                                              "${pickedDate.day.toString().padLeft(2, '0')}";
+                                          form.control('dueDateOfRepay').value =
+                                              formatted;
+                                        }
+                                      },
                                     ),
-                                    SizedBox(height: 80),
-                                    Center(
-                                      child:
-                                          state.status == SaveStatus.update ||
-                                                  state.status ==
-                                                      SaveStatus.edit
-                                              ? ElevatedButton.icon(
-                                                onPressed:
-                                                    () => handleUpdate(
-                                                      context,
-                                                      state,
-                                                    ),
-                                                icon: const Icon(
-                                                  Icons.save,
+                                  ),
+                                  SizedBox(height: 80),
+                                  Center(
+                                    child:
+                                        state.status == SaveStatus.update ||
+                                                state.status == SaveStatus.edit
+                                            ? ElevatedButton.icon(
+                                              onPressed:
+                                                  () => handleUpdate(
+                                                    context,
+                                                    state,
+                                                  ),
+                                              icon: const Icon(
+                                                Icons.save,
+                                                color: Colors.white,
+                                              ),
+                                              label: const Text(
+                                                'Update',
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.bold,
                                                   color: Colors.white,
-                                                ),
-                                                label: const Text(
-                                                  'Update',
-                                                  style: TextStyle(
-                                                    fontWeight: FontWeight.bold,
-                                                    color: Colors.white,
-                                                  ),
-                                                ),
-                                                style: ElevatedButton.styleFrom(
-                                                  // backgroundColor: const Color.fromARGB(
-                                                  //   212,
-                                                  //   5,
-                                                  //   8,
-                                                  //   205,
-                                                  // ),
-                                                  backgroundColor: Colors.teal,
-                                                  padding:
-                                                      const EdgeInsets.symmetric(
-                                                        horizontal: 32,
-                                                        vertical: 14,
-                                                      ),
-                                                  shape: RoundedRectangleBorder(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                          8,
-                                                        ),
-                                                  ),
-                                                ),
-                                              )
-                                              : ElevatedButton.icon(
-                                                onPressed:
-                                                    () => handleSave(
-                                                      context,
-                                                      state,
-                                                    ),
-                                                icon: const Icon(
-                                                  Icons.save,
-                                                  color: Colors.white,
-                                                ),
-                                                label: const Text(
-                                                  'Save',
-                                                  style: TextStyle(
-                                                    fontWeight: FontWeight.bold,
-                                                    color: Colors.white,
-                                                  ),
-                                                ),
-                                                style: ElevatedButton.styleFrom(
-                                                  backgroundColor: Colors.teal,
-                                                  padding:
-                                                      const EdgeInsets.symmetric(
-                                                        horizontal: 32,
-                                                        vertical: 14,
-                                                      ),
-                                                  shape: RoundedRectangleBorder(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                          8,
-                                                        ),
-                                                  ),
                                                 ),
                                               ),
-                                    ),
-                                  ],
+                                              style: ElevatedButton.styleFrom(
+                                                // backgroundColor: const Color.fromARGB(
+                                                //   212,
+                                                //   5,
+                                                //   8,
+                                                //   205,
+                                                // ),
+                                                backgroundColor: Colors.teal,
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                      horizontal: 32,
+                                                      vertical: 14,
+                                                    ),
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(8),
+                                                ),
+                                              ),
+                                            )
+                                            : ElevatedButton.icon(
+                                              onPressed:
+                                                  () => handleSave(
+                                                    context,
+                                                    state,
+                                                  ),
+                                              icon: const Icon(
+                                                Icons.save,
+                                                color: Colors.white,
+                                              ),
+                                              label: const Text(
+                                                'Save',
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Colors.white,
+                                                ),
+                                              ),
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor: Colors.teal,
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                      horizontal: 32,
+                                                      vertical: 14,
+                                                    ),
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(8),
+                                                ),
+                                              ),
+                                            ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Positioned(
+                      bottom: 10,
+                      right: 10,
+                      child: Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          FloatingActionButton(
+                            heroTag: 'view_button',
+                            backgroundColor: Colors.white,
+                            tooltip: 'View Saved Data',
+                            onPressed: () => showBottomSheet(context, state),
+                            child: const Icon(
+                              Icons.menu,
+                              color: Colors.blue,
+                              size: 28,
+                            ),
+                          ),
+                          if (state.cropData != null)
+                            Positioned(
+                              top: -10,
+                              right: -4,
+                              child: Container(
+                                constraints: const BoxConstraints(
+                                  minWidth: 16,
+                                  minHeight: 16,
+                                ),
+                                alignment: Alignment.center,
+                                padding: const EdgeInsets.all(2),
+                                decoration: const BoxDecoration(
+                                  color: Colors.red,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Text(
+                                  '${state.cropData?.length ?? 0}',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
                               ),
                             ),
-                          ],
-                        ),
+                        ],
                       ),
-                      Positioned(
-                        bottom: 10,
-                        right: 10,
-                        child: Stack(
-                          clipBehavior: Clip.none,
-                          children: [
-                            FloatingActionButton(
-                              heroTag: 'view_button',
-                              backgroundColor: Colors.white,
-                              tooltip: 'View Saved Data',
-                              onPressed: () => showBottomSheet(context, state),
-                              child: const Icon(
-                                Icons.menu,
-                                color: Colors.blue,
-                                size: 28,
-                              ),
-                            ),
-                            if (state.cropData != null)
-                              Positioned(
-                                top: -10,
-                                right: -4,
-                                child: Container(
-                                  constraints: const BoxConstraints(
-                                    minWidth: 16,
-                                    minHeight: 16,
-                                  ),
-                                  alignment: Alignment.center,
-                                  padding: const EdgeInsets.all(2),
-                                  decoration: const BoxDecoration(
-                                    color: Colors.red,
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: Text(
-                                    '${state.cropData?.length ?? 0}',
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-              );
-            },
-          ),
+              ),
+            );
+          },
         ),
       ),
     );

@@ -12,12 +12,14 @@ class CibilReportTableModel {
   final String applicantType;
   final String reportType;
   final String filepath;
+  final String cibilScore;
   CibilReportTableModel({
     required this.userid,
     required this.proposalNo,
     required this.applicantType,
     required this.reportType,
     required this.filepath,
+    required this.cibilScore,
   });
 
   CibilReportTableModel copyWith({
@@ -26,6 +28,7 @@ class CibilReportTableModel {
     String? applicantType,
     String? reportType,
     String? filepath,
+    String? cibilScore,
   }) {
     return CibilReportTableModel(
       userid: userid ?? this.userid,
@@ -33,6 +36,7 @@ class CibilReportTableModel {
       applicantType: applicantType ?? this.applicantType,
       reportType: reportType ?? this.reportType,
       filepath: filepath ?? this.filepath,
+      cibilScore: cibilScore ?? this.cibilScore,
     );
   }
 
@@ -43,6 +47,7 @@ class CibilReportTableModel {
       'applicantType': applicantType,
       'reportType': reportType,
       'filepath': filepath,
+      'cibilScore': cibilScore,
     };
   }
 
@@ -53,6 +58,7 @@ class CibilReportTableModel {
       applicantType: map['applicantType'] as String,
       reportType: map['reportType'] as String,
       filepath: map['filepath'] as String,
+      cibilScore: map['cibilScore'] as String,
     );
   }
 
@@ -63,7 +69,7 @@ class CibilReportTableModel {
 
   @override
   String toString() {
-    return 'CibilReportTableModel(userid: $userid, proposalNo: $proposalNo, applicantType: $applicantType, reportType: $reportType, filepath: $filepath)';
+    return 'CibilReportTableModel(userid: $userid, proposalNo: $proposalNo, applicantType: $applicantType, reportType: $reportType, filepath: $filepath, cibilScore: $cibilScore)';
   }
 
   @override
@@ -72,6 +78,7 @@ class CibilReportTableModel {
         proposalNo.hashCode ^
         applicantType.hashCode ^
         reportType.hashCode ^
-        filepath.hashCode;
+        filepath.hashCode ^
+        cibilScore.hashCode;
   }
 }

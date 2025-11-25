@@ -54,6 +54,9 @@ class LeadSubmitPage extends StatelessWidget {
       ',',
       '',
     );
+    if (loanAmountFormatted!.contains('.')) {
+      loanAmountFormatted = loanAmountFormatted.split('.').first;
+    }
 
     UserDetails? userDetails = await loadUser();
     PersonalData updatedPersonalData = personlData.copyWith(
@@ -371,10 +374,7 @@ class LeadSubmitPage extends StatelessWidget {
               SysmoTitle(
                 icon: Icons.currency_rupee,
                 label: "Loan Amount",
-                value: formatAmount(
-                  personalData.loanAmountRequested!,
-                  'currency',
-                ),
+                value: personalData.loanAmountRequested!,
               ),
               SysmoTitle(
                 icon: Icons.location_on,

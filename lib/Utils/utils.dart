@@ -11,9 +11,11 @@ import 'package:newsee/feature/coapplicant/presentation/bloc/coapp_details_bloc.
 import 'package:newsee/feature/leadInbox/domain/modal/group_lead_inbox.dart';
 import 'package:newsee/feature/masters/domain/modal/geography_master.dart';
 import 'package:newsee/feature/proposal_inbox/domain/modal/group_proposal_inbox.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 String formatAmount(String amount, [String? type]) {
   try {
+    print('amount: $amount');
     final num value = num.parse(amount);
     if (type == null || type.isEmpty) {
       final formatter = NumberFormat.decimalPattern('en_IN');
@@ -79,7 +81,7 @@ String getDateFormat(dynamic value) {
     }
   }
 
-  // Try a fallback using DateTime.parse (handles many standard formats)
+  // try a fallback using DateTime.parse (handles many standard formats)
   try {
     final date = DateTime.parse(input);
     return DateFormat('dd-MM-yyyy').format(date);
@@ -263,6 +265,7 @@ Map<String, String?> nameSeperate(String? fullName) {
 }
 
 CoapplicantData mapCoapplicantDataFromCif(CifResponse response) {
+  print('CifResponse $response');
   try {
     String mobileno = '';
     if (response.mobilNum!.length == 12 &&
@@ -303,6 +306,7 @@ CoapplicantData mapCoapplicantDataFromCif(CifResponse response) {
       // depositAmount: response.depositAmount,
       constitution: response.constitutionCode,
       title: response.custTitle,
+      gender: response.gender,
     );
 
     print('mapCoapplicantDataFromCif => $data');
@@ -376,4 +380,36 @@ String generateUniqueID() {
   // Combine timestamp and random number, take last 10 digits
   final combined = (timestamp + random).toString();
   return combined.substring(combined.length - 10);
+}
+
+Future<Map<String, String>> getPackageInfo() async {
+  final info = await PackageInfo.fromPlatform();
+  return {
+    'appName': info.appName,
+    'version': info.version,
+    'buildNumber': info.buildNumber,
+  };
+}
+
+int parseToInt(dynamic value) {
+  if (value == null) return 0;
+
+  // If already int
+  if (value is int) return value;
+
+  // If it's double — convert to int (floor/round)
+  if (value is double) return value.round();
+
+  // If it's String — try parsing
+  if (value is String) {
+    // Try int parse
+    final i = int.tryParse(value);
+    if (i != null) return i;
+
+    // Try double parse → then convert to int
+    final d = double.tryParse(value);
+    if (d != null) return d.round();
+  }
+
+  return 0; // default fallback
 }
