@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:newsee/AppData/app_constants.dart';
 import 'package:newsee/Utils/utils.dart';
 import 'package:newsee/feature/coapplicant/domain/modal/coapplicant_data.dart';
 import 'package:newsee/feature/coapplicant/presentation/bloc/coapp_details_bloc.dart';
@@ -23,9 +22,18 @@ class _CoApplicantPageState extends State<CoApplicantPage> {
   @override
   void initState() {
     super.initState();
-    context.read<CoappDetailsBloc>().add(
-      IsCoAppOrGurantorAdd(addapplicants: 'N'),
-    );
+
+    final coapplist = context.read<CoappDetailsBloc>().state.coAppList;
+    print(coapplist);
+    if (coapplist.isNotEmpty) {
+      context.read<CoappDetailsBloc>().add(
+        IsCoAppOrGurantorAdd(addapplicants: 'Y'),
+      );
+    } else {
+      context.read<CoappDetailsBloc>().add(
+        IsCoAppOrGurantorAdd(addapplicants: 'N'),
+      );
+    }
   }
 
   Future<void> openCoApplicantFormSheet(
@@ -178,15 +186,15 @@ class _CoApplicantPageState extends State<CoApplicantPage> {
                         ),
                       ),
                     );
-                  }).toList(),
+                  }),
                 ],
                 const Spacer(),
-                if (state.isApplicantsAdded == 'N')
+                if (state.isApplicantsAdded == 'N' ||
+                    state.coAppList.isNotEmpty)
                   Align(
                     alignment: Alignment.bottomCenter,
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        // minimumSize: const Size(double.infinity, 48),
                         backgroundColor: Color.fromARGB(255, 3, 9, 110),
                         foregroundColor: Colors.white,
                         padding: EdgeInsets.symmetric(
@@ -198,13 +206,17 @@ class _CoApplicantPageState extends State<CoApplicantPage> {
                         ),
                       ),
                       onPressed: () {
-                        context.read<CoappDetailsBloc>().add(
-                          IsCoAppOrGurantorAdd(
-                            addapplicants: 'N',
-                            onNext: true,
-                          ),
-                        );
-                        goToNextTab(context: context);
+                        if (state.coAppList.isNotEmpty) {
+                          goToNextTab(context: context);
+                        } else {
+                          context.read<CoappDetailsBloc>().add(
+                            IsCoAppOrGurantorAdd(
+                              addapplicants: 'N',
+                              onNext: true,
+                            ),
+                          );
+                          goToNextTab(context: context);
+                        }
                       },
                       child: const Text('Next'),
                     ),

@@ -4,11 +4,8 @@
 @param     : 
  */
 import 'package:equatable/equatable.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:newsee/AppData/DBConstants/table_key_products.dart';
 import 'package:newsee/AppData/app_constants.dart';
-import 'package:newsee/Utils/query_builder.dart';
 import 'package:newsee/core/db/db_config.dart';
 import 'package:newsee/feature/draft/draft_service.dart';
 import 'package:newsee/feature/masters/domain/modal/lov.dart';
@@ -17,7 +14,6 @@ import 'package:newsee/feature/masters/domain/modal/product_master.dart';
 import 'package:newsee/feature/masters/domain/modal/productschema.dart';
 import 'dart:convert';
 
-import 'package:flutter/foundation.dart';
 import 'package:newsee/feature/masters/domain/repository/lov_crud_repo.dart';
 import 'package:newsee/feature/masters/domain/repository/product_schema_crud_repo.dart';
 import 'package:newsee/feature/masters/domain/repository/products_crud_repo.dart';
@@ -135,7 +131,7 @@ class LoanproductBloc extends Bloc<LoanproductEvent, LoanproductState> {
     Database db,
     Emitter<dynamic> emit,
   ) async {
-    Product product = event.field as Product;
+    // Product product = event.field as Product;
 
     // if mainCategoryId is zero then maincategory is selected
     // subcategoryproducts will be fetched
@@ -160,10 +156,11 @@ class LoanproductBloc extends Bloc<LoanproductEvent, LoanproductState> {
         db,
       ).getByColumnNames(columnNames: columnNames, columnValues: columsValues);
       print('productMasterList => $productMasterList');
-      LoanproductState.init();
+      // LoanproductState.init(); //latha commented
       emit(
         state.copyWith(
           productmasterList: productMasterList,
+          selectedProduct: null,
           showBottomSheet: true,
         ),
       );
@@ -237,7 +234,7 @@ class LoanproductBloc extends Bloc<LoanproductEvent, LoanproductState> {
           await ProductSchemaCrudRepo(db).getAll();
       List<ProductMaster> productMasterList =
           await ProductMasterCrudRepo(db).getAll();
-      List<Product> productList = await ProductsCrudRepo(db).getAll();
+      // List<Product> productList = await ProductsCrudRepo(db).getAll();
       print('productSchemaList from DB => ${productSchemaList.length}');
       print('loanDraft => ${event.leadDetails}');
 
@@ -272,14 +269,18 @@ class LoanproductBloc extends Bloc<LoanproductEvent, LoanproductState> {
 
       print('loanDraft => $typeOfLoan, $productID');
       print('productID => $productID');
+      print('productSchemaList => $productSchemaList');
       ProductSchema productSchema = productSchemaList.firstWhere(
         (p) => p.optionValue == typeOfLoan,
+        orElse:
+            () => ProductSchema(optionDesc: '', optionId: '', optionValue: ''),
       );
-
+      print('productSchemass => $productSchema}');
       List<Lov> listOfLov = await LovCrudRepo(db).getByColumnNames(
         columnNames: ['Header', 'optvalue'],
         columnValues: ['AgriProductType', productSchema.optionId],
       );
+      print('listOfLov => $listOfLov}');
 
       final optCode = listOfLov.first.optCode;
       print('listOfLov.first.optCode => $optCode');

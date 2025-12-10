@@ -1,7 +1,5 @@
 import 'package:dio/dio.dart';
-import 'package:newsee/AppData/globalconfig.dart';
 import 'package:newsee/core/api/api_config.dart';
-import 'package:path/path.dart';
 
 class AuthRemoteDatasource {
   final Dio dio;

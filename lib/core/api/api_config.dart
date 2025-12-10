@@ -1,10 +1,16 @@
 class ApiConfig {
-  static const String BASE_URL = "http://192.168.0.19:19084/lendperfect/";
+  static const String BASE_URL = "http://192.168.0.19:19085/lendmobility/"; //qa
+  static const String BASE_URL_UAT =
+      "https://103.98.54.19:443/lendmobility/"; //uat
+
+  static const bool isUAT = false; // for uat set true
 
   static const String AUTH_TOKEN =
-      'U2FsdGVkX1/Wa6+JeCIOVLl8LTr8WUocMz8kIGXVbEI9Q32v7zRLrnnvAIeJIVV3';
+      'U2FsdGVkX1/Wa6+JeCIOVLl8LTr8WUocMz8kIGXVbEI9Q32v7zRLrnnvAIeJIVV3'; //uat
+  // 'U2FsdGVkX1/Wa6+JeCIOVLl8LTr8WUocMz8kIGXVbEI9Q32v7zRLrnnvAIeJIVV3'; //local
   static const String DEVICE_ID =
-      'U2FsdGVkX180H+UTzJxvLfDRxLNCZeZK0gzxeLDg9Azi7YqYqp0KqhJkMb7DiIns';
+      'U2FsdGVkX180H+UTzJxvLfDRxLNCZeZK0gzxeLDg9Azi7YqYqp0KqhJkMb7DiIns'; // uat
+  // 'U2FsdGVkX180H+UTzJxvLfDRxLNCZeZK0gzxeLDg9Azi7YqYqp0KqhJkMb7DiIns';
 
   static const String VERTICAL = '7';
 
@@ -12,6 +18,9 @@ class ApiConfig {
   static const String AADHAAR_API_ENDPOINT = 'MobileService/getAadhaarDetails';
 
   static const String CIF_API_ENDPOINT = 'MobileService/CIFSearch';
+  // static const String CIF_API_ENDPOINT = 'UAIBController/callUAIB';
+  static const String CIBIL_API_ENDPOINT = 'MobileService/getCibilConsumer';
+  // static const String CIBIL_API_ENDPOINT = 'UAIBController/callUAIB';
 
   static const String DEDUPE_API_ENDPOINT = "MobileService/getDedupeSearch";
   static const String GETCITY_API_ENDPOINT = "MasterDetails/getCityCode";
@@ -19,9 +28,11 @@ class ApiConfig {
       "MasterDetails/getDistrictCode";
 
   static const String API_RESPONSE_SUCCESS_KEY = 'Success';
+  static const String API_RESPONSE_ErrorFlag_KEY = 'ErrorFlag';
   static const String API_RESPONSE_ERRORMESSAGE_KEY = 'ErrorMessage';
 
   static const String API_RESPONSE_RESPONSE_KEY = 'responseData';
+  static const String API_RESPONSE_KEY = 'RESPONSE';
 
   static const String LEAD_INBOX_API_ENDPOINT =
       'MobileService/getLeadGroupDetails';
@@ -55,10 +66,12 @@ class ApiConfig {
   static const String UPLOAD_DOCUMENT = 'MobileService/getDocumentUpload';
   static const String FETCH_UPLOAD_DOCUMENT = 'MobileService/getUploadDocument';
   static const String DELETE_UPLOAD_DOCUMENT = 'MobileService/deleteUploadFile';
-  static const String GET_LAND_CROP_STATUS = 'MobileService/getLandAndCropStatus';
+  static const String GET_LAND_CROP_STATUS =
+      'MobileService/getLandAndCropStatus';
   static const String mpinRegisterEndpoint = 'MobileService/registerMPIN';
   static const String mpinValidateEndPoint = 'MobileService/validateMPINLogin';
   static const String module = 'AGRI';
   static const String encKey = 'sysarc@1234INFO@';
   static const String GET_LEAD_DETAILS = 'MobileService/getLeadDetails';
+  static const String sslCertPath = 'assets/certificates/';
 }

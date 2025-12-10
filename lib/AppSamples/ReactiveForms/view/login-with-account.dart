@@ -165,7 +165,6 @@ class LoginpageWithAC extends StatelessWidget {
               SnackBar(content: Text(state.errorMessage ?? 'Login Failed...')),
             );
         }
-        ;
       },
       child: BlocBuilder<AuthBloc, AuthState>(
         builder: (context, state) {
@@ -270,14 +269,12 @@ class LoginpageWithAC extends StatelessWidget {
                                     ? null
                                     : () {
                                       print('network => $network');
-                                      offlineLogin();
-                                      // switch (network) {
-                                      //   case OperationNetwork.offline:
-                                      //     offlineLogin();
-                                      //   case OperationNetwork.online:
-                                      //     //login(state);
-                                      //     offlineLogin();
-                                      // }
+                                      switch (network) {
+                                        case OperationNetwork.offline:
+                                          offlineLogin();
+                                        case OperationNetwork.online:
+                                          login(state);
+                                      }
                                     },
                             child:
                                 isLoading
