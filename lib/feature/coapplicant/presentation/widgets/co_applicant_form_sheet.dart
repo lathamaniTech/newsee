@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:newsee/AppData/app_constants.dart';
 import 'package:newsee/AppData/app_forms.dart';
+import 'package:newsee/Model/liveliness_details.dart';
 import 'package:newsee/Utils/qr_nav_utils.dart';
 import 'package:newsee/Utils/utils.dart';
-import 'package:newsee/feature/aadharvalidation/domain/modal/aadharvalidate_request.dart';
 import 'package:newsee/feature/coapplicant/applicants_utility_service.dart';
 import 'package:newsee/feature/coapplicant/domain/modal/coapplicant_data.dart';
 import 'package:newsee/feature/coapplicant/presentation/bloc/coapp_details_bloc.dart';
@@ -47,11 +48,21 @@ class _CoApplicantFormBottomSheetState
     super.initState();
     coAppAndGurantorForm.reset();
     title = widget.applicantType == 'C' ? 'Co-Applicant' : 'Gurantor';
+    print('selectedCoapp : ${widget.existingData}');
+
     if (widget.existingData != null) {
       coAppAndGurantorForm.patchValue(widget.existingData!.toMap());
       if (widget.existingData!.aadharRefNo != null) {
         refAadhaar = true;
       }
+      final constitutionCode = widget.existingData!.toMap()['constitution'];
+      final dob = widget.existingData!.toMap()['dob'];
+      print('constitution: $dob, $constitutionCode');
+      coAppAndGurantorForm
+          .control('constitution')
+          .updateValue(
+            constitutionCode == '001' || constitutionCode == 'I' ? 'I' : 'N',
+          );
     }
   }
 
@@ -103,18 +114,28 @@ class _CoApplicantFormBottomSheetState
 
                   if (value != null) {
                     if (key == 'dob') {
-                      final formattedDate = getDateFormatedByProvided(
+                      final formattedDate = getDateFormat(
                         value,
-                        from: AppConstants.Format_dd_MM_yyyy,
-                        to: AppConstants.Format_yyyy_MM_dd,
+                        // from: AppConstants.Format_dd_MM_yyyy,
+                        // to: AppConstants.Format_yyyy_MM_dd,
                       );
-                      coAppAndGurantorForm
-                          .control(key)
-                          .updateValue(formattedDate);
+                      coAppAndGurantorForm.control(key)
+                        ..updateValue(formattedDate)
+                        ..markAsDisabled();
                     } else if (key == 'state' || key == 'cityDistrict') {
                       coAppAndGurantorForm.control(key).updateValue("");
+                    } else if (key == 'constitution') {
+                      coAppAndGurantorForm
+                          .control(key)
+                          .updateValue(value == '001' ? 'I' : 'N');
                     } else {
-                      coAppAndGurantorForm.control(key).updateValue(value);
+                      if (value != null && value.toString().trim().isNotEmpty) {
+                        coAppAndGurantorForm.control(key).updateValue(value);
+                        coAppAndGurantorForm.control(key).markAsDisabled();
+                      } else {
+                        coAppAndGurantorForm.control(key).markAsEnabled();
+                      }
+                      // coAppAndGurantorForm.control(key).updateValue(value);
                     }
                   }
                 }
@@ -122,13 +143,29 @@ class _CoApplicantFormBottomSheetState
                 // showSnack(context, message: 'Cif pulling failed...');
                 showErrorDialog(
                   context,
-                  'Dedupe/CIF/Aadhar Validation failed...',
+                  'Dedupe/CIF/Aadhaar Validation failed...',
                 );
               }
             },
             builder: (context, state) {
               if (state.status == SaveStatus.success && state.getLead) {
                 coAppAndGurantorForm.markAsDisabled();
+              }
+              if (state.status == SaveStatus.success &&
+                  state.getLead == false) {
+                final fields = [
+                  'firstName',
+                  'lastName',
+                  'dob',
+                  'middleName',
+                  'title',
+                  'address1',
+                  'panNumber',
+                  'aadharRefNo',
+                ];
+                for (final key in fields) {
+                  coAppAndGurantorForm.control(key).markAsDisabled();
+                }
               }
               DedupeState? dedupeState;
               dedupeState = context.watch<DedupeBloc>().state;
@@ -168,7 +205,12 @@ class _CoApplicantFormBottomSheetState
                                 label: 'Select CustomerType',
                                 items:
                                     state.lovList!
-                                        .where((v) => v.Header == 'CustType')
+                                        .where(
+                                          (v) =>
+                                              // v.Header == 'CustType',
+                                              v.Header == 'CustType' &&
+                                              ['002'].contains(v.optvalue),
+                                        )
                                         .toList(),
                                 selItem: () {
                                   final value =
@@ -180,7 +222,11 @@ class _CoApplicantFormBottomSheetState
                                     return null;
                                   }
                                   return state.lovList!
-                                      .where((v) => v.Header == 'CustType')
+                                      .where(
+                                        (v) =>
+                                            v.Header == 'CustType' &&
+                                            ['002'].contains(v.optvalue),
+                                      )
                                       .firstWhere(
                                         (lov) => lov.optvalue == value,
                                         orElse:
@@ -257,7 +303,11 @@ class _CoApplicantFormBottomSheetState
                           label: 'Select Constitution',
                           items:
                               state.lovList!
-                                  .where((v) => v.Header == 'Constitution')
+                                  .where(
+                                    (v) =>
+                                        v.Header == 'Constitution' &&
+                                        ['I'].contains(v.optvalue),
+                                  )
                                   .toList(),
                           selItem: () {
                             final value =
@@ -268,7 +318,11 @@ class _CoApplicantFormBottomSheetState
                               return null;
                             }
                             return state.lovList!
-                                .where((v) => v.Header == 'Constitution')
+                                .where(
+                                  (v) =>
+                                      v.Header == 'Constitution' &&
+                                      ['I'].contains(v.optvalue),
+                                )
                                 .firstWhere(
                                   (lov) => lov.optvalue == value,
                                   orElse:
@@ -356,7 +410,12 @@ class _CoApplicantFormBottomSheetState
                             return state.lovList!
                                 .where((v) => v.Header == 'Title')
                                 .firstWhere(
-                                  (lov) => lov.optvalue == value,
+                                  // (lov) => (lov.optvalue == value),
+                                  (lov) =>
+                                      lov.optvalue.toString().toUpperCase() ==
+                                          value.toUpperCase() ||
+                                      lov.optDesc.toString().toUpperCase() ==
+                                          value.toUpperCase(),
                                   orElse:
                                       () => Lov(
                                         Header: 'Title',
@@ -375,17 +434,32 @@ class _CoApplicantFormBottomSheetState
                           controlName: 'firstName',
                           label: 'First Name',
                           mantatory: true,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.allow(
+                              AppConstants.NameInputFormatter,
+                            ),
+                          ],
                         ),
 
                         CustomTextField(
                           controlName: 'middleName',
                           label: 'Middle Name',
-                          mantatory: true,
+                          mantatory: false,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.allow(
+                              AppConstants.NameInputFormatter,
+                            ),
+                          ],
                         ),
                         CustomTextField(
                           controlName: 'lastName',
                           label: 'Last Name',
                           mantatory: true,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.allow(
+                              AppConstants.NameInputFormatter,
+                            ),
+                          ],
                         ), // lastName
 
                         SearchableDropdown(
@@ -449,7 +523,10 @@ class _CoApplicantFormBottomSheetState
                               );
                               if (pickedDate != null) {
                                 final formatted =
-                                    "${pickedDate.year}-${pickedDate.month.toString().padLeft(2, '0')}-${pickedDate.day.toString().padLeft(2, '0')}";
+                                    "${pickedDate.year}-"
+                                    "${pickedDate.month.toString().padLeft(2, '0')}-"
+                                    "${pickedDate.day.toString().padLeft(2, '0')}";
+                                // "${pickedDate.year}-${pickedDate.month.toString().padLeft(2, '0')}-${pickedDate.day.toString().padLeft(2, '0')}";
                                 coAppAndGurantorForm.control('dob').value =
                                     formatted;
                               }
@@ -481,6 +558,12 @@ class _CoApplicantFormBottomSheetState
                           label: 'Pan No',
                           mantatory: true,
                           autoCapitalize: true,
+                          maxlength: 10,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.allow(
+                              RegExp(r'[A-Z0-9]'),
+                            ),
+                          ],
                         ),
 
                         Row(
@@ -488,7 +571,7 @@ class _CoApplicantFormBottomSheetState
                             Expanded(
                               child: IntegerTextField(
                                 controlName: 'aadharRefNo',
-                                label: 'Aadhaar No',
+                                label: 'Aadhaar No.',
                                 mantatory: true,
                                 maxlength: 12,
                                 minlength: 12,
@@ -498,7 +581,7 @@ class _CoApplicantFormBottomSheetState
                             ElevatedButton.icon(
                               icon: Icon(Icons.qr_code_scanner),
                               label: Text('Scan'),
-                              onPressed: () => showScannerOptions(context),
+                              onPressed: () => showScannerOptions(context, ''),
                             ),
                           ],
                         ),
@@ -563,6 +646,38 @@ class _CoApplicantFormBottomSheetState
                         //       ),
                         //     ],
                         //   ),
+                        SearchableDropdown<Lov>(
+                          controlName: 'gender',
+                          label: 'Gender',
+                          items:
+                              state.lovList!
+                                  .where((v) => v.Header == 'Gender')
+                                  .toList(),
+                          onChangeListener: (Lov val) {
+                            coAppAndGurantorForm.controls['gender']
+                                ?.updateValue(val.optvalue);
+                          },
+                          selItem: () {
+                            final value =
+                                coAppAndGurantorForm.control('gender').value;
+                            if (value == null || value.toString().isEmpty) {
+                              return null;
+                            }
+                            return state.lovList!
+                                .where((v) => v.Header == 'Gender')
+                                .firstWhere(
+                                  (lov) => lov.optvalue == value,
+                                  orElse:
+                                      () => Lov(
+                                        Header: 'Gender',
+                                        optvalue: '',
+                                        optDesc: '',
+                                        optCode: '',
+                                      ),
+                                );
+                          },
+                        ),
+
                         CustomTextField(
                           controlName: 'address1',
                           label: 'Address 1',
@@ -576,7 +691,7 @@ class _CoApplicantFormBottomSheetState
                         CustomTextField(
                           controlName: 'address3',
                           label: 'Address 3',
-                          mantatory: false,
+                          mantatory: true,
                         ),
                         SearchableDropdown(
                           controlName: 'state',
@@ -602,11 +717,20 @@ class _CoApplicantFormBottomSheetState
                             }
                             if (state.selectedCoApp?.state != null) {
                               String? stateCode = state.selectedCoApp?.state;
+                              print('statedata : ${state.stateCityMaster}');
 
                               GeographyMaster? geographyMaster = state
                                   .stateCityMaster
-                                  ?.firstWhere((val) => val.code == stateCode);
-                              print(geographyMaster);
+                                  ?.firstWhere(
+                                    (val) => val.code == stateCode,
+                                    orElse:
+                                        () => GeographyMaster(
+                                          stateParentId: '0',
+                                          cityParentId: '0',
+                                          code: '0',
+                                          value: '',
+                                        ),
+                                  );
                               if (geographyMaster != null) {
                                 coAppAndGurantorForm.controls['state']
                                     ?.updateValue(geographyMaster.code);
@@ -618,12 +742,22 @@ class _CoApplicantFormBottomSheetState
                               coAppAndGurantorForm.controls['state']
                                   ?.updateValue("");
                               return <GeographyMaster>[];
-                            } else if (state.getLead) {
-                              String? stateCode = widget.existingData!.state;
+                            } else if (widget.existingData != null) {
+                              print('statedata : ${state.stateCityMaster}');
+                              String? stateCode = widget.existingData?.state!;
 
                               GeographyMaster? geographyMaster = state
                                   .stateCityMaster
-                                  ?.firstWhere((val) => val.code == stateCode);
+                                  ?.firstWhere(
+                                    (val) => val.code == stateCode,
+                                    orElse:
+                                        () => GeographyMaster(
+                                          stateParentId: '0',
+                                          cityParentId: '0',
+                                          code: '0',
+                                          value: '',
+                                        ),
+                                  );
                               if (geographyMaster != null) {
                                 coAppAndGurantorForm.controls['state']
                                     ?.updateValue(geographyMaster.code);
@@ -649,11 +783,23 @@ class _CoApplicantFormBottomSheetState
                                     .value;
                             if (value == null || value.toString().isEmpty) {
                               return null;
-                            } else {
+                            }
+                            if (widget.existingData != null) {
+                              String? cityCode =
+                                  widget.existingData?.cityDistrict!;
                               GeographyMaster? geographyMaster = state
                                   .cityMaster
-                                  ?.firstWhere((val) => val.code == value);
-                              print(geographyMaster);
+                                  ?.firstWhere(
+                                    (val) => val.code == cityCode,
+                                    orElse:
+                                        () => GeographyMaster(
+                                          stateParentId: "0",
+                                          cityParentId: "0",
+                                          code: "0",
+                                          value: "",
+                                        ),
+                                  );
+                              print('coappcity: $geographyMaster');
                               if (geographyMaster != null) {
                                 coAppAndGurantorForm.controls['cityDistrict']
                                     ?.updateValue(geographyMaster.code);
@@ -661,6 +807,10 @@ class _CoApplicantFormBottomSheetState
                               } else {
                                 return <GeographyMaster>[];
                               }
+                            } else if (state.cityMaster!.isEmpty) {
+                              coAppAndGurantorForm.controls['cityDistrict']
+                                  ?.updateValue("");
+                              return <GeographyMaster>[];
                             }
                           },
                         ),
@@ -680,13 +830,15 @@ class _CoApplicantFormBottomSheetState
                         ),
                         IntegerTextField(
                           controlName: 'loanLiabilityAmount',
-                          label: 'Loan Liability Amount',
+                          label: 'Loan Liability Amount (₹)',
                           mantatory: true,
                           isRupeeFormat: true,
+                          maxlength: 15,
+                          minlength: 1,
                         ),
                         IntegerTextField(
                           controlName: 'depositCount',
-                          label: 'DepositCount',
+                          label: 'Deposit Count',
                           mantatory: true,
                           maxlength: 2,
                           minlength: 1,
@@ -694,9 +846,11 @@ class _CoApplicantFormBottomSheetState
 
                         IntegerTextField(
                           controlName: 'depositAmount',
-                          label: 'Deposit Amount',
+                          label: 'Deposit Amount (₹)',
                           mantatory: true,
                           isRupeeFormat: true,
+                          maxlength: 15,
+                          minlength: 1,
                         ),
                         SizedBox(height: 20),
 
@@ -734,24 +888,34 @@ class _CoApplicantFormBottomSheetState
                                   return;
                                 } else {
                                   if (coAppAndGurantorForm.valid) {
-                                    print('formco: $coAppAndGurantorForm');
+                                    print(
+                                      'formco: ${coAppAndGurantorForm.rawValue}',
+                                    );
                                     CoapplicantData coapplicantData =
                                         CoapplicantData.fromMap(
-                                          coAppAndGurantorForm.value,
+                                          coAppAndGurantorForm.rawValue,
                                         );
                                     CoapplicantData coapplicantDataFormatted =
                                         coapplicantData.copyWith(
+                                          // dob: getDateFormat(
+                                          //   coapplicantData.dob,
+                                          // ),
                                           // dob: getDateFormatedByProvided(
                                           //   coapplicantData.dob,
                                           //   from:
                                           //       AppConstants.Format_dd_MM_yyyy,
                                           //   to: AppConstants.Format_yyyy_MM_dd,
                                           // ),
-                                          dob: getDateFormat(
-                                            coapplicantData.dob,
-                                          ),
                                           applicantType: widget.applicantType,
+                                          livelinessDetails: LiveLinessDetails(
+                                            verifyFlag: false,
+                                            livelinessDoc: "",
+                                            livelinessKycDoc: "",
+                                          ),
                                         );
+                                    print(
+                                      'coapplicantDataFormatted: $coapplicantDataFormatted',
+                                    );
                                     context.read<CoappDetailsBloc>().add(
                                       CoAppDetailsSaveEvent(
                                         coapplicantData:

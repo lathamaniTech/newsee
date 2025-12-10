@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:newsee/AppSamples/RouterApp/routerapp.dart';
 import 'package:newsee/Utils/injectiondependency.dart';
-import 'package:newsee/core/db/db_config.dart';
+
+import 'AppSamples/FaceDetection/HomeScreen.dart';
 
 void main() {
   // runApp(MyApp()) // Default MyApp()
@@ -12,6 +13,11 @@ void main() {
   dependencyInjection();
   // setupLocator();
   runApp(RouterApp()); // GoRouter Sample App
+  // runApp(MaterialApp(
+  //   home: Scaffold(
+  //     body: HomeScreen(),
+  //   ),
+  // ));
 }
 
 // git checkout -b karthicktechie-login_progressIndicator download-progress-indicator

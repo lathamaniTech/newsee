@@ -16,7 +16,7 @@ import '../widgets/search_bar.dart';
 class HomePage extends StatefulWidget {
   int? tabdata;
 
-  HomePage({Key? key, this.tabdata}) : super(key: key);
+  HomePage({super.key, this.tabdata});
 
   @override
   State<HomePage> createState() => HomePageState();

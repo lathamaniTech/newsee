@@ -1,4 +1,3 @@
-import 'package:newsee/feature/auth/domain/model/user/auth_response_model.dart';
 import 'package:newsee/feature/masters/domain/modal/master_version.dart';
 
 class Globalconfig {
@@ -13,7 +12,7 @@ class Globalconfig {
 
   static bool masterUpdate = false;
   static int loanAmountMaximum = 0;
-  static bool isOffline = true;
+  static bool isOffline = false;
   final OperationNetwork _operationNetwork;
 
   Globalconfig._(this._operationNetwork);
@@ -23,6 +22,8 @@ class Globalconfig {
   }) => Globalconfig._(network);
 
   OperationNetwork get operationNetwork => _operationNetwork;
+
+  static List<Map<String, dynamic>> RBIHCropDataList = [];
 }
 
 enum OperationNetwork { online, offline }
