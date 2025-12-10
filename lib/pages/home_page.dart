@@ -7,6 +7,7 @@
 import 'package:flutter/material.dart';
 import 'package:newsee/AppData/globalconfig.dart';
 import 'package:newsee/feature/masterupdate/presentation/page/master_update.dart';
+import 'package:newsee/feature/pd/presentation/pages/pd_inbox.dart';
 import '../widgets/side_navigation.dart';
 import '../widgets/bottom_navigation.dart';
 import '../widgets/floating_action.dart';
@@ -51,9 +52,7 @@ class HomePageState extends State<HomePage> {
       case 0:
         return LeadTabBar(searchQuery: searchQuery);
       case 1:
-        return Center(
-          child: Text("Field Visit Inbox", style: TextStyle(fontSize: 24)),
-        );
+        return PDInbox(searchQuery: '');
       case 2:
         return Center(
           child: Text("Query Inbox", style: TextStyle(fontSize: 24)),
