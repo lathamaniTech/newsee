@@ -15,3 +15,9 @@ class ApplicationStatusCheckEvent extends PDInboxEvent {
   final Map<String, dynamic> currentApplication;
   const ApplicationStatusCheckEvent({required this.currentApplication});
 }
+
+class PDInboxFetchEvent extends PDInboxEvent {
+  final PdInboxRequest request;
+
+  const PDInboxFetchEvent({required this.request});
+}

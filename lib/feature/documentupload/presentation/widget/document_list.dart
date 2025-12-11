@@ -40,6 +40,22 @@ class DocumentList extends StatelessWidget {
               physics: const NeverScrollableScrollPhysics(),
               itemCount: state.documentsList.length,
               itemBuilder: (context, index) {
+                if (index == state.documentsList.length - 1) {
+                  return DocumentItem(
+                    doc: DocumentModel(
+                      lpdDocId: "1234",
+                      lpdDocDesc: "Video Proof",
+                      lpdManCheck: "M",
+                      lpdRowId: "",
+                      lpdPartyId: "",
+                      lpdPartyType: "B",
+                      lpdDocAction: "s",
+                      lpdDocType: "s",
+                      imgs: [],
+                    ),
+                    index: index,
+                  );
+                }
                 final doc = state.documentsList[index];
                 return DocumentItem(doc: doc, index: index);
               },

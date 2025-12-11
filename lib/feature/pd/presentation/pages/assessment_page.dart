@@ -11,6 +11,7 @@ class _AssessmentHomePageState extends State<AssessmentHomePage> {
   int currentSection = 0;
   int currentQuestion = 0;
   final List<int?> scores = List.filled(14, null);
+  final Map<String, String> scoreCardMap = {};
   final List<TextEditingController> commentControllers = List.generate(
     9,
     (_) => TextEditingController(),
@@ -48,6 +49,8 @@ class _AssessmentHomePageState extends State<AssessmentHomePage> {
       "questions": [
         {
           "q": "1. Years of experience",
+          "QuestionId": "5205497",
+
           "options": [
             {"text": "10+ years", "score": 5},
             {"text": "6–10 years", "score": 4},
@@ -58,6 +61,8 @@ class _AssessmentHomePageState extends State<AssessmentHomePage> {
         },
         {
           "q": "2. Understanding of activity",
+          "QuestionId": "5205501",
+
           "options": [
             {"text": "Excellent understanding", "score": 5},
             {"text": "Good understanding", "score": 4},
@@ -68,6 +73,8 @@ class _AssessmentHomePageState extends State<AssessmentHomePage> {
         },
         {
           "q": "3. Loan purpose clarity",
+          "QuestionId": "5205508",
+
           "options": [
             {"text": "Very clear", "score": 5},
             {"text": "Clear", "score": 4},
@@ -78,6 +85,8 @@ class _AssessmentHomePageState extends State<AssessmentHomePage> {
         },
         {
           "q": "4. Risk awareness",
+          "QuestionId": "5205512",
+
           "options": [
             {"text": "Strong risk awareness", "score": 5},
             {"text": "Good awareness", "score": 4},
@@ -96,6 +105,8 @@ class _AssessmentHomePageState extends State<AssessmentHomePage> {
       "questions": [
         {
           "q": "5. Land & irrigation",
+          "QuestionId": "5205537",
+
           "options": [
             {"text": "Good Reliable (Canal)", "score": 5},
             {"text": "Reliable (Drip/Borewell)", "score": 4},
@@ -105,6 +116,8 @@ class _AssessmentHomePageState extends State<AssessmentHomePage> {
         },
         {
           "q": "6. Crop/livestock condition",
+          "QuestionId": "5205558",
+
           "options": [
             {"text": "Healthy", "score": 5},
             {"text": "Average", "score": 4},
@@ -114,6 +127,8 @@ class _AssessmentHomePageState extends State<AssessmentHomePage> {
         },
         {
           "q": "7. Farm infrastructure",
+          "QuestionId": "5205573",
+
           "options": [
             {"text": "Full Facilitated Excellent", "score": 5},
             {"text": "Good Facilitated", "score": 4},
@@ -124,6 +139,8 @@ class _AssessmentHomePageState extends State<AssessmentHomePage> {
         },
         {
           "q": "8. Yield / production",
+          "QuestionId": "5205574",
+
           "options": [
             {"text": "Excellent", "score": 5},
             {"text": "Good", "score": 4},
@@ -142,6 +159,8 @@ class _AssessmentHomePageState extends State<AssessmentHomePage> {
       "questions": [
         {
           "q": "9. Agri income stability",
+          "QuestionId": "5205586",
+
           "options": [
             {
               "text":
@@ -170,6 +189,8 @@ class _AssessmentHomePageState extends State<AssessmentHomePage> {
         },
         {
           "q": "10. Allied income",
+          "QuestionId": "5205659",
+
           "options": [
             {
               "text": "Regular & stable for 3 years – strong support",
@@ -186,6 +207,8 @@ class _AssessmentHomePageState extends State<AssessmentHomePage> {
         },
         {
           "q": "11. Non-agri income",
+          "QuestionId": "5205726",
+
           "options": [
             {
               "text": "Stable salary/business for 3+ years with proof",
@@ -199,6 +222,8 @@ class _AssessmentHomePageState extends State<AssessmentHomePage> {
         },
         {
           "q": "12. Household expenses control",
+          "QuestionId": "5205753",
+
           "options": [
             {"text": "Excellent control, regular savings", "score": 5},
             {"text": "Good control, some savings", "score": 4},
@@ -217,6 +242,8 @@ class _AssessmentHomePageState extends State<AssessmentHomePage> {
       "questions": [
         {
           "q": "13. Existing liabilities Track record",
+          "QuestionId": "5205793",
+
           "options": [
             {
               "text": "Excellent repayment; no overdue in last 24 months",
@@ -230,6 +257,8 @@ class _AssessmentHomePageState extends State<AssessmentHomePage> {
         },
         {
           "q": "14. CIBIL score",
+          "QuestionId": "5205827",
+
           "options": [
             {"text": "≥ 750 – Very low risk", "score": 5},
             {"text": "700–749 – Good", "score": 4},
@@ -317,8 +346,12 @@ class _AssessmentHomePageState extends State<AssessmentHomePage> {
     }
   }
 
-  void onAnswer(int globalIdx, int score) {
-    setState(() => scores[globalIdx] = score);
+  void onAnswer(int globalIdx, int score, String questionId) {
+    setState(() {
+      scores[globalIdx] = score;
+      scoreCardMap[questionId] = score.toString();
+      print('scoreCardMap => $scoreCardMap');
+    });
     Future.delayed(const Duration(milliseconds: 300), next);
   }
 
@@ -726,7 +759,8 @@ class _AssessmentHomePageState extends State<AssessmentHomePage> {
                           ),
                         ),
                       ),
-                      onChanged: (v) => onAnswer(globalIdx, v!),
+                      onChanged:
+                          (v) => onAnswer(globalIdx, v!, q["QuestionId"]),
                     );
                   },
                 ),

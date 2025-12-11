@@ -14,6 +14,7 @@ import 'package:newsee/Utils/utils.dart';
 import 'package:newsee/feature/leadInbox/domain/modal/lead_request.dart';
 import 'package:newsee/feature/loader/presentation/bloc/global_loading_bloc.dart';
 import 'package:newsee/feature/loader/presentation/bloc/global_loading_event.dart';
+import 'package:newsee/feature/pd/domain/modal/pd_inbox_request.dart';
 import 'package:newsee/feature/pd/presentation/bloc/pd_inbox_bloc.dart';
 import 'package:newsee/feature/pd/presentation/pages/assessment_page.dart';
 import 'package:newsee/feature/proposal_inbox/domain/modal/application_status_response.dart';
@@ -51,18 +52,14 @@ class PDInbox extends StatelessWidget {
       create:
           (context) =>
               PDInboxBloc()..add(
-                SearchProposalInboxEvent(
-                  request: LeadInboxRequest(userid: '', token: ''),
+                PDInboxFetchEvent(
+                  request: PdInboxRequest(userId: '', token: ''),
                 ),
               ),
       child: BlocConsumer<PDInboxBloc, PDInboxState>(
         listener: (context, state) {
           if (state.applicationStatus == SaveStatus.success) {
-            _showBottomSheet(
-              context,
-              state.currentApplication!,
-              state.applicationStatusResponse!,
-            );
+            // _showBottomSheet(context, proposal['lpdPropNo']);
           } else if (state.applicationStatus == SaveStatus.failure) {
             showAlert(context, state.errorMessage);
           }
@@ -71,9 +68,9 @@ class PDInbox extends StatelessWidget {
           final globalLoadingBloc = context.read<GlobalLoadingBloc>();
           Future<void> onRefresh() async {
             context.read<PDInboxBloc>().add(
-              SearchProposalInboxEvent(
-                request: LeadInboxRequest(
-                  userid: '',
+              PDInboxFetchEvent(
+                request: PdInboxRequest(
+                  userId: '',
                   token: '',
                   pageNo: state.currentPage,
                 ),
@@ -150,10 +147,10 @@ class PDInbox extends StatelessWidget {
                 final proposal = filteredLeads[index].finalList;
                 return LeadTileCard(
                   title:
-                      proposal['applicantName']?.toString().isNotEmpty == true
-                          ? proposal['applicantName']
+                      proposal['lpdProposalName']?.toString().isNotEmpty == true
+                          ? proposal['lpdProposalName']
                           : 'Name is Empty',
-                  subtitle: proposal['propNo'] ?? 'N/A',
+                  subtitle: proposal['lpdPropNo'] ?? 'N/A',
                   icon: Icons.person,
                   color: Colors.teal,
                   type: proposal['proposalStatus'] ?? 'N/A',
@@ -163,9 +160,10 @@ class PDInbox extends StatelessWidget {
                   location: proposal['branchName'] ?? 'N/A',
                   loanamount: proposal['loanAmount']?.toString() ?? '',
                   onTap: () {
-                    context.read<PDInboxBloc>().add(
-                      ApplicationStatusCheckEvent(currentApplication: proposal),
-                    );
+                    // context.read<PDInboxBloc>().add(
+                    //   ApplicationStatusCheckEvent(currentApplication: proposal),
+                    // );
+                    _showBottomSheet(context, proposal['lpdPropNo']);
                   },
                 );
               },
@@ -240,12 +238,13 @@ class PDInbox extends StatelessWidget {
               initialPage: currentPage,
               onPageChange: (int index) {
                 context.read<PDInboxBloc>().add(
-                  SearchProposalInboxEvent(
-                    request: LeadInboxRequest(
-                      userid: '',
+                  PDInboxFetchEvent(
+                    request: PdInboxRequest(
+                      userId: '',
                       token: '',
                       pageNo: index,
                       pageCount: 20,
+                      orgId: [],
                     ),
                   ),
                 );
@@ -269,11 +268,7 @@ class PDInbox extends StatelessWidget {
     );
   }
 
-  void _showBottomSheet(
-    BuildContext context,
-    Map<String, dynamic> proposal,
-    ApplicationStatusResponse status,
-  ) {
+  void _showBottomSheet(BuildContext context, String proposal) {
     openBottomSheet(context, 0.6, 0.4, 0.9, (context, scrollController) {
       return SingleChildScrollView(
         controller: scrollController,
@@ -284,7 +279,7 @@ class PDInbox extends StatelessWidget {
               icon: Icons.document_scanner,
               title: "PD Assessment",
               subtitle: "PD Assessment Details",
-              status: status.cibilDetails ? 'completed' : 'pending',
+              status: 'pending',
               onTap: () {
                 context.pop();
                 print('selectedProp: $proposal');
@@ -298,10 +293,10 @@ class PDInbox extends StatelessWidget {
               icon: Icons.description,
               title: "Document Upload",
               subtitle: "Pre-Sanctioned Documents Upload",
-              status: status.documentDetails ? 'completed' : 'pending',
+              status: 'pending',
               onTap: () {
                 context.pop();
-                context.pushNamed('document', extra: proposal['propNo']);
+                context.pushNamed('document', extra: proposal);
               },
             ),
           ],

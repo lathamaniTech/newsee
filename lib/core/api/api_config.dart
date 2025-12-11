@@ -60,6 +60,8 @@ class ApiConfig {
   static const String PROPOSAL_INBOX_API_ENDPOINT =
       '/MobileService/getProposalInboxDetails';
 
+  static const String PD_INBOX_API_ENDPOINT = 'MobileService/getPDGroupInbox';
+
   static const String GET_MASTERS_VERSION_API_ENDPOINT =
       'MobileService/getMastersVersions';
   static const String GET_DOCUMENTS = 'MobileService/getDocumentDetails';
