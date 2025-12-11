@@ -137,6 +137,7 @@ class CropyieldpageBloc extends Bloc<CropyieldpageEvent, CropyieldpageState> {
           "cropResponse.right.agriCropDetails-gettime ${cropResponse.right.agriCropDetails}",
         );
         // List<LandData> landData = landresponse.right.agriLandHoldingsList.map((e) => LandData.fromMap(e)).toList();
+
         emit(
           state.copyWith(
             lovlist: listOfLov,
