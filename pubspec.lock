@@ -960,7 +960,7 @@ packages:
   kyc_verification:
     dependency: "direct main"
     description:
-      path: "D:\\Lathamani\\GitHub\\ubi_flutter_github\\Base_Project\\base_app\\Kyc_Verification"
+      path: "D:\\FlutterApps\\newsee\\Kyc_Verification"
       relative: false
     source: path
     version: "0.0.1"

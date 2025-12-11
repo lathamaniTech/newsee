@@ -124,7 +124,7 @@
             "seasontype": "Kharif",
             "croparea": "0.357",
             "cropirrigatedtype": "",
-            "croptype": "Jute",
+            "croptype": "Sorghum, Maize, Pearl Millet (Fodder)",
             "sichitarea": "0.357",
             "asichitarea": "0",
             "year": "",
@@ -132,10 +132,10 @@
             "cropirrigationsource": ""
           },
           {
-            "seasontype": "Rabi",
-            "croparea": "0.67",
+            "seasontype": "Kharif",
+            "croparea": "0.357",
             "cropirrigatedtype": "",
-            "croptype": "Wheat",
+            "croptype": "Paddy - High Yielding",
             "sichitarea": "0.357",
             "asichitarea": "0",
             "year": "",
