@@ -58,15 +58,14 @@ class DocumentList extends StatelessWidget {
                               lpdDocType: "s",
                               imgs: [],
                             ),
-                            index: index,
+                            index: -1,
                           );
                         }
                         final doc = state.documentsList[index];
                         return DocumentItem(doc: doc, index: index);
                       },
                     ),
-                    VideoItem()
-                    
+                    // VideoItem(),
                   ],
                 ),
               ],
@@ -105,7 +104,13 @@ class DocumentItem extends StatelessWidget {
                 icon: const Icon(Icons.add_circle, color: Colors.blue),
                 onPressed:
                     () =>
-                        showFileSourceSelector(context, index, doc.lpdDocDesc),
+                        index != -1
+                            ? showFileSourceSelector(
+                              context,
+                              index,
+                              doc.lpdDocDesc,
+                            )
+                            : captureVideo(context),
               ),
               Stack(
                 clipBehavior: Clip.none,
@@ -153,6 +158,7 @@ class DocumentItem extends StatelessWidget {
     );
   }
 }
+
 captureVideo(context) {
   try {
     Navigator.push(
@@ -160,14 +166,14 @@ captureVideo(context) {
       MaterialPageRoute(
         builder:
             (_) => VideoCapture(
-              finalData: '', 
-              capturedDate: '', 
-              capturedTime: '', 
-              videoFile: ''
-            )
+              finalData: '',
+              capturedDate: '',
+              capturedTime: '',
+              videoFile: '',
+            ),
       ),
     );
-  } catch(error) {
+  } catch (error) {
     print("cpatureVideo-error $error");
   }
 }
@@ -194,9 +200,7 @@ class VideoItem extends StatelessWidget {
               ),
               IconButton(
                 icon: const Icon(Icons.video_call_sharp, color: Colors.black),
-                onPressed:
-                    () =>
-                        captureVideo(context),
+                onPressed: () => captureVideo(context),
               ),
               // Stack(
               //   clipBehavior: Clip.none,

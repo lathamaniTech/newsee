@@ -932,17 +932,17 @@ class _AssessmentHomePageState extends State<AssessmentHomePage> {
                       value: opt["score"],
                       groupValue: selected,
                       activeColor: color,
-                      secondary: CircleAvatar(
-                        radius: 20,
-                        backgroundColor: isSelected ? color : Colors.grey[300],
-                        child: Text(
-                          "${opt["score"]}",
-                          style: TextStyle(
-                            color: isSelected ? Colors.white : Colors.black87,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
+                      // secondary: CircleAvatar(
+                      //   radius: 20,
+                      //   backgroundColor: isSelected ? color : Colors.grey[300],
+                      //   child: Text(
+                      //     "${opt["score"]}",
+                      //     style: TextStyle(
+                      //       color: isSelected ? Colors.white : Colors.black87,
+                      //       fontWeight: FontWeight.bold,
+                      //     ),
+                      //   ),
+                      // ),
                       onChanged:
                           (v) => onAnswer(
                             globalIdx,
@@ -1011,7 +1011,6 @@ class _AssessmentHomePageState extends State<AssessmentHomePage> {
                         child: ElevatedButton.icon(
                           onPressed: () {
                             _submitComments();
-                            Navigator.pop(context);
                           },
                           icon: const Icon(
                             Icons.cloud_done,
