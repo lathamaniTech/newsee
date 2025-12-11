@@ -1,10 +1,15 @@
 class ApiConfig {
-  static const String BASE_URL = "http://192.168.0.19:19085/lendmobility/"; //qa
+  static const String BASE_URL = "http://10.100.0.247:19085/lendmobility/"; //qa
   static const String BASE_URL_UAT =
       "https://103.98.54.19:443/lendmobility/"; //uat
+  // static const String BASE_URL_QUERY =
+  //     "http://192.168.7.193:9001/lendmobility/";
+  static const String BASE_URL_QUERY =
+      "http://10.100.0.247:19085/lendmobility/";
+  // static const String BASE_URL_Query = "http://172.30.0.1:9001/lendmobility/";
 
   static const bool isUAT = false; // for uat set true
-static const String UPLOAD_VIDEO  = "MobileService/getVideoUpload";
+  static const String UPLOAD_VIDEO = "MobileService/getVideoUpload";
   static const String AUTH_TOKEN =
       'U2FsdGVkX1/Wa6+JeCIOVLl8LTr8WUocMz8kIGXVbEI9Q32v7zRLrnnvAIeJIVV3'; //uat
   // 'U2FsdGVkX1/Wa6+JeCIOVLl8LTr8WUocMz8kIGXVbEI9Q32v7zRLrnnvAIeJIVV3'; //local
@@ -83,4 +88,13 @@ static const String UPLOAD_VIDEO  = "MobileService/getVideoUpload";
   static const String encKey = 'sysarc@1234INFO@';
   static const String GET_LEAD_DETAILS = 'MobileService/getLeadDetails';
   static const String sslCertPath = 'assets/certificates/';
+  // Query Module APIs
+  static const String GET_QUERY_INBOX_LIST = 'MobileService/queryinbox';
+  static const String GET_QUERY_DETAILS_TEXT = 'MobileService/queryrequest';
+  static const String SEND_TEXTMSG_RESPONSE = 'MobileService/queryresponse';
+  static const String SEND_IMAGE_RESPONSE = 'MobileService/uploadQueryDoc';
+  static const String GET_QUERYDETAILS_IMG =
+      'MobileService/getQueryDocumDetList';
+  static const String GET_SINGLEDOCUMENT_IMAGE =
+      'MobileService/getQueryDocument';
 }
