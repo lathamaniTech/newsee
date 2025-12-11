@@ -76,7 +76,7 @@ class _RouterAppState extends State<RouterApp> {
           '/chatwindow',
           extra: {
             "queryId": message.data['id'],
-            "proposalNo": message.data['propNo'],
+            "proposalNo": message.data['propNo'].toString(),
             "queryType": message.notification?.body ?? "",
             "userName": message.notification?.title ?? "",
           },

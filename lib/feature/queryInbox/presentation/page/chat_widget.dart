@@ -462,10 +462,7 @@ class ChatWidgetState extends State<ChatWidget> {
       } else {
         final errorMessage = responseData['ErrorMessage'] ?? "Unknown error";
         print('Error: $errorMessage');
-        final snack = SnackBar(
-          content: Text('Technical Issue occurred, please try again later.'),
-        );
-        ScaffoldMessenger.of(context).showSnackBar(snack);
+        safeShowSnack('Technical Issue occurred, please try again later.');
       }
     } on DioException catch (e) {
       final failure = DioHttpExceptionParser(exception: e).parse();
@@ -558,10 +555,7 @@ class ChatWidgetState extends State<ChatWidget> {
       } else {
         final errorMessage = responseData['ErrorMessage'] ?? "Unknown error";
         print('Error: $errorMessage');
-        final snack = SnackBar(
-          content: Text('Technical Issue occurred, please try again later.'),
-        );
-        ScaffoldMessenger.of(context).showSnackBar(snack);
+        safeShowSnack('Technical Issue occurred, please try again later.');
       }
     } on DioException catch (e) {
       final failure = DioHttpExceptionParser(exception: e).parse();
@@ -692,10 +686,7 @@ class ChatWidgetState extends State<ChatWidget> {
       } else {
         final errorMessage = responseData['ErrorMessage'] ?? "Unknown error";
         print('Error: $errorMessage');
-        final snack = SnackBar(
-          content: Text('Technical Issue occurred, please try again later.'),
-        );
-        ScaffoldMessenger.of(context).showSnackBar(snack);
+        safeShowSnack('Technical Issue occurred, please try again later.');
       }
     } on DioException catch (e) {
       final failure = DioHttpExceptionParser(exception: e).parse();
@@ -748,10 +739,8 @@ class ChatWidgetState extends State<ChatWidget> {
 
       if (!isSuccess) {
         print("Error: ${responseData['ErrorMessage']}");
-        final snack = SnackBar(
-          content: Text('Technical Issue occurred, please try again later.'),
-        );
-        ScaffoldMessenger.of(context).showSnackBar(snack);
+
+        safeShowSnack('Technical Issue occurred, please try again later.');
         return;
       }
 
@@ -855,6 +844,9 @@ class ChatWidgetState extends State<ChatWidget> {
     try {
       Dio dio = Dio();
       dio.options.baseUrl = ApiConfig.BASE_URL_QUERY;
+      dio.options
+        ..connectTimeout = Duration(seconds: 20)
+        ..receiveTimeout = Duration(seconds: 20);
       dio.options.headers = {
         'token': ApiConfig.AUTH_TOKEN,
         'deviceId': ApiConfig.DEVICE_ID,
@@ -1100,10 +1092,7 @@ class ChatWidgetState extends State<ChatWidget> {
 
       if (!isSuccess) {
         print("Error: ${responseData['ErrorMessage']}");
-        final snack = SnackBar(
-          content: Text('Technical Issue occurred, please try again later.'),
-        );
-        ScaffoldMessenger.of(context).showSnackBar(snack);
+        // safeShowSnack('Technical Issue occurred, please try again later.');
         return;
       }
 

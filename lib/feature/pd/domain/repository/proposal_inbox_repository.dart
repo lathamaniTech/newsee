@@ -7,5 +7,6 @@ import 'package:newsee/feature/proposal_inbox/domain/modal/proposal_inbox_respon
 abstract class ProposalInboxRepository {
   Future<AsyncResponseHandler<Failure, ProposalInboxResponseModel>>
   searchProposalInbox(LeadInboxRequest req);
-  Future<AsyncResponseHandler<Failure, ApplicationStatusResponse>> getApplicationStatus(req);
+  Future<AsyncResponseHandler<Failure, ApplicationStatusResponse>>
+  getApplicationStatus(req);
 }

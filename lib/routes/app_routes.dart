@@ -173,7 +173,7 @@ final routes = GoRouter(
         final title = data?['title'] ?? "No Title";
         final body = data?['body'] ?? "No Body";
         final queryId = data?['queryId'] ?? "";
-        final proposalNo = data?['proposalNo'] ?? "";
+        final proposalNo = num.tryParse("${data?['proposalNo']}") ?? 0;
         final queryType = data?['queryType'] ?? "";
         final userName = data?['userName'] ?? "";
 

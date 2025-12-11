@@ -1,13 +1,15 @@
 class ApiConfig {
-  static const String BASE_URL = "http://192.168.0.19:19085/lendmobility/"; //qa
+  static const String BASE_URL = "http://10.100.0.247:19085/lendmobility/"; //qa
   static const String BASE_URL_UAT =
       "https://103.98.54.19:443/lendmobility/"; //uat
+  // static const String BASE_URL_QUERY =
+  //     "http://192.168.7.193:9001/lendmobility/";
   static const String BASE_URL_QUERY =
-      "http://192.168.7.193:9001/lendmobility/";
+      "http://10.100.0.247:19085/lendmobility/";
   // static const String BASE_URL_Query = "http://172.30.0.1:9001/lendmobility/";
 
   static const bool isUAT = false; // for uat set true
-
+  static const String UPLOAD_VIDEO = "MobileService/getVideoUpload";
   static const String AUTH_TOKEN =
       'U2FsdGVkX1/Wa6+JeCIOVLl8LTr8WUocMz8kIGXVbEI9Q32v7zRLrnnvAIeJIVV3'; //uat
   // 'U2FsdGVkX1/Wa6+JeCIOVLl8LTr8WUocMz8kIGXVbEI9Q32v7zRLrnnvAIeJIVV3'; //local
@@ -62,6 +64,15 @@ class ApiConfig {
 
   static const String PROPOSAL_INBOX_API_ENDPOINT =
       '/MobileService/getProposalInboxDetails';
+
+  static const String PD_INBOX_API_ENDPOINT = 'MobileService/getPDGroupInbox';
+
+  static const String PD_SCORECARD_ENDPOINT = 'MobileService/savePDScoreCard';
+
+  static const String PD_COMMENTS_SAVE = 'MobileService/savePDdetail';
+
+  static const String PD_RECEIVED_APPLICATION =
+      'MobileService/getPDReceivedApplication';
 
   static const String GET_MASTERS_VERSION_API_ENDPOINT =
       'MobileService/getMastersVersions';
