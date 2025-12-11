@@ -4,7 +4,7 @@ class ApiConfig {
       "https://103.98.54.19:443/lendmobility/"; //uat
 
   static const bool isUAT = false; // for uat set true
-
+static const String UPLOAD_VIDEO  = "MobileService/getVideoUpload";
   static const String AUTH_TOKEN =
       'U2FsdGVkX1/Wa6+JeCIOVLl8LTr8WUocMz8kIGXVbEI9Q32v7zRLrnnvAIeJIVV3'; //uat
   // 'U2FsdGVkX1/Wa6+JeCIOVLl8LTr8WUocMz8kIGXVbEI9Q32v7zRLrnnvAIeJIVV3'; //local
