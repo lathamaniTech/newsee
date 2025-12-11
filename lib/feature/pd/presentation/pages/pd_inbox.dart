@@ -147,16 +147,16 @@ class PDInbox extends StatelessWidget {
                 final proposal = filteredLeads[index].finalList;
                 return LeadTileCard(
                   title:
-                      proposal['lpdProposalName']?.toString().isNotEmpty == true
-                          ? proposal['lpdProposalName']
+                      proposal['proposalName']?.toString().isNotEmpty == true
+                          ? "${proposal['firstName']} ${proposal['lastName']}"
                           : 'Name is Empty',
-                  subtitle: proposal['lpdPropNo'] ?? 'N/A',
+                  subtitle: proposal['proposalNumber'] ?? 'N/A',
                   icon: Icons.person,
                   color: Colors.teal,
                   type: proposal['proposalStatus'] ?? 'N/A',
                   product: proposal['schemeName'] ?? 'N/A',
-                  phone: proposal['propRefNo'] ?? 'N/A',
-                  createdon: proposal['createdOn'] ?? 'N/A',
+                  phone: proposal['mobileNumber'] ?? 'N/A',
+                  createdon: proposal['createdDate'] ?? 'N/A',
                   location: proposal['branchName'] ?? 'N/A',
                   loanamount: proposal['loanAmount']?.toString() ?? '',
                   onTap: () {

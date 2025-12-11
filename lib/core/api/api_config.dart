@@ -64,6 +64,11 @@ class ApiConfig {
 
   static const String PD_SCORECARD_ENDPOINT = 'MobileService/savePDScoreCard';
 
+  static const String PD_COMMENTS_SAVE = 'MobileService/savePDdetail';
+
+  static const String PD_RECEIVED_APPLICATION =
+      'MobileService/getPDReceivedApplication';
+
   static const String GET_MASTERS_VERSION_API_ENDPOINT =
       'MobileService/getMastersVersions';
   static const String GET_DOCUMENTS = 'MobileService/getDocumentDetails';

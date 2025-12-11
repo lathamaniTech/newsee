@@ -5,6 +5,7 @@ import 'package:newsee/Utils/utils.dart';
 import 'package:newsee/core/api/api_client.dart';
 import 'package:newsee/core/api/api_config.dart';
 import 'package:newsee/feature/auth/domain/model/user_details.dart';
+import 'package:newsee/widgets/sysmo_alert.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AssessmentHomePage extends StatefulWidget {
@@ -42,8 +43,52 @@ class _AssessmentHomePageState extends State<AssessmentHomePage> {
 
   Future<void> _saveComments() async {
     final prefs = await SharedPreferences.getInstance();
+
     for (int i = 0; i < 9; i++) {
       await prefs.setString('comment_$i', commentControllers[i].text);
+    }
+  }
+
+  Future<void> _submitComments() async {
+    UserDetails? userDetails = await loadUser();
+
+    final response = await ApiClient().getDio().post(
+      ApiConfig.PD_COMMENTS_SAVE,
+      data: {
+        "proposalNumber": widget.proposalNumber,
+        "userId": userDetails!.LPuserID,
+        "token": ApiConstants.api_qa_token,
+        "CustomerActivity": commentControllers[0].text,
+        "AgriActivities": commentControllers[1].text,
+        "FarmActivities": commentControllers[2].text,
+        "CommentOnMarketing": commentControllers[3].text,
+        "CommentOnFacility": commentControllers[4].text,
+        "CommentOnFeed": commentControllers[5].text,
+        "Shed": commentControllers[6].text,
+        "CommentOnIncome": commentControllers[7].text,
+        "CommentOnActivity": commentControllers[8].text,
+        "LatLong": " 12.9483,80.2546",
+        "PdStatus": "1", // 1-positive, 2-Nagative
+      },
+    );
+
+    final responseData = response.data;
+    final isSuccess = responseData[ApiConfig.API_RESPONSE_SUCCESS_KEY] == true;
+    if (isSuccess) {
+      final data = responseData[ApiConfig.API_RESPONSE_RESPONSE_KEY];
+      print('comments submission response => $data');
+      showDialog(
+        context: context,
+        builder:
+            (_) => SysmoAlert.success(
+              message: 'Comments submitted successfully!',
+              onButtonPressed: () {
+                Navigator.pop(context);
+              },
+            ),
+      );
+    } else {
+      print('Failed to submit comments: ${responseData['ErrorMessage']}');
     }
   }
 
@@ -454,24 +499,54 @@ class _AssessmentHomePageState extends State<AssessmentHomePage> {
         scoreCardMap.entries
             .map((e) => {'questionId': e.key, 'optionId': e.value})
             .toList();
-    final response = await ApiClient().getDio().post(
-      ApiConfig.PD_SCORECARD_ENDPOINT,
+    final receivePDResponse = await ApiClient().getDio().post(
+      ApiConfig.PD_RECEIVED_APPLICATION,
       data: {
-        "proposalNumber": widget.proposalNumber,
+        "propNo": widget.proposalNumber,
         "userId": userDetails!.LPuserID,
         "token": ApiConstants.api_qa_token,
-        "scoreCardVal": scoreCardValues,
       },
     );
 
-    final responseData = response.data;
-    final isSuccess = responseData[ApiConfig.API_RESPONSE_SUCCESS_KEY] == true;
-    if (isSuccess) {
-      final data = responseData[ApiConfig.API_RESPONSE_RESPONSE_KEY];
-      print('scorecard response => $data');
-      _showFinalSummary(data);
+    final responseDataPDReceived = receivePDResponse.data;
+    final isPDReceivedSuccess =
+        responseDataPDReceived[ApiConfig.API_RESPONSE_SUCCESS_KEY] == true;
+    if (isPDReceivedSuccess) {
+      final response = await ApiClient().getDio().post(
+        ApiConfig.PD_SCORECARD_ENDPOINT,
+        data: {
+          "proposalNumber": widget.proposalNumber,
+          "userId": userDetails!.LPuserID,
+          "token": ApiConstants.api_qa_token,
+          "scoreCardVal": scoreCardValues,
+        },
+      );
+
+      final responseData = response.data;
+      final isSuccess =
+          responseData[ApiConfig.API_RESPONSE_SUCCESS_KEY] == true;
+      if (isSuccess) {
+        final data = responseData[ApiConfig.API_RESPONSE_RESPONSE_KEY];
+        print('scorecard response => $data');
+        _showFinalSummary(data);
+      } else {
+        print('Failed to submit scorecard: ${responseData['ErrorMessage']}');
+      }
     } else {
-      print('Failed to submit scorecard: ${responseData['ErrorMessage']}');
+      print(
+        'Failed to receive PD application: ${responseDataPDReceived['ErrorMessage']}',
+      );
+      showDialog(
+        context: context,
+        builder:
+            (_) => SysmoAlert.failure(
+              message:
+                  "Failed to receive PD application: ${responseDataPDReceived['ErrorMessage']}",
+              onButtonPressed: () {
+                Navigator.pop(context);
+              },
+            ),
+      );
     }
   }
 
@@ -929,6 +1004,37 @@ class _AssessmentHomePageState extends State<AssessmentHomePage> {
                     setState(() {});
                   },
                 ),
+                i == comments.length - 1
+                    ? Center(
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 20),
+                        child: ElevatedButton.icon(
+                          onPressed: () {
+                            _submitComments();
+                            Navigator.pop(context);
+                          },
+                          icon: const Icon(
+                            Icons.cloud_done,
+                            color: Colors.white,
+                          ),
+                          label: const Text(
+                            "Submit & Close",
+                            style: TextStyle(color: Colors.white),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.teal.shade700,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 40,
+                              vertical: 16,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30),
+                            ),
+                          ),
+                        ),
+                      ),
+                    )
+                    : SizedBox(),
               ],
             ),
           ),
