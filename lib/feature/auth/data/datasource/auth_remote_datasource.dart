@@ -15,6 +15,7 @@ class AuthRemoteDatasource {
   @return     : Future<Response> Response - > HttpResponse
    */
   loginWithUserAccount(Map<String, dynamic> payload) async {
+    dio.options.baseUrl = ApiConfig.BASE_URL_QUERY;
     Response response = await dio.post(
       'MobileService/LoginService',
       data: {'Login': payload, 'token': ApiConfig.AUTH_TOKEN},

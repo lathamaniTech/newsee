@@ -22,6 +22,8 @@ import 'package:newsee/feature/landholding/presentation/bloc/land_holding_bloc.d
 import 'package:newsee/feature/landholding/presentation/page/land_holding_page.dart';
 import 'package:newsee/feature/masters/presentation/page/masters_page.dart';
 import 'package:newsee/feature/cic_check/presentation/cic_check_page.dart';
+import 'package:newsee/feature/queryInbox/presentation/page/chat_widget.dart';
+import 'package:newsee/feature/queryInbox/presentation/page/query_inbox.dart';
 import 'package:newsee/pages/home_page.dart';
 import 'package:newsee/pages/newlead_page.dart';
 import 'package:newsee/pages/not_found_error.page.dart';
@@ -149,6 +151,40 @@ final routes = GoRouter(
       path: AppRouteConstants.CIC_CHECK_PAGE['path']!,
       name: AppRouteConstants.CIC_CHECK_PAGE['name'],
       builder: (context, state) => CicCheckPage(),
+    ),
+    GoRoute(
+      path: AppRouteConstants.QUERY_INBOX_PAGE['path']!,
+      name: AppRouteConstants.QUERY_INBOX_PAGE['name'],
+      builder: (context, state) {
+        final data = state.extra as Map<String, dynamic>?;
+        print('here....$data...${state.extra}');
+        final title = data?['title'] ?? "No Title";
+        final body = data?['body'] ?? "No Body";
+
+        return QueryInbox(title: title, body: body);
+      },
+    ),
+    GoRoute(
+      path: AppRouteConstants.ChatWindow['path']!,
+      name: AppRouteConstants.ChatWindow['name'],
+      builder: (context, state) {
+        final data = state.extra as Map<String, dynamic>?;
+        print('here....$data...${state.extra}');
+        final title = data?['title'] ?? "No Title";
+        final body = data?['body'] ?? "No Body";
+        final queryId = data?['queryId'] ?? "";
+        final proposalNo = data?['proposalNo'] ?? "";
+        final queryType = data?['queryType'] ?? "";
+        final userName = data?['userName'] ?? "";
+
+        return ChatWidget(
+          queryId: queryId,
+          status: 'Open',
+          proposalNo: proposalNo,
+          queryType: body,
+          userName: userName,
+        );
+      },
     ),
     GoRoute(
       path: AppRouteConstants.CAMERA_PAGE['path']!,
