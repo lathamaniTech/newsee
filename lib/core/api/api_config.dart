@@ -62,6 +62,8 @@ class ApiConfig {
 
   static const String PD_INBOX_API_ENDPOINT = 'MobileService/getPDGroupInbox';
 
+  static const String PD_SCORECARD_ENDPOINT = 'MobileService/savePDScoreCard';
+
   static const String GET_MASTERS_VERSION_API_ENDPOINT =
       'MobileService/getMastersVersions';
   static const String GET_DOCUMENTS = 'MobileService/getDocumentDetails';

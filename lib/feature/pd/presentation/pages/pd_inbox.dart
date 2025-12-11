@@ -163,7 +163,7 @@ class PDInbox extends StatelessWidget {
                     // context.read<PDInboxBloc>().add(
                     //   ApplicationStatusCheckEvent(currentApplication: proposal),
                     // );
-                    _showBottomSheet(context, proposal['lpdPropNo']);
+                    _showBottomSheet(context, proposal['proposalNumber']);
                   },
                 );
               },
@@ -285,7 +285,11 @@ class PDInbox extends StatelessWidget {
                 print('selectedProp: $proposal');
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => AssessmentHomePage()),
+                  MaterialPageRoute(
+                    builder:
+                        (context) =>
+                            AssessmentHomePage(proposalNumber: proposal),
+                  ),
                 );
               },
             ),

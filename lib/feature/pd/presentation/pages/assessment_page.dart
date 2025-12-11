@@ -1,8 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:newsee/AppData/app_api_constants.dart';
+import 'package:newsee/Utils/shared_preference_utils.dart';
+import 'package:newsee/Utils/utils.dart';
+import 'package:newsee/core/api/api_client.dart';
+import 'package:newsee/core/api/api_config.dart';
+import 'package:newsee/feature/auth/domain/model/user_details.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AssessmentHomePage extends StatefulWidget {
-  const AssessmentHomePage({super.key});
+  final String proposalNumber;
+  const AssessmentHomePage({super.key, required this.proposalNumber});
   @override
   State<AssessmentHomePage> createState() => _AssessmentHomePageState();
 }
@@ -52,11 +59,11 @@ class _AssessmentHomePageState extends State<AssessmentHomePage> {
           "QuestionId": "5205497",
 
           "options": [
-            {"text": "10+ years", "score": 5},
-            {"text": "6–10 years", "score": 4},
-            {"text": "3–5 years", "score": 3},
-            {"text": "0–2 years", "score": 2},
-            {"text": "< 1 year", "score": 0},
+            {"text": "10+ years", "score": 5, "optionId": "208"},
+            {"text": "6–10 years", "score": 4, "optionId": "207"},
+            {"text": "3–5 years", "score": 3, "optionId": "206"},
+            {"text": "0–2 years", "score": 2, "optionId": "205"},
+            {"text": "< 1 year", "score": 0, "optionId": "204"},
           ],
         },
         {
@@ -64,11 +71,11 @@ class _AssessmentHomePageState extends State<AssessmentHomePage> {
           "QuestionId": "5205501",
 
           "options": [
-            {"text": "Excellent understanding", "score": 5},
-            {"text": "Good understanding", "score": 4},
-            {"text": "Average", "score": 3},
-            {"text": "Poor", "score": 2},
-            {"text": "Very poor", "score": 0},
+            {"text": "Excellent understanding", "score": 5, "optionId": "213"},
+            {"text": "Good understanding", "score": 4, "optionId": "212"},
+            {"text": "Average", "score": 3, "optionId": "211"},
+            {"text": "Poor", "score": 2, "optionId": "210"},
+            {"text": "Very poor", "score": 0, "optionId": "209"},
           ],
         },
         {
@@ -76,11 +83,11 @@ class _AssessmentHomePageState extends State<AssessmentHomePage> {
           "QuestionId": "5205508",
 
           "options": [
-            {"text": "Very clear", "score": 5},
-            {"text": "Clear", "score": 4},
-            {"text": "Somewhat clear", "score": 3},
-            {"text": "Unclear", "score": 2},
-            {"text": "Confusing", "score": 0},
+            {"text": "Very clear", "score": 5, "optionId": "218"},
+            {"text": "Clear", "score": 4, "optionId": "217"},
+            {"text": "Somewhat clear", "score": 3, "optionId": "216"},
+            {"text": "Unclear", "score": 2, "optionId": "215"},
+            {"text": "Confusing", "score": 0, "optionId": "214"},
           ],
         },
         {
@@ -88,11 +95,11 @@ class _AssessmentHomePageState extends State<AssessmentHomePage> {
           "QuestionId": "5205512",
 
           "options": [
-            {"text": "Strong risk awareness", "score": 5},
-            {"text": "Good awareness", "score": 4},
-            {"text": "Moderate", "score": 3},
-            {"text": "Low", "score": 2},
-            {"text": "No awareness", "score": 0},
+            {"text": "Strong risk awareness", "score": 5, "optionId": "223"},
+            {"text": "Good awareness", "score": 4, "optionId": "222"},
+            {"text": "Moderate", "score": 3, "optionId": "221"},
+            {"text": "Low", "score": 2, "optionId": "220"},
+            {"text": "No awareness", "score": 0, "optionId": "219"},
           ],
         },
       ],
@@ -108,10 +115,10 @@ class _AssessmentHomePageState extends State<AssessmentHomePage> {
           "QuestionId": "5205537",
 
           "options": [
-            {"text": "Good Reliable (Canal)", "score": 5},
-            {"text": "Reliable (Drip/Borewell)", "score": 4},
-            {"text": "Partially reliable", "score": 3},
-            {"text": "Rainfed only", "score": 0},
+            {"text": "Good Reliable (Canal)", "score": 5, "optionId": "227"},
+            {"text": "Reliable (Drip/Borewell)", "score": 4, "optionId": "226"},
+            {"text": "Partially reliable", "score": 3, "optionId": "225"},
+            {"text": "Rainfed only", "score": 0, "optionId": "224"},
           ],
         },
         {
@@ -119,10 +126,10 @@ class _AssessmentHomePageState extends State<AssessmentHomePage> {
           "QuestionId": "5205558",
 
           "options": [
-            {"text": "Healthy", "score": 5},
-            {"text": "Average", "score": 4},
-            {"text": "Weak/Pest", "score": 2},
-            {"text": "No Activity", "score": 0},
+            {"text": "Healthy", "score": 5, "optionId": "231"},
+            {"text": "Average", "score": 4, "optionId": "230"},
+            {"text": "Weak/Pest", "score": 2, "optionId": "229"},
+            {"text": "No Activity", "score": 0, "optionId": "228"},
           ],
         },
         {
@@ -130,11 +137,15 @@ class _AssessmentHomePageState extends State<AssessmentHomePage> {
           "QuestionId": "5205573",
 
           "options": [
-            {"text": "Full Facilitated Excellent", "score": 5},
-            {"text": "Good Facilitated", "score": 4},
-            {"text": "Average Facilitated", "score": 3},
-            {"text": "Poor Facilitated", "score": 2},
-            {"text": "Not Facility", "score": 0},
+            {
+              "text": "Full Facilitated Excellent",
+              "score": 5,
+              "optionId": "236",
+            },
+            {"text": "Good Facilitated", "score": 4, "optionId": "235"},
+            {"text": "Average Facilitated", "score": 3, "optionId": "234"},
+            {"text": "Poor Facilitated", "score": 2, "optionId": "233"},
+            {"text": "Not Facility", "score": 0, "optionId": "232"},
           ],
         },
         {
@@ -142,11 +153,11 @@ class _AssessmentHomePageState extends State<AssessmentHomePage> {
           "QuestionId": "5205574",
 
           "options": [
-            {"text": "Excellent", "score": 5},
-            {"text": "Good", "score": 4},
-            {"text": "Average", "score": 3},
-            {"text": "Poor", "score": 2},
-            {"text": "Not Facility", "score": 0},
+            {"text": "Excellent", "score": 5, "optionId": "241"},
+            {"text": "Good", "score": 4, "optionId": "240"},
+            {"text": "Average", "score": 3, "optionId": "239"},
+            {"text": "Poor", "score": 2, "optionId": "238"},
+            {"text": "Not Facility", "score": 0, "optionId": "237"},
           ],
         },
       ],
@@ -166,24 +177,29 @@ class _AssessmentHomePageState extends State<AssessmentHomePage> {
               "text":
                   "Income stable for the last 3 years (consistent yield + good marketability)",
               "score": 5,
+              "optionId": "246",
             },
             {
               "text":
                   "Income stable for last 2 years (normal fluctuations only)",
               "score": 4,
+              "optionId": "245",
             },
             {
               "text": "Income stable for 2 years BUT marketability is low",
               "score": 3,
+              "optionId": "244",
             },
             {
               "text": "Income is low and unstable (seasonal/weather dependent)",
               "score": 2,
+              "optionId": "243",
             },
             {
               "text":
                   "Crop yield low and marketability poor (high-risk income)",
               "score": 0,
+              "optionId": "242",
             },
           ],
         },
@@ -195,14 +211,28 @@ class _AssessmentHomePageState extends State<AssessmentHomePage> {
             {
               "text": "Regular & stable for 3 years – strong support",
               "score": 5,
+              "optionId": "251",
             },
             {
               "text": "Stable for last 2 years with predictable inflow",
               "score": 4,
+              "optionId": "250",
             },
-            {"text": "Exists but moderate/seasonal income", "score": 3},
-            {"text": "Low due to poor productivity", "score": 2},
-            {"text": "No allied income OR no marketability", "score": 0},
+            {
+              "text": "Exists but moderate/seasonal income",
+              "score": 3,
+              "optionId": "249",
+            },
+            {
+              "text": "Low due to poor productivity",
+              "score": 2,
+              "optionId": "248",
+            },
+            {
+              "text": "No allied income OR no marketability",
+              "score": 0,
+              "optionId": "247",
+            },
           ],
         },
         {
@@ -213,11 +243,16 @@ class _AssessmentHomePageState extends State<AssessmentHomePage> {
             {
               "text": "Stable salary/business for 3+ years with proof",
               "score": 5,
+              "optionId": "256",
             },
-            {"text": "Stable for last 2 years", "score": 4},
-            {"text": "Irregular or small-scale", "score": 3},
-            {"text": "Low and unstable (daily wage)", "score": 2},
-            {"text": "No non-agri income", "score": 0},
+            {"text": "Stable for last 2 years", "score": 4, "optionId": "255"},
+            {"text": "Irregular or small-scale", "score": 3, "optionId": "254"},
+            {
+              "text": "Low and unstable (daily wage)",
+              "score": 2,
+              "optionId": "253",
+            },
+            {"text": "No non-agri income", "score": 0, "optionId": "252"},
           ],
         },
         {
@@ -225,11 +260,31 @@ class _AssessmentHomePageState extends State<AssessmentHomePage> {
           "QuestionId": "5205753",
 
           "options": [
-            {"text": "Excellent control, regular savings", "score": 5},
-            {"text": "Good control, some savings", "score": 4},
-            {"text": "Average control, limited savings", "score": 3},
-            {"text": "Poor control, frequent borrowing", "score": 2},
-            {"text": "No control, chronic shortage", "score": 0},
+            {
+              "text": "Excellent control, regular savings",
+              "score": 5,
+              "optionId": "261",
+            },
+            {
+              "text": "Good control, some savings",
+              "score": 4,
+              "optionId": "260",
+            },
+            {
+              "text": "Average control, limited savings",
+              "score": 3,
+              "optionId": "259",
+            },
+            {
+              "text": "Poor control, frequent borrowing",
+              "score": 2,
+              "optionId": "258",
+            },
+            {
+              "text": "No control, chronic shortage",
+              "score": 0,
+              "optionId": "257",
+            },
           ],
         },
       ],
@@ -248,11 +303,28 @@ class _AssessmentHomePageState extends State<AssessmentHomePage> {
             {
               "text": "Excellent repayment; no overdue in last 24 months",
               "score": 5,
+              "optionId": "266",
             },
-            {"text": "Good; minor delays ≤30 days", "score": 4},
-            {"text": "Average; 30–60 days delay observed", "score": 3},
-            {"text": "Weak; multiple delays >60 days", "score": 2},
-            {"text": "Poor; overdue >90 days or default", "score": 0},
+            {
+              "text": "Good; minor delays ≤30 days",
+              "score": 4,
+              "optionId": "265",
+            },
+            {
+              "text": "Average; 30–60 days delay observed",
+              "score": 3,
+              "optionId": "264",
+            },
+            {
+              "text": "Weak; multiple delays >60 days",
+              "score": 2,
+              "optionId": "263",
+            },
+            {
+              "text": "Poor; overdue >90 days or default",
+              "score": 0,
+              "optionId": "262",
+            },
           ],
         },
         {
@@ -260,11 +332,15 @@ class _AssessmentHomePageState extends State<AssessmentHomePage> {
           "QuestionId": "5205827",
 
           "options": [
-            {"text": "≥ 750 – Very low risk", "score": 5},
-            {"text": "700–749 – Good", "score": 4},
-            {"text": "650–699 – Average", "score": 3},
-            {"text": "600–649 – Weak", "score": 2},
-            {"text": "< 600 OR No hit – Very high risk", "score": 0},
+            {"text": "≥ 750 – Very low risk", "score": 5, "optionId": "271"},
+            {"text": "700–749 – Good", "score": 4, "optionId": "270"},
+            {"text": "650–699 – Average", "score": 3, "optionId": "269"},
+            {"text": "600–649 – Weak", "score": 2, "optionId": "268"},
+            {
+              "text": "< 600 OR No hit – Very high risk",
+              "score": 0,
+              "optionId": "267",
+            },
           ],
         },
       ],
@@ -315,13 +391,15 @@ class _AssessmentHomePageState extends State<AssessmentHomePage> {
   }
 
   void next() {
+    /// when all the scores are collected , call saveScoreCard service
+
     if (currentSection == 4) {
       _saveComments();
-      _showFinalSummary();
+      // _showFinalSummary();
     } else if (currentQuestion <
         sections[currentSection]["questions"].length - 1) {
       _pageController.nextPage(
-        duration: const Duration(milliseconds: 400),
+        duration: const Duration(milliseconds: 200),
         curve: Curves.easeInOut,
       );
     } else if (currentSection < 4) {
@@ -346,13 +424,18 @@ class _AssessmentHomePageState extends State<AssessmentHomePage> {
     }
   }
 
-  void onAnswer(int globalIdx, int score, String questionId) {
+  void onAnswer(int globalIdx, int score, String questionId, String optionId) {
     setState(() {
       scores[globalIdx] = score;
-      scoreCardMap[questionId] = score.toString();
+      scoreCardMap[questionId] = optionId.toString();
       print('scoreCardMap => $scoreCardMap');
     });
-    Future.delayed(const Duration(milliseconds: 300), next);
+    print(globalIdx);
+    if (globalIdx == 13) {
+      //runScoreCard();
+      return;
+    }
+    Future.delayed(const Duration(milliseconds: 30), next);
   }
 
   int _globalIndex(int s, int q) =>
@@ -364,13 +447,40 @@ class _AssessmentHomePageState extends State<AssessmentHomePage> {
           ? 8 + q
           : 12 + q;
 
-  void _showFinalSummary() {
-    final a = scores.sublist(0, 4).whereType<int>().fold(0, (s, v) => s + v);
-    final b = scores.sublist(4, 8).whereType<int>().fold(0, (s, v) => s + v);
-    final c = scores.sublist(8, 12).whereType<int>().fold(0, (s, v) => s + v);
-    final d = scores.sublist(12, 14).whereType<int>().fold(0, (s, v) => s + v);
-    final total = a + b + c + d;
+  runScoreCard() async {
+    UserDetails? userDetails = await loadUser();
 
+    final scoreCardValues =
+        scoreCardMap.entries
+            .map((e) => {'questionId': e.key, 'optionId': e.value})
+            .toList();
+    final response = await ApiClient().getDio().post(
+      ApiConfig.PD_SCORECARD_ENDPOINT,
+      data: {
+        "proposalNumber": widget.proposalNumber,
+        "userId": userDetails!.LPuserID,
+        "token": ApiConstants.api_qa_token,
+        "scoreCardVal": scoreCardValues,
+      },
+    );
+
+    final responseData = response.data;
+    final isSuccess = responseData[ApiConfig.API_RESPONSE_SUCCESS_KEY] == true;
+    if (isSuccess) {
+      final data = responseData[ApiConfig.API_RESPONSE_RESPONSE_KEY];
+      print('scorecard response => $data');
+      _showFinalSummary(data);
+    } else {
+      print('Failed to submit scorecard: ${responseData['ErrorMessage']}');
+    }
+  }
+
+  void _showFinalSummary(Map<String, dynamic> scoreData) {
+    final total = parseToInt(scoreData["totalScoreObtained"]);
+    final a = parseToInt(scoreData["totalMaxScore"]);
+    final b = scoreData["ratingDesc"];
+    final c = parseToInt(scoreData["totalScoreObtained"]);
+    final d = scoreData["avgRating"];
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -393,32 +503,27 @@ class _AssessmentHomePageState extends State<AssessmentHomePage> {
                   ),
                   const SizedBox(height: 16),
                   _scoreRow(
-                    "A. Knowledge & Experience",
-                    a,
+                    "Total Max Score",
+                    a.toString(),
                     20,
                     Colors.blue.shade700,
                   ),
                   _scoreRow(
-                    "B. Land & Farm Condition",
-                    b,
+                    "Rating Description",
+                    b!,
                     20,
                     Colors.green.shade700,
                   ),
                   _scoreRow(
-                    "C. Financial Stability",
-                    c,
+                    "TotalScore Obtained",
+                    c.toString(),
                     20,
                     Colors.purple.shade700,
                   ),
-                  _scoreRow(
-                    "D. Repayment Behaviour",
-                    d,
-                    10,
-                    Colors.orange.shade800,
-                  ),
+                  _scoreRow("Average Rating", d!, 10, Colors.orange.shade800),
                   const Divider(height: 30, thickness: 2),
                   Text(
-                    "TOTAL SCORE: $total / 70",
+                    "TOTAL SCORE: ${scoreData["totalScoreObtained"]} / ${scoreData["totalMaxScore"]}",
                     style: const TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
@@ -484,9 +589,13 @@ class _AssessmentHomePageState extends State<AssessmentHomePage> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  onPressed:
-                      () =>
-                          Navigator.popUntil(context, (route) => route.isFirst),
+                  onPressed: () {
+                    Navigator.pop(context);
+                    goToSection(4); // pageViewer will move to comments page
+
+                    // next();
+                  },
+                  //Navigator.popUntil(context, (route) => route.isFirst),
                   child: const Text(
                     "Submit & Close",
                     style: TextStyle(fontSize: 18, color: Colors.white),
@@ -498,7 +607,7 @@ class _AssessmentHomePageState extends State<AssessmentHomePage> {
     );
   }
 
-  Widget _scoreRow(String label, int score, int max, Color color) => Padding(
+  Widget _scoreRow(String label, String score, int max, Color color) => Padding(
     padding: const EdgeInsets.symmetric(vertical: 8),
     child: Row(
       children: [
@@ -509,7 +618,7 @@ class _AssessmentHomePageState extends State<AssessmentHomePage> {
           ),
         ),
         Text(
-          "$score / $max",
+          score,
           style: TextStyle(
             color: color,
             fontWeight: FontWeight.bold,
@@ -760,7 +869,12 @@ class _AssessmentHomePageState extends State<AssessmentHomePage> {
                         ),
                       ),
                       onChanged:
-                          (v) => onAnswer(globalIdx, v!, q["QuestionId"]),
+                          (v) => onAnswer(
+                            globalIdx,
+                            v!,
+                            q["QuestionId"],
+                            opt["optionId"],
+                          ),
                     );
                   },
                 ),
@@ -827,21 +941,26 @@ class _AssessmentHomePageState extends State<AssessmentHomePage> {
     return Padding(
       padding: const EdgeInsets.only(bottom: 20),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          ElevatedButton.icon(
-            onPressed:
-                currentSection > 0 || currentQuestion > 0 ? previous : null,
-            icon: const Icon(Icons.arrow_back),
-            label: const Text("Previous"),
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.grey[600]),
-          ),
-          ElevatedButton.icon(
-            onPressed: next,
-            icon: const Icon(Icons.arrow_forward),
-            label: Text(currentSection == 4 ? "Submit" : "Next"),
-            style: ElevatedButton.styleFrom(backgroundColor: color),
-          ),
+          // ElevatedButton.icon(
+          //   onPressed:
+          //       currentSection > 0 || currentQuestion > 0 ? previous : null,
+          //   icon: const Icon(Icons.arrow_back),
+          //   label: const Text("Previous"),
+          //   style: ElevatedButton.styleFrom(backgroundColor: Colors.grey[600]),
+          // ),
+          currentSection == 3
+              ? ElevatedButton.icon(
+                onPressed: runScoreCard,
+                icon: const Icon(Icons.arrow_forward, color: Colors.white),
+                label: Text(
+                  "Run ScoreCard",
+                  style: TextStyle(color: Colors.white),
+                ),
+                style: ElevatedButton.styleFrom(backgroundColor: color),
+              )
+              : SizedBox(width: 10),
         ],
       ),
     );
