@@ -5,6 +5,7 @@ import 'package:newsee/AppData/app_constants.dart';
 import 'package:newsee/Utils/shared_preference_utils.dart';
 import 'package:newsee/feature/auth/domain/model/user_details.dart';
 import 'package:newsee/feature/leadInbox/domain/modal/lead_request.dart';
+import 'package:newsee/feature/pd/domain/modal/pd_inbox_request.dart';
 import 'package:newsee/feature/proposal_inbox/data/repository/proposal_inbox_repository_impl.dart';
 import 'package:newsee/feature/proposal_inbox/domain/modal/application_status_response.dart';
 import 'package:newsee/feature/proposal_inbox/domain/modal/group_proposal_inbox.dart';
@@ -21,6 +22,7 @@ class PDInboxBloc extends Bloc<PDInboxEvent, PDInboxState> {
       super(PDInboxState()) {
     on<SearchProposalInboxEvent>(onSearchProposalInbox);
     on<ApplicationStatusCheckEvent>(onCheckStatus);
+    on<PDInboxFetchEvent>(onSearchPDInbox);
   }
 
   Future<void> onSearchProposalInbox(
@@ -97,6 +99,46 @@ class PDInboxBloc extends Bloc<PDInboxEvent, PDInboxState> {
       emit(state.copyWith(applicationStatus: SaveStatus.failure));
       Future.delayed(Duration(seconds: 1));
       emit(state.copyWith(applicationStatus: SaveStatus.update));
+    }
+  }
+
+  /// @author : karthick.d  10/12/2025
+  /// @desc   : Fetch PD Inbox - when PDInboxFetchEvent is added
+
+  Future<void> onSearchPDInbox(
+    PDInboxFetchEvent event,
+    Emitter<PDInboxState> emit,
+  ) async {
+    emit(state.copyWith(status: PDInboxStatus.loading));
+    UserDetails? userDetails = await loadUser();
+    final request = PdInboxRequest(
+      userId: userDetails!.LPuserID,
+      token: ApiConstants.api_qa_token,
+      pageNo: event.request.pageNo,
+      pageCount: event.request.pageCount,
+      orgId: ["14356"],
+    );
+
+    final response = await proposalInboxRepository.searchPDInbox(request);
+    // check if response i success and contains valid data , success status is emitted
+
+    if (response.isRight()) {
+      emit(
+        state.copyWith(
+          status: PDInboxStatus.success,
+          proposalResponseModel: response.right.proposalDetails,
+          currentPage: event.request.pageNo,
+          totalProposalApplication: response.right.totalProposals,
+        ),
+      );
+    } else {
+      print('Proposal failure response.left');
+      emit(
+        state.copyWith(
+          status: PDInboxStatus.failure,
+          errorMessage: response.left.message,
+        ),
+      );
     }
   }
 }
