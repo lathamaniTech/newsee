@@ -14,9 +14,9 @@ void main() async {
   // runApp(App()); // timerApp
   // runApp(ToolBarSample()); // Toolbar App
   //runApp(LoginApp()); // Login Form App
+  WidgetsFlutterBinding.ensureInitialized();
   dependencyInjection();
 
-  WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: ".env");
   if (Firebase.apps.isEmpty) {
     await Firebase.initializeApp(options: DefaultFirebaseOptions.android);

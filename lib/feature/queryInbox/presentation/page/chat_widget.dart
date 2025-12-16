@@ -339,9 +339,9 @@ class ChatWidgetState extends State<ChatWidget> {
     try {
       print('came here');
       Dio dio = Dio();
-      // dio.options.baseUrl = ApiConfig.BASE_URL_QUERY;
+      // dio.options.baseUrl = ApiConfig.BASE_URL;
       dio.options
-        ..baseUrl = ApiConfig.BASE_URL_QUERY
+        ..baseUrl = ApiConfig.BASE_URL
         ..connectTimeout = Duration(seconds: 20)
         ..receiveTimeout = Duration(seconds: 20);
 
@@ -435,7 +435,7 @@ class ChatWidgetState extends State<ChatWidget> {
       print('came here');
       Dio dio = Dio();
       dio.options
-        ..baseUrl = ApiConfig.BASE_URL_QUERY
+        ..baseUrl = ApiConfig.BASE_URL
         ..connectTimeout = Duration(seconds: 20)
         ..receiveTimeout = Duration(seconds: 20);
 
@@ -533,9 +533,9 @@ class ChatWidgetState extends State<ChatWidget> {
       final ext = file.path.split('.').last.toLowerCase();
       final fileType = getFileType(ext); // image/pdf/doc
       Dio dio = Dio();
-      // dio.options.baseUrl = ApiConfig.BASE_URL_QUERY;
+      // dio.options.baseUrl = ApiConfig.BASE_URL;
       dio.options
-        ..baseUrl = ApiConfig.BASE_URL_QUERY
+        ..baseUrl = ApiConfig.BASE_URL
         ..connectTimeout = Duration(seconds: 50)
         ..receiveTimeout = Duration(seconds: 50);
 
@@ -699,7 +699,7 @@ class ChatWidgetState extends State<ChatWidget> {
       Dio dio = Dio();
 
       dio.options
-        ..baseUrl = ApiConfig.BASE_URL_QUERY
+        ..baseUrl = ApiConfig.BASE_URL
         ..connectTimeout = Duration(seconds: 50)
         ..receiveTimeout = Duration(seconds: 50);
 
@@ -835,7 +835,7 @@ class ChatWidgetState extends State<ChatWidget> {
   //   print('here...13');
   //   try {
   //     Dio dio = Dio();
-  //     dio.options.baseUrl = ApiConfig.BASE_URL_QUERY;
+  //     dio.options.baseUrl = ApiConfig.BASE_URL;
   //     dio.options
   //       ..connectTimeout = Duration(seconds: 20)
   //       ..receiveTimeout = Duration(seconds: 20);
@@ -911,7 +911,7 @@ class ChatWidgetState extends State<ChatWidget> {
 
     try {
       Dio dio = Dio();
-      dio.options.baseUrl = ApiConfig.BASE_URL_QUERY;
+      dio.options.baseUrl = ApiConfig.BASE_URL;
       dio.options.headers = {
         'token': ApiConfig.AUTH_TOKEN,
         'deviceId': ApiConfig.DEVICE_ID,
@@ -1114,7 +1114,7 @@ class ChatWidgetState extends State<ChatWidget> {
       Dio dio = Dio();
 
       dio.options
-        ..baseUrl = ApiConfig.BASE_URL_QUERY
+        ..baseUrl = ApiConfig.BASE_URL
         ..connectTimeout = Duration(seconds: 50)
         ..receiveTimeout = Duration(seconds: 50);
 
@@ -1248,7 +1248,7 @@ class ChatWidgetState extends State<ChatWidget> {
       Dio dio = Dio();
 
       dio.options
-        ..baseUrl = ApiConfig.BASE_URL_QUERY
+        ..baseUrl = ApiConfig.BASE_URL
         ..connectTimeout = Duration(seconds: 20)
         ..receiveTimeout = Duration(seconds: 20);
 
