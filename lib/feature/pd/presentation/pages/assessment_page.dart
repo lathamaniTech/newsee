@@ -316,12 +316,12 @@ class _AssessmentHomePageState extends State<AssessmentHomePage> {
             {
               "text": "Excellent control, regular savings",
               "score": 5,
-              "optionId": "1747",
+              "optionId": "1751",
             },
             {
               "text": "Good control, some savings",
               "score": 4,
-              "optionId": "1748",
+              "optionId": "1750",
             },
             {
               "text": "Average control, limited savings",
@@ -331,12 +331,12 @@ class _AssessmentHomePageState extends State<AssessmentHomePage> {
             {
               "text": "Poor control, frequent borrowing",
               "score": 2,
-              "optionId": "1750",
+              "optionId": "1748",
             },
             {
               "text": "No control, chronic shortage",
               "score": 0,
-              "optionId": "1751",
+              "optionId": "1747",
             },
           ],
         },
@@ -356,12 +356,12 @@ class _AssessmentHomePageState extends State<AssessmentHomePage> {
             {
               "text": "Excellent repayment; no overdue in last 24 months",
               "score": 5,
-              "optionId": "1686",
+              "optionId": "1690",
             },
             {
               "text": "Good; minor delays ≤30 days",
               "score": 4,
-              "optionId": "1687",
+              "optionId": "1689",
             },
             {
               "text": "Average; 30–60 days delay observed",
@@ -371,12 +371,12 @@ class _AssessmentHomePageState extends State<AssessmentHomePage> {
             {
               "text": "Weak; multiple delays >60 days",
               "score": 2,
-              "optionId": "1689",
+              "optionId": "1687",
             },
             {
               "text": "Poor; overdue >90 days or default",
               "score": 0,
-              "optionId": "1690",
+              "optionId": "1686",
             },
           ],
         },
