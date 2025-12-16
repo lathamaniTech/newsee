@@ -21,7 +21,13 @@ class ApiClient {
       if (ApiConfig.isUAT == true) {
         dio.options.baseUrl = ApiConfig.BASE_URL_UAT;
       } else {
-        dio.options.baseUrl = ApiConfig.BASE_URL;
+        if (ApiConfig.isAWS == true) {
+          // AWS QA URL
+          dio.options.baseUrl = ApiConfig.BASE_URL_AWS;
+        } else {
+          // local QA URL
+          dio.options.baseUrl = ApiConfig.BASE_URL;
+        }
       }
 
       dio.options.headers = {

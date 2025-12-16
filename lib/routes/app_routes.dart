@@ -260,8 +260,11 @@ final routes = GoRouter(
       path: AppRouteConstants.DOCUMENT_PAGE['path']!,
       name: AppRouteConstants.DOCUMENT_PAGE['name'],
       builder: (context, state) {
-        final extra = state.extra as String?;
-        final proposalNumber = extra ?? '';
+        final extra = state.extra as Map<String, dynamic>;
+
+        final proposalNumber = extra['proposal'] ?? '';
+
+        final fromPage = extra['fromPage'] ?? 'proposal';
 
         return PopScope(
           canPop: false,
@@ -294,7 +297,10 @@ final routes = GoRouter(
           },
           child: BlocProvider(
             create: (_) => DocumentBloc(mediaService: MediaService()),
-            child: DocumentPage(proposalnumber: proposalNumber),
+            child: DocumentPage(
+              proposalnumber: proposalNumber,
+              fromPage: fromPage,
+            ),
           ),
         );
       },
