@@ -53,7 +53,6 @@ class DefaultFirebaseOptions {
     }
   }
 
-  // replace with your api keys , appid projectId
   static FirebaseOptions android = FirebaseOptions(
     apiKey: dotenv.env['FIREBASE_API_KEY'] ?? '',
     appId: dotenv.env['APPID'] ?? '',
