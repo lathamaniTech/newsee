@@ -51,13 +51,25 @@ class DefaultFirebaseOptions {
         );
     }
   }
- // replace with your api keys , appid projectId
-  static const FirebaseOptions android = FirebaseOptions(
-    apiKey: '',
-    appId: '',
-    messagingSenderId: '',
-    projectId: '',
-    storageBucket: '',
-  );
 
+  // replace with your api keys , appid projectId
+  /*
+AIzaSyBf9s8YYAN9jMuEviYcHtY9z23hPnQVMO8
+
+1:570378478500:android:bb79601d731913d8a75731
+
+570378478500
+
+lendingbot-9a852
+
+lendingbot-9a852.firebasestorage.app
+
+ */
+  static const FirebaseOptions android = FirebaseOptions(
+    apiKey: 'AIzaSyBf9s8YYAN9jMuEviYcHtY9z23hPnQVMO8',
+    appId: '1:570378478500:android:bb79601d731913d8a75731',
+    messagingSenderId: '570378478500',
+    projectId: 'lendingbot-9a852',
+    storageBucket: 'lendingbot-9a852.firebasestorage.app',
+  );
 }

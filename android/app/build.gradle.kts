@@ -7,8 +7,8 @@ plugins {
 }
 
 android {
-    namespace = "com.ubi.agri"
-    compileSdk = 35
+    namespace = "com.example.newsee"
+    compileSdk = 36
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
